@@ -1,0 +1,28 @@
+spring:
+  cloud:
+    stream:
+      bindings:
+        checkoutCompletionInputOrder:
+          group: subscription-operation-checkout-completion
+          destination: checkoutCompletion
+        subscriptionCreatedOutput:
+          destination: subscriptionCreated
+broadleaf:
+  database:
+    provider: none
+  transitionrequest:
+    enabled: false
+  changesummary:
+    notification:
+      active: false
+  tracking:
+    sandbox:
+      purge:
+        enabled: false
+    notification:
+      prune:
+        active: false
+  purge:
+    message:
+      lock:
+        active: false
