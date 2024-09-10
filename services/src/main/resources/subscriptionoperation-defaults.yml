@@ -2,9 +2,9 @@ spring:
   cloud:
     stream:
       bindings:
-        checkoutCompletionInputOrder:
-          group: subscription-operation-checkout-completion
-          destination: checkoutCompletion
+        subscriptionOperationsOrderCreatedInput:
+          group: subscription-operations-order-created
+          destination: orderCreated
         subscriptionCreatedOutput:
           destination: subscriptionCreated
 broadleaf:
