@@ -1,1 +1,2 @@
+com.broadleafcommerce.subscriptionoperation.service.autoconfigure.SubscriptionOperationServiceAutoConfiguration
 com.broadleafcommerce.subscriptionoperation.service.messaging.autoconfigure.SubscriptionOperationMessagingAutoConfiguration
