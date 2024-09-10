@@ -1,4 +1,15 @@
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          subscriptionopsclient:
+            authorization-grant-type: client_credentials
+            client-id: subscriptionopsclient
+            client-secret: subscriptionopsclient_secret
+        provider:
+          subscriptionopsclient:
+            token-uri: https://localhost:8443/oauth/token
   cloud:
     stream:
       bindings:
