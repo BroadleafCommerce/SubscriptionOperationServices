@@ -18,11 +18,13 @@ package com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreat
 
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.integration.support.MessageBuilder;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.common.messaging.service.DefaultMessageLockService;
 import com.broadleafcommerce.common.messaging.service.IdempotentMessageConsumptionService;
+import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 
 import io.azam.ulidj.ULID;
 import lombok.AccessLevel;
@@ -55,10 +57,15 @@ public class SubscriptionOrderCreatedListener {
                 "SubscriptionOperations: Received an OrderCreatedEvent for order number %s. Emitting a blank SubscriptionCreatedEvent",
                 orderNumber));
 
+        sendSubscriptionCreatedMessage(orderNumber, message.getPayload().getContextInfo());
+    }
+
+    public void sendSubscriptionCreatedMessage(String orderNumber,
+            @Nullable ContextInfo contextInfo) {
         SubscriptionCreatedEvent subscriptionCreated =
                 typeFactory.get(SubscriptionCreatedEvent.class);
         subscriptionCreated.setOrderNumber(orderNumber);
-        subscriptionCreated.setContextInfo(message.getPayload().getContextInfo());
+        subscriptionCreated.setContextInfo(contextInfo);
 
         subscriptionCreatedProducer.subscriptionCreatedOutput()
                 .send(MessageBuilder.withPayload(subscriptionCreated)
