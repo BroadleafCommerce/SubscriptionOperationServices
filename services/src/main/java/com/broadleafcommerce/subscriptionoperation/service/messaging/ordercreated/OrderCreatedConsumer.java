@@ -26,8 +26,8 @@ import org.springframework.messaging.SubscribableChannel;
 @SuppressWarnings("squid:S1214")
 public interface OrderCreatedConsumer {
 
-    String CHANNEL = "subscriptionOperationsOrderCreatedInput";
+    String CHANNEL = "orderCreatedInputSubscriptionOperations";
 
     @Input(CHANNEL)
-    SubscribableChannel subscriptionOperationsOrderCreatedInput();
+    SubscribableChannel orderCreatedInputSubscriptionOperations();
 }

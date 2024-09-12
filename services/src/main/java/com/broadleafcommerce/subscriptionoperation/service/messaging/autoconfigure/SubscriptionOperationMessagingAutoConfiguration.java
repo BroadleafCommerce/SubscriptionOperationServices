@@ -24,13 +24,15 @@ import org.springframework.context.annotation.Configuration;
 import com.broadleafcommerce.common.extension.ConditionalOnPropertyOrGroup;
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.common.messaging.service.IdempotentMessageConsumptionService;
+import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.OrderCreatedConsumer;
 import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.SubscriptionCreatedProducer;
 import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.SubscriptionOrderCreatedListener;
 
 @Configuration
-@ConditionalOnPropertyOrGroup(name = "broadleaf.orderoperation.messaging.active",
+@ConditionalOnPropertyOrGroup(name = "broadleaf.subscriptionoperation.messaging.active",
         group = "broadleaf.basic.messaging.enabled", matchIfMissing = true)
-@EnableBinding({SubscriptionCreatedProducer.class})
+@EnableBinding({SubscriptionCreatedProducer.class,
+        OrderCreatedConsumer.class})
 public class SubscriptionOperationMessagingAutoConfiguration {
 
     @Bean
