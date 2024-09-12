@@ -13,7 +13,7 @@ spring:
   cloud:
     stream:
       bindings:
-        subscriptionOperationsOrderCreatedInput:
+        orderCreatedInputSubscriptionOperations:
           group: subscription-operations-order-created
           destination: orderCreated
         subscriptionCreatedOutput:
