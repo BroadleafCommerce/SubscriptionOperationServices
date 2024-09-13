@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: schema-subscriptionoperation
+      author: broadleaf
+      changes:
+        - sql:
+            sql: create schema if not exists subscriptionoperation
+  - include:
+      file: db/changelog/subscriptionoperation.yugabytedb.changelog-master.xml
