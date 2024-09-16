@@ -23,14 +23,18 @@ import org.springframework.context.annotation.Configuration;
 
 import com.broadleafcommerce.common.extension.ConditionalOnPropertyOrGroup;
 import com.broadleafcommerce.common.extension.TypeFactory;
+import com.broadleafcommerce.common.messaging.notification.DetachedDurableMessageSender;
 import com.broadleafcommerce.common.messaging.service.IdempotentMessageConsumptionService;
+import com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.SubscriptionOperationProviderProperties;
 import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.OrderCreatedConsumer;
 import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.SubscriptionCreatedProducer;
 import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.SubscriptionOrderCreatedListener;
 
 @Configuration
-@ConditionalOnPropertyOrGroup(name = "broadleaf.subscriptionoperation.messaging.active",
-        group = "broadleaf.basic.messaging.enabled", matchIfMissing = true)
+@ConditionalOnPropertyOrGroup(
+        name = "broadleaf.subscriptionoperation.messaging.active",
+        group = "broadleaf.basic.messaging.enabled",
+        matchIfMissing = true)
 @EnableBinding({SubscriptionCreatedProducer.class,
         OrderCreatedConsumer.class})
 public class SubscriptionOperationMessagingAutoConfiguration {
@@ -38,11 +42,16 @@ public class SubscriptionOperationMessagingAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SubscriptionOrderCreatedListener subscriptionOrderCreatedListener(
-            TypeFactory typeFactory,
             IdempotentMessageConsumptionService idempotentConsumptionService,
-            SubscriptionCreatedProducer subscriptionCreatedProducer) {
-        return new SubscriptionOrderCreatedListener(typeFactory,
+            SubscriptionCreatedProducer subscriptionCreatedProducer,
+            DetachedDurableMessageSender sender,
+            SubscriptionOperationProviderProperties providerProperties,
+            TypeFactory typeFactory) {
+        return new SubscriptionOrderCreatedListener(
                 idempotentConsumptionService,
-                subscriptionCreatedProducer);
+                subscriptionCreatedProducer,
+                sender,
+                providerProperties,
+                typeFactory);
     }
 }

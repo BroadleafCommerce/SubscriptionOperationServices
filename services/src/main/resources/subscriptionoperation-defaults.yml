@@ -19,8 +19,6 @@ spring:
         subscriptionCreatedOutput:
           destination: subscriptionCreated
 broadleaf:
-  database:
-    provider: none
   transitionrequest:
     enabled: false
   changesummary:

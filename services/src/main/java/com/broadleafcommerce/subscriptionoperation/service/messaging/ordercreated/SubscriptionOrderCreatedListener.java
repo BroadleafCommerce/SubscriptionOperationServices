@@ -16,15 +16,21 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated;
 
+
+import static com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants.Persistence.SUBSCRIPTION_OPS_ROUTE_KEY;
+
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 
 import com.broadleafcommerce.common.extension.TypeFactory;
+import com.broadleafcommerce.common.extension.data.DataRouteByKey;
+import com.broadleafcommerce.common.messaging.notification.DetachedDurableMessageSender;
 import com.broadleafcommerce.common.messaging.service.DefaultMessageLockService;
 import com.broadleafcommerce.common.messaging.service.IdempotentMessageConsumptionService;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.SubscriptionOperationProviderProperties;
 
 import io.azam.ulidj.ULID;
 import lombok.AccessLevel;
@@ -34,16 +40,23 @@ import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Slf4j
+@DataRouteByKey(SUBSCRIPTION_OPS_ROUTE_KEY)
 public class SubscriptionOrderCreatedListener {
-
-    @Getter(AccessLevel.PROTECTED)
-    private final TypeFactory typeFactory;
 
     @Getter(AccessLevel.PROTECTED)
     private final IdempotentMessageConsumptionService idempotentMessageService;
 
     @Getter(AccessLevel.PROTECTED)
     private final SubscriptionCreatedProducer subscriptionCreatedProducer;
+
+    @Getter(value = AccessLevel.PROTECTED)
+    private final DetachedDurableMessageSender sender;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final SubscriptionOperationProviderProperties providerProperties;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final TypeFactory typeFactory;
 
     @StreamListener(value = OrderCreatedConsumer.CHANNEL)
     public void listen(Message<OrderCreatedEvent> message) {
@@ -67,10 +80,22 @@ public class SubscriptionOrderCreatedListener {
         subscriptionCreated.setOrderNumber(orderNumber);
         subscriptionCreated.setContextInfo(contextInfo);
 
-        subscriptionCreatedProducer.subscriptionCreatedOutput()
-                .send(MessageBuilder.withPayload(subscriptionCreated)
-                        .setHeaderIfAbsent(DefaultMessageLockService.MESSAGE_IDEMPOTENCY_KEY,
-                                ULID.random())
-                        .build());
+        if (providerProperties != null
+                && !"none".equals(providerProperties.getProvider())
+                && sender != null) {
+            sender.send(subscriptionCreated, SubscriptionCreatedProducer.TYPE,
+                    ULID.random(), SUBSCRIPTION_OPS_ROUTE_KEY);
+        } else {
+            log.debug("Durable sending for subscription operation is disabled. " +
+                    "This occurs if the database provider is set to 'none' or if the sender does not exist.");
+
+            Message<SubscriptionCreatedEvent> processRequestMessage =
+                    MessageBuilder.withPayload(subscriptionCreated)
+                            .setHeaderIfAbsent(DefaultMessageLockService.MESSAGE_IDEMPOTENCY_KEY,
+                                    ULID.random())
+                            .build();
+
+            subscriptionCreatedProducer.subscriptionCreatedOutput().send(processRequestMessage);
+        }
     }
 }
