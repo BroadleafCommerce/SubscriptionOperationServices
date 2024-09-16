@@ -16,22 +16,27 @@
  */
 package com.broadleafcommerce.subscriptionoperation.provider.jpa.autoconfigure;
 
-import static com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants.Persistence.SUBSCRIPTION_OP_ROUTE_KEY;
-import static com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants.Persistence.SUBSCRIPTION_OP_ROUTE_PACKAGE;
+import static com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants.Persistence.SUBSCRIPTION_OPS_ROUTE_KEY;
+import static com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants.Persistence.SUBSCRIPTION_OPS_ROUTE_PACKAGE;
 
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.broadleafcommerce.common.jpa.data.JpaDataRoute;
 import com.broadleafcommerce.common.messaging.data.MessagingDataRouteSupporting;
 import com.broadleafcommerce.data.tracking.core.data.TrackingDataRouteSupporting;
+import com.broadleafcommerce.data.tracking.jpa.messaging.DurableProducer;
 import com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.SubscriptionOperationJpaProperties;
+import com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.SubscriptionOperationProviderProperties;
+import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.SubscriptionCreatedProducer;
 
 @Configuration
 @AutoConfigureBefore(DataSourceAutoConfiguration.class)
+@EnableConfigurationProperties(SubscriptionOperationProviderProperties.class)
 public class SubscriptionOperationJpaAutoConfiguration {
 
     @ConditionalOnProperty(
@@ -40,9 +45,16 @@ public class SubscriptionOperationJpaAutoConfiguration {
             havingValue = "jpa")
     @EnableConfigurationProperties(SubscriptionOperationJpaProperties.class)
     @JpaDataRoute(boundPropertiesType = SubscriptionOperationJpaProperties.class,
-            routePackage = SUBSCRIPTION_OP_ROUTE_PACKAGE, routeKey = SUBSCRIPTION_OP_ROUTE_KEY,
+            routePackage = SUBSCRIPTION_OPS_ROUTE_PACKAGE, routeKey = SUBSCRIPTION_OPS_ROUTE_KEY,
             supportingRouteTypes = {TrackingDataRouteSupporting.class,
                     MessagingDataRouteSupporting.class})
-    public static class EnabledGranularOrFlex {}
+    @Import({EnabledGranularOrFlex.SubscriptionCreatedConfig.class})
+    public static class EnabledGranularOrFlex {
+        @DurableProducer(output = SubscriptionCreatedProducer.class,
+                name = SubscriptionCreatedProducer.TYPE,
+                configurationPrefix = "broadleaf.subscription-created",
+                componentPrefix = "subscriptionCreated")
+        public static class SubscriptionCreatedConfig {}
+    }
 
 }

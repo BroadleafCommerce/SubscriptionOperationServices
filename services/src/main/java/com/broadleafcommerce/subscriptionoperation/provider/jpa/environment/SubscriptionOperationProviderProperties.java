@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Broadleaf Commerce
+ * Copyright (C) 2024 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -16,16 +16,12 @@
  */
 package com.broadleafcommerce.subscriptionoperation.provider.jpa.environment;
 
-import lombok.experimental.UtilityClass;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@UtilityClass
-public class RouteConstants {
+import lombok.Data;
 
-    @UtilityClass
-    public static class Persistence {
-        public static final String SUBSCRIPTION_OPS_ROUTE_PACKAGE =
-                "com.broadleafcommerce.subscriptionoperation";
-        public static final String SUBSCRIPTION_OPS_ROUTE_KEY = "subscriptionoperation";
-    }
-
+@Data
+@ConfigurationProperties("broadleaf.subscriptionoperation.database")
+public class SubscriptionOperationProviderProperties {
+    private String provider = "none";
 }
