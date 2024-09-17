@@ -14,7 +14,7 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation;
+package com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -30,9 +30,6 @@ import org.springframework.messaging.support.MessageBuilder;
 
 import com.broadleafcommerce.common.messaging.service.DefaultMessageLockService;
 import com.broadleafcommerce.order.client.domain.Order;
-import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.OrderCreatedEvent;
-import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.SubscriptionCreatedProducer;
-import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.SubscriptionOrderCreatedListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +40,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import io.azam.ulidj.ULID;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "broadleaf.database.provider=jpa"
+})
 class SubscriptionOrderCreatedListenerIT {
 
     @Autowired
