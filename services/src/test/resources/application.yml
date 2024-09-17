@@ -9,3 +9,7 @@ spring:
         temp:
           use_jdbc_metadata_defaults: false
         dialect: org.hibernate.dialect.HSQLDialect
+broadleaf:
+  default:
+    data:
+      route: subscriptionoperation

@@ -19,6 +19,7 @@ package com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreat
 
 import static com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants.Persistence.SUBSCRIPTION_OPS_ROUTE_KEY;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.lang.Nullable;
@@ -36,6 +37,7 @@ import io.azam.ulidj.ULID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
@@ -50,6 +52,7 @@ public class SubscriptionOrderCreatedListener {
     private final SubscriptionCreatedProducer subscriptionCreatedProducer;
 
     @Getter(value = AccessLevel.PROTECTED)
+    @Setter(onMethod_ = {@Autowired(required = false)})
     private final DetachedDurableMessageSender sender;
 
     @Getter(AccessLevel.PROTECTED)
