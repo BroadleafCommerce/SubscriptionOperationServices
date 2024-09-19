@@ -36,31 +36,22 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionChangeTierRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 
 @FrameworkRestController
-@FrameworkMapping(SubscriptionOperationEndpoint.BASE_URI)
+@FrameworkMapping(CustomerSubscriptionOperationEndpoint.BASE_URI)
 @DataRouteByKey(SUBSCRIPTION_OPS_ROUTE_KEY)
-public class SubscriptionOperationEndpoint {
-    public static final String BASE_URI = "/subscription-ops";
+public class CustomerSubscriptionOperationEndpoint {
+
+    public static final String BASE_URI = "/customer-subscription-ops";
 
     @Getter(AccessLevel.PROTECTED)
     protected SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
-    @FrameworkPostMapping
-    @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION", operationTypes = OperationType.CREATE)
-    public SubscriptionWithItems createSubscription(
-            @RequestBody SubscriptionCreationRequest subscriptionCreationRequest,
-            @ContextOperation(OperationType.CREATE) final ContextInfo contextInfo) {
-        return subscriptionOperationService.createSubscriptionWithItems(subscriptionCreationRequest,
-                contextInfo);
-    }
-
     @FrameworkPostMapping(value = "/{subscriptionId}/upgrade")
-    @Policy(permissionRoots = {"SYSTEM_SUBSCRIPTION"}, operationTypes = OperationType.UPDATE)
+    @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"}, operationTypes = OperationType.UPDATE)
     public Subscription upgradeSubscription(
             @RequestParam String subscriptionId,
             @RequestBody SubscriptionChangeTierRequest changeTierRequest,
@@ -70,7 +61,7 @@ public class SubscriptionOperationEndpoint {
     }
 
     @FrameworkPutMapping(value = "/{subscriptionId}/cancel")
-    @Policy(permissionRoots = {"SYSTEM_SUBSCRIPTION"}, operationTypes = OperationType.UPDATE)
+    @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"}, operationTypes = OperationType.UPDATE)
     public Subscription cancelSubscription(
             @RequestParam String subscriptionId,
             @RequestBody SubscriptionCancellationRequest subscriptionCancellationRequest,
@@ -79,4 +70,5 @@ public class SubscriptionOperationEndpoint {
         return subscriptionOperationService.cancelSubscription(subscriptionCancellationRequest,
                 contextInfo);
     }
+
 }
