@@ -16,7 +16,6 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
-import static com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants.Persistence.SUBSCRIPTION_OPS_ROUTE_KEY;
 
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
@@ -25,7 +24,6 @@ import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.broadleafcommerce.common.extension.data.DataRouteByKey;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
 import com.broadleafcommerce.data.tracking.core.policy.Policy;
@@ -40,15 +38,16 @@ import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreati
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @FrameworkRestController
 @FrameworkMapping(SubscriptionOperationEndpoint.BASE_URI)
-@DataRouteByKey(SUBSCRIPTION_OPS_ROUTE_KEY)
+@RequiredArgsConstructor
 public class SubscriptionOperationEndpoint {
     public static final String BASE_URI = "/subscription-ops";
 
     @Getter(AccessLevel.PROTECTED)
-    protected SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
+    protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
     @FrameworkPostMapping
     @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION", operationTypes = OperationType.CREATE)
