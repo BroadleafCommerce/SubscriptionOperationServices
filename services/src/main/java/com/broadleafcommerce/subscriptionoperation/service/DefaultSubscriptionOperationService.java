@@ -86,6 +86,7 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
         subscription.setNextStatusChangeReason(request.getNextStatusChangeReason());
         subscription.setRootItemRefType(request.getRootItemRefType());
         subscription.setRootItemRef(request.getRootItemRef());
+        subscription.setUserRefType(request.getUserRefType());
         subscription.setUserRef(request.getUserRef());
         subscription.setAlternateUserRef(request.getAlternateUserRef());
         subscription.setSubscriptionSource(request.getSubscriptionSource());
@@ -95,6 +96,7 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
         subscription.setPreferredPaymentAccountId(request.getPreferredPaymentAccountId());
         subscription.setCurrency(request.getCurrency());
         subscription.setNeedGrantEntitlements(request.isNeedGrantEntitlements());
+        subscription.setSubscriptionAdjustments(request.getSubscriptionAdjustments());
         return subscription;
     }
 
@@ -112,8 +114,9 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
             item.setParentItemRef(request.getParentItemRef());
             item.setItemUnitPrice(request.getItemUnitPrice());
             item.setQuantity(request.getQuantity());
-            item.setTaxable(request.getTaxable());
+            item.setTaxable(request.isTaxable());
             item.setTaxCategory(request.getTaxCategory());
+            item.setSubscriptionItemAdjustments(request.getSubscriptionItemAdjustments());
             items.add(item);
         }
         return items;

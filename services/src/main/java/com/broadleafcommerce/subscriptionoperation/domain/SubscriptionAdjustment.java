@@ -16,108 +16,89 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain;
 
+
 import com.broadleafcommerce.data.tracking.core.ContextStateAware;
 import com.broadleafcommerce.data.tracking.core.filtering.business.domain.ContextState;
 import com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * This represents a line item for a {@link Subscription}
+ * This is a representation of a price adjustment for a
+ * {@link com.broadleafcommerce.subscription.domain.Subscription}
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SubscriptionItem implements ContextStateAware {
+public class SubscriptionAdjustment implements ContextStateAware {
 
+    /**
+     * @deprecated Use {@link #getId()} field instead
+     */
+    @Deprecated(since = "1.0.0")
     @Size(max = 255)
+    private String adjustmentId;
+
     private String id;
 
     /**
-     * Reference the subscription for this item
+     * Reference to the {@link com.broadleafcommerce.subscription.domain.Subscription} whose price
+     * this adjusts
      */
-    @Size(max = 255)
     @NotBlank
     private String subscriptionId;
 
     /**
-     * Type of item that this object represents
+     * Reference to the promotion or offer that drives this adjustment
      */
-    private String itemRefType;
+    @NotBlank
+    private String adjustmentRef;
 
     /**
-     * Reference to the id of the item represented by this object
+     * Type of this adjustment
+     *
+     * @see DefaultSubscriptionAdjustmentType
      */
-    private String itemRef;
+    private String subscriptionAdjustmentType;
 
     /**
-     * Item name
+     * Amount of this adjustment
      */
-    private String itemName;
+    private BigDecimal adjustmentAmount;
 
     /**
-     * Type of the parent subscription item's backing item if this is a child subscription item
+     * Number of the billing period this adjustment starts being active
      */
-    private String parentItemRefType;
+    @PositiveOrZero
+    private Integer beginPeriod;
 
     /**
-     * Reference of the parent subscription item's backing item if this is a child subscription item
+     * Number of the billing period this adjustment stops. If this field is null, the adjustment is
+     * considered indefinite
      */
-    private String parentItemRef;
-
-    /**
-     * Unit price of the item (price of a single unit)
-     */
-    private BigDecimal itemUnitPrice;
-
-    /**
-     * Quantity purchased
-     */
-    private Integer quantity;
-
-    /**
-     * Whether this item is taxable
-     */
-    private Boolean taxable;
-
-    /**
-     * Tax category of the item
-     */
-    private String taxCategory;
-
-    /**
-     * Comma-separated nexus codes
-     */
-    private String taxNexus;
-
-    /**
-     * Whether this item is archived
-     */
-    private boolean archived = false;
-
-    /**
-     * Why this item was archived
-     */
-    private String archiveReason;
-
-    /**
-     * Adjustments for this subscription. This field is used for creation from an API request and is
-     * not persisted with the object
-     */
-    private List<SubscriptionItemAdjustment> subscriptionItemAdjustments = new ArrayList<>();
+    private Integer endPeriod;
 
     /**
      * A subset of {@link Tracking} information to expose the context state for this object.
      */
     private ContextState contextState;
+
+    public void setAdjustmentId(String adjustmentId) {
+        this.adjustmentId = adjustmentId;
+        this.id = adjustmentId;
+    }
+
+    public void setId(String id) {
+        this.adjustmentId = id;
+        this.id = id;
+    }
 }

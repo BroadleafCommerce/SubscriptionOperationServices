@@ -16,10 +16,14 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItemAdjustment;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -67,17 +71,23 @@ public class SubscriptionItemCreationRequest implements Serializable {
     /**
      * Quantity purchased
      */
-    private Integer quantity;
+    private int quantity = 1;
 
     /**
      * Whether this item is taxable
      */
-    private Boolean taxable;
+    private boolean taxable = true;
 
     /**
      * Tax category of the item
      */
     private String taxCategory;
+
+    /**
+     * Adjustments for this subscription. This field is used for creation from an API request and is
+     * not persisted with the object
+     */
+    private List<SubscriptionItemAdjustment> subscriptionItemAdjustments = new ArrayList<>();
 
     /**
      * Miscellaneous attributes that can be set to this request in order to inform business logic

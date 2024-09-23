@@ -16,6 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAdjustment;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatusEnum;
 
 import java.io.Serial;
@@ -88,6 +89,13 @@ public class SubscriptionCreationRequest implements Serializable {
     private String rootItemRef;
 
     /**
+     * Type of user owning this subscription
+     *
+     * @see com.broadleafcommerce.cart.client.domain.enums.DefaultUserTypes
+     */
+    private String userRefType;
+
+    /**
      * Reference to the user to whom this subscription belongs
      */
     @NotBlank
@@ -96,7 +104,6 @@ public class SubscriptionCreationRequest implements Serializable {
     /**
      * Alternate reference to the user. Useful for third-party authentication system identifiers
      */
-    @NotBlank
     private String alternateUserRef;
 
     /**
@@ -141,8 +148,7 @@ public class SubscriptionCreationRequest implements Serializable {
      * Adjustments for this subscription. This field is used for creation from an API request and is
      * not persisted with the object
      */
-    // @JsonView(RequestView.class)
-    // private List<SubscriptionAdjustment> subscriptionAdjustments = new ArrayList<>();
+    private List<SubscriptionAdjustment> subscriptionAdjustments = new ArrayList<>();
 
     /**
      * Whether the system has outstanding

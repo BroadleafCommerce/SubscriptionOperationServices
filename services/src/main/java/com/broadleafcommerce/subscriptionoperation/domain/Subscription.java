@@ -29,7 +29,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonView;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.money.CurrencySupplier;
 import javax.money.CurrencyUnit;
@@ -111,6 +113,13 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
      * Reference to the item id for which this subscription was provision
      */
     private String rootItemRef;
+
+    /**
+     * Type of user owning this subscription
+     *
+     * @see com.broadleafcommerce.cart.client.domain.enums.DefaultUserTypes
+     */
+    private String userRefType;
 
     /**
      * Reference to the user to whom this subscription belongs
@@ -232,6 +241,13 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
      * {@link BillingJobProperties#getEntitlements()#isEnabled()}
      */
     private boolean needGrantEntitlements;
+
+    /**
+     * Adjustments for this subscription. This field is used for creation from an API request and is
+     * not persisted with the object
+     */
+    @JsonView(RequestView.class)
+    private List<SubscriptionAdjustment> subscriptionAdjustments = new ArrayList<>();
 
     /**
      * The version of this subscription. Used for checking if the requested version of the
