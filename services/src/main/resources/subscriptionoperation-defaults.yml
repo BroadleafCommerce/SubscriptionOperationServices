@@ -35,3 +35,7 @@ broadleaf:
     message:
       lock:
         active: false
+  subscriptionoperation:
+    subscriptionprovider:
+      url: https://localhost:8467/billing
+      subscription-uri: /subscriptions

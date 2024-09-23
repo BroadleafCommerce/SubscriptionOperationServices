@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Data;
 
 @Data
-@ConfigurationProperties("broadleaf.subscriptionperation.subscriptionprovider")
+@ConfigurationProperties("broadleaf.subscriptionoperation.subscriptionprovider")
 public class ExternalSubscriptionProperties {
 
     /**
