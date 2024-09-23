@@ -16,16 +16,20 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service.provider;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 
+import cz.jirutka.rsql.parser.ast.Node;
+
 
 /**
  * TODO
  */
-public interface SubscriptionProvider<S extends SubscriptionWithItems> {
+public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
 
     /**
      * TODO
@@ -34,6 +38,12 @@ public interface SubscriptionProvider<S extends SubscriptionWithItems> {
      * @param contextInfo
      * @return
      */
-    S create(S subscriptionWithItems, @Nullable ContextInfo contextInfo);
+    SWI create(SWI subscriptionWithItems, @Nullable ContextInfo contextInfo);
+
+    Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
+            String userId,
+            Pageable page,
+            Node filters,
+            ContextInfo contextInfo);
 
 }

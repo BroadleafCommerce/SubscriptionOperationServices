@@ -16,6 +16,9 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
@@ -30,6 +33,7 @@ import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionItemCr
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +48,16 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
 
     @Getter(AccessLevel.PROTECTED)
     protected final TypeFactory typeFactory;
+
+    @Override
+    public Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
+            String userId,
+            Pageable page,
+            Node filters,
+            ContextInfo contextInfo) {
+        return subscriptionProvider.readSubscriptionsForUserTypeAndUserId(userType, userId, page,
+                filters, contextInfo);
+    }
 
     @Override
     public SWI createSubscriptionWithItems(SubscriptionCreationRequest subscriptionCreationRequest,

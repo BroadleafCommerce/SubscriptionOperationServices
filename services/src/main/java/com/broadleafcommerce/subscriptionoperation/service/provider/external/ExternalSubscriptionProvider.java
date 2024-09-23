@@ -19,6 +19,8 @@ package com.broadleafcommerce.subscriptionoperation.service.provider.external;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -29,14 +31,16 @@ import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
+import com.broadleafcommerce.subscriptionoperation.service.provider.page.ResponsePageGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 
-public class ExternalSubscriptionProvider<S extends SubscriptionWithItems>
+public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
         extends AbstractExternalProvider
-        implements SubscriptionProvider<S> {
+        implements SubscriptionProvider<SWI> {
 
     protected static final String SUBSCRIPTION_SOURCE_PARAM = "subscriptionSource";
     protected static final String SUBSCRIPTION_SOURCE_REF_PARAM = "subscriptionSourceRef";
@@ -53,7 +57,7 @@ public class ExternalSubscriptionProvider<S extends SubscriptionWithItems>
     }
 
     @Override
-    public S create(S subscriptionWithItems,
+    public SWI create(SWI subscriptionWithItems,
             @Nullable ContextInfo contextInfo) {
         return executeRequest(() -> getWebClient()
                 .post()
@@ -64,9 +68,37 @@ public class ExternalSubscriptionProvider<S extends SubscriptionWithItems>
                 .bodyValue(subscriptionWithItems)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<S>() {})
+                .bodyToMono(new ParameterizedTypeReference<SWI>() {})
                 .blockOptional()
                 .orElseThrow(EntityMissingException::new));
+    }
+
+    @Override
+    public Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
+            String userId,
+            Pageable page,
+            Node filters,
+            ContextInfo contextInfo) {
+        return executeRequest(() -> getWebClient()
+                .get()
+                .uri(getBaseUri().toUriString())
+                .headers(headers -> headers.putAll(getHeaders(contextInfo)))
+                .attributes(clientRegistrationId(getServiceClient()))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(getPageType())
+                .blockOptional()
+                .map(ResponsePageGenerator::getPage)
+                .orElseThrow(EntityMissingException::new));
+    }
+
+    /**
+     * Gets the type reference for a page generator of item list items.
+     *
+     * @return type reference for a page generator of item list items
+     */
+    protected ParameterizedTypeReference<ResponsePageGenerator<SWI>> getPageType() {
+        return new ParameterizedTypeReference<>() {};
     }
 
     /**

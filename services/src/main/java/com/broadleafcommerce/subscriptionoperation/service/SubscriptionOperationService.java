@@ -16,6 +16,9 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
@@ -24,11 +27,19 @@ import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancel
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionChangeTierRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 
+import cz.jirutka.rsql.parser.ast.Node;
+
 
 /**
  *
  */
 public interface SubscriptionOperationService<S extends Subscription, I extends SubscriptionItem, SWI extends SubscriptionWithItems> {
+
+    Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
+            String userId,
+            Pageable page,
+            Node filters,
+            ContextInfo contextInfo);
 
     /**
      *

@@ -17,10 +17,14 @@
 package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
 
+import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPutMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -36,18 +40,31 @@ import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancel
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionChangeTierRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 
+import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @FrameworkRestController
 @FrameworkMapping(SubscriptionOperationEndpoint.BASE_URI)
-@RequiredArgsConstructor
 public class SubscriptionOperationEndpoint {
     public static final String BASE_URI = "/subscription-ops";
 
     @Getter(AccessLevel.PROTECTED)
     protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
+
+    @FrameworkGetMapping(params = {"userId", "userType"})
+    @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION")
+    public Page<SubscriptionWithItems> readUserSubscriptions(
+            @RequestParam("userType") String userType,
+            @RequestParam("userId") String userId,
+            @PageableDefault Pageable page,
+            Node filters,
+            @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
+        return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(userType, userId,
+                page, filters, contextInfo);
+    }
 
     @FrameworkPostMapping
     @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION", operationTypes = OperationType.CREATE)

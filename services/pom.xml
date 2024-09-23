@@ -31,6 +31,10 @@
         </dependency>
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
+            <artifactId>broadleaf-cart-services-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-order-services-client</artifactId>
         </dependency>
         <dependency>
