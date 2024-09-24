@@ -35,7 +35,7 @@ public class ExternalSubscriptionProperties {
     private String subscriptionUri;
 
     /**
-     * The service client to use when calling billing services. Default is "subscription".
+     * The service client to use when calling billing services. Default is "subscriptionopsclient".
      */
     private String serviceClient = "subscriptionopsclient";
 }
