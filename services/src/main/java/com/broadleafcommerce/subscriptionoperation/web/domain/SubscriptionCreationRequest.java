@@ -17,6 +17,7 @@
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAdjustment;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 
 import java.io.Serial;
@@ -29,8 +30,6 @@ import java.util.Map;
 
 import javax.money.CurrencyUnit;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -42,6 +41,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SubscriptionCreationRequest implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -98,8 +98,14 @@ public class SubscriptionCreationRequest implements Serializable {
     /**
      * Reference to the user to whom this subscription belongs
      */
-    @NotBlank
     private String userRef;
+
+    /**
+     * Type of the alternative user reference
+     *
+     * @see DefaultUserTypes
+     */
+    private String alternateUserRefType;
 
     /**
      * Alternate reference to the user. Useful for third-party authentication system identifiers
@@ -109,7 +115,6 @@ public class SubscriptionCreationRequest implements Serializable {
     /**
      * This field shows from which process or user action this subscription originated
      */
-    @NotBlank
     private String subscriptionSource;
 
     /**
@@ -122,7 +127,6 @@ public class SubscriptionCreationRequest implements Serializable {
      *
      * @see com.broadleafcommerce.subscription.domain.DefaultSubscriptionBillingFrequencyEnum
      */
-    @NotBlank
     private String billingFrequency;
 
     /**
@@ -141,7 +145,6 @@ public class SubscriptionCreationRequest implements Serializable {
     /**
      * Currency of this subscription
      */
-    @NotNull
     private CurrencyUnit currency;
 
     /**
@@ -155,7 +158,7 @@ public class SubscriptionCreationRequest implements Serializable {
      * {@link com.broadleafcommerce.subscription.domain.entitlement.Entitlement entitlements} to
      * grant on this subscription
      */
-    private boolean needGrantEntitlements;
+    private boolean needGrantEntitlements = false;
 
     private List<SubscriptionItemCreationRequest> itemCreationRequests = new ArrayList<>();
 
