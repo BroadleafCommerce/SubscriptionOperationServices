@@ -32,13 +32,6 @@
         <tag>HEAD</tag>
     </scm>
 
-    <distributionManagement>
-        <repository>
-            <id>broadleaf-microservices</id>
-            <url>https://repository.broadleafcommerce.com/repository/microservices/</url>
-        </repository>
-    </distributionManagement>
-
     <build>
         <plugins>
             <plugin>
