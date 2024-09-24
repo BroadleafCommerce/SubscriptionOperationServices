@@ -24,15 +24,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import com.broadleafcommerce.common.jpa.data.JpaDataRoute;
 import com.broadleafcommerce.common.messaging.data.MessagingDataRouteSupporting;
 import com.broadleafcommerce.data.tracking.core.data.TrackingDataRouteSupporting;
-import com.broadleafcommerce.data.tracking.jpa.messaging.DurableProducer;
 import com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.SubscriptionOperationJpaProperties;
 import com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.SubscriptionOperationProviderProperties;
-import com.broadleafcommerce.subscriptionoperation.service.messaging.ordercreated.SubscriptionCreatedProducer;
 
 @Configuration
 @AutoConfigureBefore(DataSourceAutoConfiguration.class)
@@ -48,13 +45,6 @@ public class SubscriptionOperationJpaAutoConfiguration {
             routePackage = SUBSCRIPTION_OPS_ROUTE_PACKAGE, routeKey = SUBSCRIPTION_OPS_ROUTE_KEY,
             supportingRouteTypes = {TrackingDataRouteSupporting.class,
                     MessagingDataRouteSupporting.class})
-    @Import({EnabledGranularOrFlex.SubscriptionCreatedConfig.class})
-    public static class EnabledGranularOrFlex {
-        @DurableProducer(output = SubscriptionCreatedProducer.class,
-                name = SubscriptionCreatedProducer.TYPE,
-                configurationPrefix = "broadleaf.subscription-created",
-                componentPrefix = "subscriptionCreated")
-        public static class SubscriptionCreatedConfig {}
-    }
+    public static class EnabledGranularOrFlex {}
 
 }
