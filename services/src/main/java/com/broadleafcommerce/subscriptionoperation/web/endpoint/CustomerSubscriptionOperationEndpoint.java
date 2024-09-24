@@ -58,7 +58,7 @@ public class CustomerSubscriptionOperationEndpoint {
 
     @FrameworkGetMapping(value = "/{customerId}/subscriptions")
     @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
-            identityTypes = {IdentityType.ADMIN, IdentityType.OWNER},
+            identityTypes = {IdentityType.OWNER},
             ownerIdentifierParam = 0)
     public Page<SubscriptionWithItems> readCustomerSubscriptions(
             @PathVariable("customerId") String customerId,
