@@ -21,52 +21,32 @@ import org.apache.commons.lang3.StringUtils;
 public enum DefaultUserTypes {
 
     /**
-     * Represents a customer user who is an account member.
+     * Describes an anonymous customer.
      */
-    BLC_ACCOUNT_MEMBER,
+    ANONYMOUS,
 
     /**
-     * Represents a customer user who has permission to approve account carts.
+     * Describes Broadleaf's Account.
      */
-    BLC_ACCOUNT_APPROVER,
+    BLC_ACCOUNT,
 
     /**
-     * Represents a customer.
+     * Describes Broadleaf's Customer.
      */
-    BLC_CUSTOMER,
+    BLC_CUSTOMER;
 
-    /**
-     * Represents a sales representative.
-     * <p>
-     * Typically used for users who can manage and respond to quotes.
-     */
-    BLC_SALES_REP,
-
-    /**
-     * Represents the system.
-     * <p>
-     * Typically used for system originated changes such as a scheduled job to mark quotes as
-     * expired.
-     */
-    BLC_SYSTEM;
-
-    public static boolean isBroadleafAccountMember(String cartActionAuditUserType) {
-        return StringUtils.equals(cartActionAuditUserType, BLC_ACCOUNT_MEMBER.name());
+    public static boolean isAnonymousCustomer(String owningUserType) {
+        return StringUtils.equals(owningUserType,
+                DefaultUserTypes.ANONYMOUS.name());
     }
 
-    public static boolean isBroadleafAccountApprover(String cartActionAuditUserType) {
-        return StringUtils.equals(cartActionAuditUserType, BLC_ACCOUNT_APPROVER.name());
+    public static boolean isBroadleafAccount(String owningUserType) {
+        return StringUtils.equals(owningUserType,
+                DefaultUserTypes.BLC_ACCOUNT.name());
     }
 
-    public static boolean isBroadleafCustomer(String cartActionAuditUserType) {
-        return StringUtils.equals(cartActionAuditUserType, BLC_CUSTOMER.name());
-    }
-
-    public static boolean isBroadleafSalesRep(String cartActionAuditUserType) {
-        return StringUtils.equals(cartActionAuditUserType, BLC_SALES_REP.name());
-    }
-
-    public static boolean isBroadleafSystem(String cartActionAuditUserType) {
-        return StringUtils.equals(cartActionAuditUserType, BLC_SYSTEM.name());
+    public static boolean isBroadleafCustomer(String owningUserType) {
+        return StringUtils.equals(owningUserType,
+                DefaultUserTypes.BLC_CUSTOMER.name());
     }
 }

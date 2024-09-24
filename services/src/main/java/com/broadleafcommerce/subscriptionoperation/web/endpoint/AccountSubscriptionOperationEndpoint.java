@@ -60,6 +60,6 @@ public class AccountSubscriptionOperationEndpoint {
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(
-                DefaultUserTypes.BLC_ACCOUNT_MEMBER.name(), accountId, page, filters, contextInfo);
+                DefaultUserTypes.BLC_ACCOUNT.name(), accountId, page, filters, contextInfo);
     }
 }
