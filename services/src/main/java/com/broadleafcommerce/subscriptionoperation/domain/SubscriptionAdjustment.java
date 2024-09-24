@@ -20,20 +20,18 @@ package com.broadleafcommerce.subscriptionoperation.domain;
 import com.broadleafcommerce.data.tracking.core.ContextStateAware;
 import com.broadleafcommerce.data.tracking.core.filtering.business.domain.ContextState;
 import com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionAdjustmentType;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.math.BigDecimal;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * This is a representation of a price adjustment for a
- * {@link com.broadleafcommerce.subscription.domain.Subscription}
+ * This is a representation of a price adjustment for a {@link Subscription}
  */
 @Data
 @NoArgsConstructor
@@ -41,26 +39,17 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubscriptionAdjustment implements ContextStateAware {
 
-    /**
-     * @deprecated Use {@link #getId()} field instead
-     */
-    @Deprecated(since = "1.0.0")
-    @Size(max = 255)
-    private String adjustmentId;
-
+    @JsonAlias("adjustmentId")
     private String id;
 
     /**
-     * Reference to the {@link com.broadleafcommerce.subscription.domain.Subscription} whose price
-     * this adjusts
+     * Reference to the {@link Subscription} whose price this adjusts
      */
-    @NotBlank
     private String subscriptionId;
 
     /**
      * Reference to the promotion or offer that drives this adjustment
      */
-    @NotBlank
     private String adjustmentRef;
 
     /**
@@ -78,7 +67,6 @@ public class SubscriptionAdjustment implements ContextStateAware {
     /**
      * Number of the billing period this adjustment starts being active
      */
-    @PositiveOrZero
     private Integer beginPeriod;
 
     /**
@@ -91,14 +79,4 @@ public class SubscriptionAdjustment implements ContextStateAware {
      * A subset of {@link Tracking} information to expose the context state for this object.
      */
     private ContextState contextState;
-
-    public void setAdjustmentId(String adjustmentId) {
-        this.adjustmentId = adjustmentId;
-        this.id = adjustmentId;
-    }
-
-    public void setId(String id) {
-        this.adjustmentId = id;
-        this.id = id;
-    }
 }

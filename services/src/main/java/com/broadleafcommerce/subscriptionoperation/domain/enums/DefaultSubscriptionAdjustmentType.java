@@ -14,13 +14,10 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.domain;
+package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
-
-/**
- * Duplicated values from com.broadleafcommerce.promotion.offer.domain.type.DiscountMethodType
- */
 public enum DefaultSubscriptionAdjustmentType {
+
     /**
      * Take a percent off the total amount. For example, an offer using this discount method with a
      * discount value of {@code .20} being applied to an item with a price of {@code $5}, would

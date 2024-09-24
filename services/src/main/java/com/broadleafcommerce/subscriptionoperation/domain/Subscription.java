@@ -16,7 +16,6 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain;
 
-
 import com.broadleafcommerce.common.extension.RequestView;
 import com.broadleafcommerce.common.extension.ResponseView;
 import com.broadleafcommerce.data.tracking.core.ContextStateAware;
@@ -24,7 +23,9 @@ import com.broadleafcommerce.data.tracking.core.filtering.business.domain.Contex
 import com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking;
 import com.broadleafcommerce.money.CurrencyConsumer;
 import com.broadleafcommerce.money.util.MonetaryUtils;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -36,9 +37,6 @@ import java.util.List;
 import javax.money.CurrencySupplier;
 import javax.money.CurrencyUnit;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,7 +45,7 @@ import lombok.NoArgsConstructor;
  * This is a domain representing a user's subscription to a service or a good. The particular line
  * items of the subscription are contained in {@link SubscriptionItem} objects, while any price
  * changes would be held by {@link SubscriptionAdjustment adjustments}. Changes to a subscription's
- * status should be followed by a {@link SubscriptionStatusAudit} to track them.
+ * status should be followed by a SubscriptionStatusAudit to track them.
  */
 @Data
 @NoArgsConstructor
@@ -56,13 +54,7 @@ import lombok.NoArgsConstructor;
 @JsonView({RequestView.class, ResponseView.class})
 public class Subscription implements ContextStateAware, CurrencySupplier, CurrencyConsumer {
 
-    /**
-     * @deprecated Use {@link #getId()} field instead
-     */
-    @Deprecated(since = "1.0.0")
-    @Size(max = 255)
-    private String subscriptionId;
-
+    @JsonAlias("subscriptionId")
     private String id;
 
     /**
@@ -117,26 +109,23 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     /**
      * Type of user owning this subscription
      *
-     * @see com.broadleafcommerce.cart.client.domain.enums.DefaultUserTypes
+     * @see DefaultUserTypes
      */
     private String userRefType;
 
     /**
      * Reference to the user to whom this subscription belongs
      */
-    @NotBlank
     private String userRef;
 
     /**
      * Alternate reference to the user. Useful for third-party authentication system identifiers
      */
-    @NotBlank
     private String alternateUserRef;
 
     /**
      * This field shows from which process or user action this subscription originated
      */
-    @NotBlank
     private String subscriptionSource;
 
     /**
@@ -154,7 +143,6 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
      *
      * @see DefaultSubscriptionBillingFrequencyEnum
      */
-    @NotBlank
     private String billingFrequency;
 
     /**
@@ -163,24 +151,14 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private Date nextBillDate;
 
     /**
-     * References an identifier of a {@link com.broadleafcommerce.billing.job.domain.PaymentAccount}
-     * that is considered preferred for this subscription. Overrides the ordering of
-     * {@link com.broadleafcommerce.billing.job.domain.PaymentAccount accounts} as provided by
-     * {@link com.broadleafcommerce.billing.service.provider.SavedPaymentMethodProvider}
+     * References an identifier of a PaymentAccount that is considered preferred for this
+     * subscription.
      */
     private String preferredPaymentAccountId;
 
     /**
-     * @deprecated use {@link #getCurrency()} field instead
-     */
-    @NotBlank
-    @Deprecated(since = "1.0.0")
-    private String currencyCode;
-
-    /**
      * Currency of this subscription
      */
-    @NotNull
     private CurrencyUnit currency;
 
     /**
@@ -214,17 +192,9 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private Date createdDate;
 
     /**
-     * @deprecated Use
-     *             {@link com.broadleafcommerce.data.tracking.core.context.ContextInfo#setAuthor(String)}
-     *             instead
-     */
-    @Deprecated(since = "1.0.0")
-    private String updatedBy;
-
-    /**
      * Whether this subscription is being cancelled due to a chargeback
      */
-    private Boolean chargeback;
+    private boolean chargeback = false;
 
     /**
      * The next period this subscription will cover. This value is related to 'beginPeriod' and
@@ -240,7 +210,7 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
      * Note that this field does not have any effects if Entitlements are disabled in
      * {@link BillingJobProperties#getEntitlements()#isEnabled()}
      */
-    private boolean needGrantEntitlements;
+    private boolean needGrantEntitlements = false;
 
     /**
      * Adjustments for this subscription. This field is used for creation from an API request and is
@@ -257,27 +227,11 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private Integer version;
 
     public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
         this.currency = currencyCode == null ? null : MonetaryUtils.getCurrency(currencyCode);
-    }
-
-    public void setCurrency(CurrencyUnit currency) {
-        this.currency = currency;
-        this.currencyCode = currency == null ? null : currency.getCurrencyCode();
     }
 
     /**
      * A subset of {@link Tracking} information to expose the context state for this object.
      */
     private ContextState contextState;
-
-    public void setSubscriptionId(String subscriptionId) {
-        this.subscriptionId = subscriptionId;
-        this.id = subscriptionId;
-    }
-
-    public void setId(String id) {
-        this.subscriptionId = id;
-        this.id = id;
-    }
 }

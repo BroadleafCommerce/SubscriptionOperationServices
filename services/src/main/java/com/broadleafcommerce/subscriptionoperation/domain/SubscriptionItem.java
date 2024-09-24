@@ -25,8 +25,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,15 +38,17 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SubscriptionItem implements ContextStateAware {
 
-    @Size(max = 255)
     private String id;
 
     /**
      * Reference the subscription for this item
      */
-    @Size(max = 255)
-    @NotBlank
     private String subscriptionId;
+
+    /**
+     * Item name
+     */
+    private String itemName;
 
     /**
      * Type of item that this object represents
@@ -59,11 +59,6 @@ public class SubscriptionItem implements ContextStateAware {
      * Reference to the id of the item represented by this object
      */
     private String itemRef;
-
-    /**
-     * Item name
-     */
-    private String itemName;
 
     /**
      * Type of the parent subscription item's backing item if this is a child subscription item
@@ -83,12 +78,12 @@ public class SubscriptionItem implements ContextStateAware {
     /**
      * Quantity purchased
      */
-    private Integer quantity;
+    private int quantity = 1;
 
     /**
      * Whether this item is taxable
      */
-    private Boolean taxable;
+    private boolean taxable = true;
 
     /**
      * Tax category of the item
