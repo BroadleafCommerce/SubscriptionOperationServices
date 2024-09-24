@@ -19,17 +19,27 @@ package com.broadleafcommerce.subscriptionoperation.provider.jpa.autoconfigure;
 import static com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants.Persistence.SUBSCRIPTION_OPS_ROUTE_KEY;
 import static com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants.Persistence.SUBSCRIPTION_OPS_ROUTE_PACKAGE;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.Nullable;
 
+import com.broadleafcommerce.common.extension.data.DataRouteSupporting;
+import com.broadleafcommerce.common.extension.data.PackageDataRouteSupplier;
 import com.broadleafcommerce.common.jpa.data.JpaDataRoute;
 import com.broadleafcommerce.common.messaging.data.MessagingDataRouteSupporting;
+import com.broadleafcommerce.data.tracking.core.context.ContextInfoCustomizer;
 import com.broadleafcommerce.data.tracking.core.data.TrackingDataRouteSupporting;
+import com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.RouteConstants;
 import com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.SubscriptionOperationJpaProperties;
 import com.broadleafcommerce.subscriptionoperation.provider.jpa.environment.SubscriptionOperationProviderProperties;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @AutoConfigureBefore(DataSourceAutoConfiguration.class)
@@ -46,5 +56,42 @@ public class SubscriptionOperationJpaAutoConfiguration {
             supportingRouteTypes = {TrackingDataRouteSupporting.class,
                     MessagingDataRouteSupporting.class})
     public static class EnabledGranularOrFlex {}
+
+    /**
+     * Defines a {@link DataRouteSupporting} for Subscription Ops. By default, this is detached from
+     * any persistence and is used for supporting {@link ContextInfoCustomizer} in a flexpackage
+     * configuration to ensure it is only invoked for this specific service.
+     */
+    @Bean(name = "subscriptionOperationSource")
+    @ConditionalOnMissingBean(name = "subscriptionOperationSource")
+    public DataRouteSupporting subscriptionOperationSource() {
+        return new OrchestrationDataRouteSupporting(
+                RouteConstants.Persistence.SUBSCRIPTION_OPS_ROUTE_KEY);
+    }
+
+    @Bean(name = "subscriptionOperationRouteSupplier")
+    @ConditionalOnMissingBean(name = "subscriptionOperationRouteSupplier")
+    public PackageDataRouteSupplier<DataRouteSupporting> subscriptionOperationRouteSupplier(
+            @Nullable @Qualifier("subscriptionOperationSource") DataRouteSupporting route) {
+        return () -> new PackageDataRouteSupplier.PackageMapping<>(
+                RouteConstants.Persistence.SUBSCRIPTION_OPS_ROUTE_PACKAGE,
+                route);
+    }
+
+    @RequiredArgsConstructor
+    private static class OrchestrationDataRouteSupporting implements DataRouteSupporting {
+
+        private final String routeKey;
+
+        @Override
+        public String getLookupKey() {
+            return routeKey;
+        }
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
+    }
 
 }
