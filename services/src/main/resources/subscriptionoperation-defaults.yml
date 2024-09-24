@@ -10,14 +10,6 @@ spring:
         provider:
           subscriptionopsclient:
             token-uri: https://localhost:8443/oauth/token
-  cloud:
-    stream:
-      bindings:
-        orderCreatedInputSubscriptionOperations:
-          group: subscription-operations-order-created
-          destination: orderCreated
-        subscriptionCreatedOutput:
-          destination: subscriptionCreated
 broadleaf:
   transitionrequest:
     enabled: false
