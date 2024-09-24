@@ -51,7 +51,7 @@ public class AccountSubscriptionOperationEndpoint {
     protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
     @FrameworkGetMapping(value = "/{accountId}/subscriptions")
-    @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
+    @Policy(permissionRoots = "ACCOUNT_SUBSCRIPTION",
             identityTypes = {IdentityType.ADMIN, IdentityType.OWNER},
             ownerIdentifierParam = 0, ownerIdentifier = "acct_id,parent_accts")
     public Page<SubscriptionWithItems> readAccountSubscriptions(
