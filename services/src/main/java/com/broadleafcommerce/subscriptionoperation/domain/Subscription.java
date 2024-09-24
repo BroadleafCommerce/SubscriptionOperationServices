@@ -119,6 +119,13 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private String userRef;
 
     /**
+     * Type of the alternative user reference
+     *
+     * @see DefaultUserTypes
+     */
+    private String alternateUserRefType;
+
+    /**
      * Alternate reference to the user. Useful for third-party authentication system identifiers
      */
     private String alternateUserRef;
