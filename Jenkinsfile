@@ -1,7 +1,4 @@
 mavenBuild {
-  nightlyTests = 'true'
-  sonarAnalysis = 'skip'
-  nightlySonar = 'true'
   extraBuildProfiles = '-Pdeptrack'
   dependencyCheck = 'enabled'
   dependencyCheckBomName = 'SubscriptionOperationServices'
