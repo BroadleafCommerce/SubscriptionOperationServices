@@ -48,6 +48,7 @@ import com.broadleafcommerce.subscriptionoperation.web.endpoint.util.InMemorySub
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,11 +57,11 @@ import io.azam.ulidj.ULID;
 @WithMockUser
 @SpringBootTest
 @AutoConfigureMockMvc
-class CustomerSubscriptionOperationEndpointIT {
+class AccountSubscriptionOperationEndpointIT {
 
     protected static final String SYSTEM_SUBSCRIPTION_URI = "/subscription-ops";
-    protected static final String CUSTOMER_URI = "/customer";
-    protected static final String CUSTOMER_READ_URI = "/{customerId}/subscriptions";
+    protected static final String ACCOUNT_URI = "/account";
+    protected static final String ACCOUNT_READ_URI = "/{accountId}/subscriptions";
 
     protected static final String CUSTOMER_SUBSCRIPTION = "CUSTOMER_SUBSCRIPTION";
 
@@ -97,77 +98,81 @@ class CustomerSubscriptionOperationEndpointIT {
     }
 
     @Test
-    void cannotReadSubscriptionsWithoutPermissionAndWrongUser() throws Exception {
-        inMemorySubscriptionProvider.create(getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID),
+    void cannotReadSubscriptionsWithoutPermissionAndWrongAccount() throws Exception {
+        inMemorySubscriptionProvider.create(getSubscriptionForAccount(REGISTERED_CUSTOMER_ID),
                 createContextInfo());
 
         Map<String, Object> authDetails = new HashMap<>();
-        authDetails.put("customer_id", "2");
+        authDetails.put("acct_id", "2");
 
-        mockMvc.perform(get(CUSTOMER_URI + CUSTOMER_READ_URI, "2")
+        mockMvc.perform(get(ACCOUNT_URI + ACCOUNT_READ_URI, "2")
                 .with(authUtil.withAuthoritiesAndDetails(Sets.newSet("RANDOM_PERMISSION"),
                         authDetails))
-                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT)))
+                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void cannotReadSubscriptionsWithoutPermissionWithCorrectUser() throws Exception {
-        inMemorySubscriptionProvider.create(getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID),
+    void cannotReadSubscriptionsWithoutPermissionWithCorrectAccount() throws Exception {
+        inMemorySubscriptionProvider.create(getSubscriptionForAccount(ACCOUNT_ID),
                 createContextInfo());
 
         Map<String, Object> authDetails = new HashMap<>();
-        authDetails.put("customer_id", REGISTERED_CUSTOMER_ID);
+        authDetails.put("acct_id", ACCOUNT_ID);
 
-        mockMvc.perform(get(CUSTOMER_URI + CUSTOMER_READ_URI, REGISTERED_CUSTOMER_ID)
+        mockMvc.perform(get(ACCOUNT_URI + ACCOUNT_READ_URI, ACCOUNT_ID)
                 .with(authUtil.withAuthoritiesAndDetails(Sets.newSet("RANDOM_PERMISSION"),
                         authDetails))
-                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT)))
+                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void cannotReadSubscriptionsWithPermissionWithWrongUser() throws Exception {
-        inMemorySubscriptionProvider.create(getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID),
+    void cannotReadSubscriptionsWithPermissionWithWrongAccount() throws Exception {
+        inMemorySubscriptionProvider.create(getSubscriptionForAccount(ACCOUNT_ID),
                 createContextInfo());
 
         Map<String, Object> authDetails = new HashMap<>();
-        authDetails.put("customer_id", "2");
+        authDetails.put("acct_id", "2");
+        authDetails.put("parent_accts", Collections.emptyList());
 
-        mockMvc.perform(get(CUSTOMER_URI + CUSTOMER_READ_URI, REGISTERED_CUSTOMER_ID)
-                .with(authUtil.withAuthoritiesAndDetails(Sets.newSet("READ_CUSTOMER_SUBSCRIPTION"),
+        mockMvc.perform(get(ACCOUNT_URI + ACCOUNT_READ_URI, ACCOUNT_ID)
+                .with(authUtil.withAuthoritiesAndDetails(Sets.newSet("READ_ACCOUNT_SUBSCRIPTION"),
                         authDetails))
-                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT)))
+                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void readsSubscriptionsWithPermission() throws Exception {
-        inMemorySubscriptionProvider.create(getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID),
+        inMemorySubscriptionProvider.create(getSubscriptionForAccount(ACCOUNT_ID),
                 createContextInfo());
 
         Map<String, Object> authDetails = new HashMap<>();
-        authDetails.put("customer_id", REGISTERED_CUSTOMER_ID);
+        authDetails.put("acct_id", ACCOUNT_ID);
 
-        mockMvc.perform(get(CUSTOMER_URI + CUSTOMER_READ_URI, REGISTERED_CUSTOMER_ID)
-                .with(authUtil.withAuthoritiesAndDetails(Sets.newSet("READ_CUSTOMER_SUBSCRIPTION"),
+        mockMvc.perform(get(ACCOUNT_URI + ACCOUNT_READ_URI, ACCOUNT_ID)
+                .with(authUtil.withAuthoritiesAndDetails(Sets.newSet("READ_ACCOUNT_SUBSCRIPTION"),
                         authDetails))
                 .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(
                         jsonPath("$.content[0].subscription.userRefType")
-                                .value(DefaultUserTypes.BLC_CUSTOMER.name()))
+                                .value(DefaultUserTypes.BLC_ACCOUNT.name()))
                 .andExpect(jsonPath("$.content[0].subscription.userRef")
-                        .value(REGISTERED_CUSTOMER_ID));
+                        .value(ACCOUNT_ID));
     }
 
-    private SubscriptionWithItems getSubscriptionForCustomer(String userRef) {
+    private SubscriptionWithItems getSubscriptionForAccount(String userRef) {
         SubscriptionWithItems subscriptionWithItems = new SubscriptionWithItems();
         Subscription subscription = new Subscription();
         subscription.setId(ULID.random());
         subscription.setName(ULID.random());
-        subscription.setUserRefType(DefaultUserTypes.BLC_CUSTOMER.name());
+        subscription.setUserRefType(DefaultUserTypes.BLC_ACCOUNT.name());
         subscription.setUserRef(userRef);
         subscriptionWithItems.setSubscription(subscription);
         return subscriptionWithItems;
