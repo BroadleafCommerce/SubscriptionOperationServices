@@ -38,6 +38,11 @@ public class SubscriptionItemCreationRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
+     * Item name
+     */
+    private String itemName;
+
+    /**
      * Type of item that this object represents
      */
     private String itemRefType;
@@ -46,11 +51,6 @@ public class SubscriptionItemCreationRequest implements Serializable {
      * Reference to the item ID
      */
     private String itemRef;
-
-    /**
-     * Item name
-     */
-    private String itemName;
 
     /**
      * Type of the parent subscription item's backing item if this is a child subscription item
