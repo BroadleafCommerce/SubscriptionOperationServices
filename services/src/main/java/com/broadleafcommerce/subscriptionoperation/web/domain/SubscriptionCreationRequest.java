@@ -17,7 +17,7 @@
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAdjustment;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatusEnum;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -53,14 +53,14 @@ public class SubscriptionCreationRequest implements Serializable {
     /**
      * Current status of this subscription
      *
-     * @see com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatusEnum
+     * @see SubscriptionStatuses
      */
-    private String subscriptionStatus = SubscriptionStatusEnum.ACTIVE.name();
+    private String subscriptionStatus = SubscriptionStatuses.ACTIVE.name();
 
     /**
      * Next status for this subscription
      *
-     * @see SubscriptionStatusEnum
+     * @see SubscriptionStatuses
      */
     private String subscriptionNextStatus;
 

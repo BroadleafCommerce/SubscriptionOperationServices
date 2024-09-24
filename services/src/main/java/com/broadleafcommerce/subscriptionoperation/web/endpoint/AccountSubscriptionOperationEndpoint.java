@@ -24,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.broadleafcommerce.cart.client.domain.enums.DefaultUserTypes;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
 import com.broadleafcommerce.data.tracking.core.policy.IdentityType;
@@ -33,6 +32,7 @@ import com.broadleafcommerce.data.tracking.core.type.OperationType;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
 
 import cz.jirutka.rsql.parser.ast.Node;

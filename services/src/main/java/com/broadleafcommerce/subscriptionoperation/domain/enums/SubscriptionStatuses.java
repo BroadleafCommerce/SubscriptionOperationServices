@@ -16,9 +16,17 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
-public enum SubscriptionStatusEnum {
+public enum SubscriptionStatuses {
 
-    ACTIVE, CANCELLED, PENDING_CANCELLATION, PAUSED, ERROR;
+    ACTIVE,
+
+    CANCELLED,
+
+    PENDING_CANCELLATION,
+
+    PAUSED,
+
+    ERROR;
 
     public static boolean isActive(String subscriptionStatus) {
         return ACTIVE.name().equals(subscriptionStatus);

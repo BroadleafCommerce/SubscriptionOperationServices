@@ -24,7 +24,7 @@ import com.broadleafcommerce.data.tracking.core.filtering.business.domain.Contex
 import com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking;
 import com.broadleafcommerce.money.CurrencyConsumer;
 import com.broadleafcommerce.money.util.MonetaryUtils;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatusEnum;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -73,14 +73,14 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     /**
      * Current status of this subscription
      *
-     * @see SubscriptionStatusEnum
+     * @see SubscriptionStatuses
      */
     private String subscriptionStatus;
 
     /**
      * Next status for this subscription
      *
-     * @see SubscriptionStatusEnum
+     * @see SubscriptionStatuses
      */
     private String subscriptionNextStatus;
 
