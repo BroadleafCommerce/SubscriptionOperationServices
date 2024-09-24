@@ -26,7 +26,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
@@ -51,12 +50,12 @@ import lombok.RequiredArgsConstructor;
 @FrameworkMapping(CustomerSubscriptionOperationEndpoint.BASE_URI)
 public class CustomerSubscriptionOperationEndpoint {
 
-    public static final String BASE_URI = "/customer";
+    public static final String BASE_URI = "/customer/{customerId}/subscriptions";
 
     @Getter(AccessLevel.PROTECTED)
     protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
-    @FrameworkGetMapping(value = "/{customerId}/subscriptions")
+    @FrameworkGetMapping()
     @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
             identityTypes = {IdentityType.OWNER},
             ownerIdentifierParam = 0)
@@ -70,9 +69,13 @@ public class CustomerSubscriptionOperationEndpoint {
     }
 
     @FrameworkPostMapping(value = "/{subscriptionId}/upgrade")
-    @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"}, operationTypes = OperationType.UPDATE)
+    @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"},
+            identityTypes = {IdentityType.OWNER},
+            ownerIdentifierParam = 0,
+            operationTypes = OperationType.UPDATE)
     public Subscription upgradeSubscription(
-            @RequestParam String subscriptionId,
+            @PathVariable("customerId") String customerId,
+            @PathVariable("subscriptionId") String subscriptionId,
             @RequestBody SubscriptionChangeTierRequest changeTierRequest,
             @ContextOperation(OperationType.UPDATE) final ContextInfo contextInfo) {
         changeTierRequest.setPriorSubscriptionId(subscriptionId);
@@ -80,9 +83,13 @@ public class CustomerSubscriptionOperationEndpoint {
     }
 
     @FrameworkPutMapping(value = "/{subscriptionId}/cancel")
-    @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"}, operationTypes = OperationType.UPDATE)
+    @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"},
+            identityTypes = {IdentityType.OWNER},
+            ownerIdentifierParam = 0,
+            operationTypes = OperationType.UPDATE)
     public Subscription cancelSubscription(
-            @RequestParam String subscriptionId,
+            @PathVariable("customerId") String customerId,
+            @PathVariable("subscriptionId") String subscriptionId,
             @RequestBody SubscriptionCancellationRequest subscriptionCancellationRequest,
             @ContextOperation(OperationType.UPDATE) final ContextInfo contextInfo) {
         subscriptionCancellationRequest.setSubscriptionId(subscriptionId);
