@@ -16,7 +16,9 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
+import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAdjustment;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 
@@ -35,7 +37,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * TODO
+ * A request DTO that stores fields necessary for creating a {@link Subscription} and its
+ * {@link SubscriptionItem items}. {@link SubscriptionAdjustment Adjustments} may also be created
+ * with this request
  */
 @Data
 @AllArgsConstructor

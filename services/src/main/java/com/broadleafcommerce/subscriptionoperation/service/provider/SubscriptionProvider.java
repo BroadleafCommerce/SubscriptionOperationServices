@@ -21,25 +21,38 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 
 import cz.jirutka.rsql.parser.ast.Node;
 
 
 /**
- * TODO
+ * Provider interfacing with Broadleaf's BillingServices to gather, update, or create
+ * {@link Subscription} and related entities.
  */
 public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
 
     /**
-     * TODO
+     * Persists a subscription alongside its items
      *
-     * @param subscriptionWithItems
-     * @param contextInfo
-     * @return
+     * @param subscriptionWithItems subscription with items to persist
+     * @param contextInfo context information around multi-tenant state
+     * @return the created subscription and items
      */
     SWI create(SWI subscriptionWithItems, @Nullable ContextInfo contextInfo);
 
+    /**
+     * Retrieves subscription with items for a given user type and user id, taking into account the
+     * provided filters and paging
+     *
+     * @param userType type of user
+     * @param userId user id
+     * @param page pageable
+     * @param filters Additional RSQL filters
+     * @param contextInfo context information around multi-tenant state
+     * @return
+     */
     Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
             String userId,
             Pageable page,

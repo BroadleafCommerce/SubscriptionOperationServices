@@ -30,6 +30,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+/**
+ * Request DTO stored on {@link SubscriptionCreationRequest} that holds fields necessary for
+ * building and creating a subscription
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

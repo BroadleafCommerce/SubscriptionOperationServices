@@ -20,6 +20,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import lombok.Data;
 
+/**
+ * Provides a programmatic way to access the property that defines whether a database provider is
+ * present, and if so, which framework is used.
+ */
 @Data
 @ConfigurationProperties("broadleaf.subscriptionoperation.database")
 public class SubscriptionOperationProviderProperties {

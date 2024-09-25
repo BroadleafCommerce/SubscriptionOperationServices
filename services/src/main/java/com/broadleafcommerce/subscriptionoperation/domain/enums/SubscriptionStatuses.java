@@ -16,16 +16,34 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
+/**
+ * Enumerates the statuses for a subscription
+ */
 public enum SubscriptionStatuses {
 
+    /**
+     * Indicates an active subscription
+     */
     ACTIVE,
 
+    /**
+     * Indicates a subscription that has been cancelled
+     */
     CANCELLED,
 
+    /**
+     * Indicates a subscription that should be cancelled soon
+     */
     PENDING_CANCELLATION,
 
+    /**
+     * Indicates a subscription whose activity is temporarily halted
+     */
     PAUSED,
 
+    /**
+     * Indicates a subscription with an error state
+     */
     ERROR;
 
     public static boolean isActive(String subscriptionStatus) {
