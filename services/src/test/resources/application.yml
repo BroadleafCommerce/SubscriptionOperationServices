@@ -1,0 +1,15 @@
+spring:
+  cache:
+    type: none
+  liquibase:
+    enabled: false
+  jpa:
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+        dialect: org.hibernate.dialect.HSQLDialect
+broadleaf:
+  default:
+    data:
+      route: subscriptionoperation

@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/subscriptionoperation.yugabytedb.changelog-master.xml

@@ -64,6 +64,16 @@
 
         <!-- Tests -->
         <dependency>
+            <groupId>org.liquibase.ext</groupId>
+            <artifactId>liquibase-yugabytedb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.yugabyte</groupId>
+            <artifactId>testcontainers-yugabytedb</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-common-extension-compatibility-test</artifactId>
             <scope>test</scope>

@@ -1,0 +1,33 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          subscriptionopsclient:
+            authorization-grant-type: client_credentials
+            client-id: subscriptionopsclient
+            client-secret: subscriptionopsclient_secret
+        provider:
+          subscriptionopsclient:
+            token-uri: https://localhost:8443/oauth/token
+broadleaf:
+  transitionrequest:
+    enabled: false
+  changesummary:
+    notification:
+      active: false
+  tracking:
+    sandbox:
+      purge:
+        enabled: false
+    notification:
+      prune:
+        active: false
+  purge:
+    message:
+      lock:
+        active: false
+  subscriptionoperation:
+    subscriptionprovider:
+      url: https://localhost:8467/billing
+      subscription-uri: /subscriptions
