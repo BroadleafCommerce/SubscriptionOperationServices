@@ -31,3 +31,9 @@ broadleaf:
     subscriptionprovider:
       url: https://localhost:8467/billing
       subscription-uri: /subscriptions
+    database:
+      provider: jpa
+    liquibase:
+      change-log: ${changelogPath}
+      liquibase-schema: ${liquibase-schema}
+      default-schema: ${default-schema}
