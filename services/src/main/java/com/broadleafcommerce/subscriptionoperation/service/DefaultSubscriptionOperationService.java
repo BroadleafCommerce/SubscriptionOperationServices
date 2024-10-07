@@ -37,7 +37,6 @@ import java.util.List;
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -86,7 +85,7 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
 
     @SuppressWarnings("unchecked")
     protected SWI buildSubscriptionWithItems(
-            @NonNull SubscriptionCreationRequest subscriptionCreationRequest,
+            @lombok.NonNull SubscriptionCreationRequest subscriptionCreationRequest,
             @Nullable ContextInfo contextInfo) {
         S subscription = buildSubscription(subscriptionCreationRequest, contextInfo);
         List<I> items = buildSubscriptionItems(subscriptionCreationRequest, contextInfo);
