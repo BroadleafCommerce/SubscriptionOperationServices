@@ -83,16 +83,6 @@ public class SubscriptionCreationRequest implements Serializable {
     private String nextStatusChangeReason;
 
     /**
-     * Type of the item for which this subscription was provisioned
-     */
-    private String rootItemRefType;
-
-    /**
-     * Reference to the item id for which this subscription was provision
-     */
-    private String rootItemRef;
-
-    /**
      * Type of user owning this subscription
      *
      * @see DefaultUserTypes
@@ -157,17 +147,22 @@ public class SubscriptionCreationRequest implements Serializable {
     private Date nextBillDate;
 
     /**
-     * References an identifier of a {@link com.broadleafcommerce.billing.job.domain.PaymentAccount}
-     * that is considered preferred for this subscription. Overrides the ordering of
-     * {@link com.broadleafcommerce.billing.job.domain.PaymentAccount accounts} as provided by
-     * {@link com.broadleafcommerce.billing.service.provider.SavedPaymentMethodProvider}
+     * References an identifier of a BillingServices PaymentAccount
+     * that is considered preferred for this subscription.
      */
     private String preferredPaymentAccountId;
 
     /**
-     * Currency of this subscription
+     * Type of the item for which this subscription was provisioned
      */
-    private CurrencyUnit currency;
+    private String rootItemRefType;
+
+    /**
+     * Reference to the item id for which this subscription was provision
+     */
+    private String rootItemRef;
+
+    private List<SubscriptionItemCreationRequest> itemCreationRequests = new ArrayList<>();
 
     /**
      * Adjustments for this subscription. This field is used for creation from an API request and is
@@ -176,13 +171,14 @@ public class SubscriptionCreationRequest implements Serializable {
     private List<SubscriptionAdjustment> subscriptionAdjustments = new ArrayList<>();
 
     /**
-     * Whether the system has outstanding
-     * {@link com.broadleafcommerce.subscription.domain.entitlement.Entitlement entitlements} to
-     * grant on this subscription
+     * Currency of this subscription
+     */
+    private CurrencyUnit currency;
+
+    /**
+     * Whether the system has outstanding entitlements to grant for this subscription
      */
     private boolean needGrantEntitlements = false;
-
-    private List<SubscriptionItemCreationRequest> itemCreationRequests = new ArrayList<>();
 
     /**
      * Miscellaneous attributes that can be set to this request in order to inform business logic
