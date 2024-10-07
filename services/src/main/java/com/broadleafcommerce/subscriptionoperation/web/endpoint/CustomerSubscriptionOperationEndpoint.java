@@ -38,7 +38,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionChangeTierRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
@@ -76,10 +76,10 @@ public class CustomerSubscriptionOperationEndpoint {
     public Subscription upgradeSubscription(
             @PathVariable("customerId") String customerId,
             @PathVariable("subscriptionId") String subscriptionId,
-            @RequestBody SubscriptionChangeTierRequest changeTierRequest,
+            @RequestBody SubscriptionUpgradeRequest upgradeRequest,
             @ContextOperation(OperationType.UPDATE) final ContextInfo contextInfo) {
-        changeTierRequest.setPriorSubscriptionId(subscriptionId);
-        return subscriptionOperationService.upgradeSubscription(changeTierRequest, contextInfo);
+        upgradeRequest.setPriorSubscriptionId(subscriptionId);
+        return subscriptionOperationService.upgradeSubscription(upgradeRequest, contextInfo);
     }
 
     @FrameworkPutMapping(value = "/{subscriptionId}/cancel")

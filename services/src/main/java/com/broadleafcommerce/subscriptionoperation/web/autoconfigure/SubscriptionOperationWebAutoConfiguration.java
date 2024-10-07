@@ -17,9 +17,12 @@
 package com.broadleafcommerce.subscriptionoperation.web.autoconfigure;
 
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkControllerScan;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.broadleafcommerce.subscriptionoperation.web.endpoint.SubscriptionOperationEndpoint;
+import com.broadleafcommerce.subscriptionoperation.web.endpoint.exception.SubscriptionOperationExceptionAdvisor;
 
 @Configuration
 public class SubscriptionOperationWebAutoConfiguration {
@@ -27,4 +30,10 @@ public class SubscriptionOperationWebAutoConfiguration {
     @Configuration
     @FrameworkControllerScan(basePackageClasses = SubscriptionOperationEndpoint.class)
     static class EnableBroadleafControllers {}
+
+    @Bean
+    @ConditionalOnMissingBean
+    SubscriptionOperationExceptionAdvisor subscriptionOperationExceptionAdvisor() {
+        return new SubscriptionOperationExceptionAdvisor();
+    }
 }

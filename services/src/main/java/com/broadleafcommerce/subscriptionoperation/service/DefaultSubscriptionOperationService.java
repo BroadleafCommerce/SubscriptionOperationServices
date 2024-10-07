@@ -16,6 +16,8 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -25,11 +27,12 @@ import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionChangeTierRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionItemCreationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,34 +64,67 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
 
     @Override
     public SWI createSubscriptionWithItems(
-            @lombok.NonNull SubscriptionCreationRequest subscriptionCreationRequest,
+            @lombok.NonNull SubscriptionCreationRequest creationRequest,
             @Nullable ContextInfo contextInfo) {
+        validateSubscriptionCreationRequest(creationRequest, contextInfo);
+
         SWI subscriptionWithItemsToCreate =
-                buildSubscriptionWithItems(subscriptionCreationRequest, contextInfo);
+                buildSubscriptionWithItems(creationRequest, contextInfo);
 
         return subscriptionProvider.create(subscriptionWithItemsToCreate, contextInfo);
     }
 
     @Override
     public S cancelSubscription(
-            @lombok.NonNull SubscriptionCancellationRequest subscriptionCancellationRequest,
+            @lombok.NonNull SubscriptionCancellationRequest cancellationRequest,
             @Nullable ContextInfo context) {
         return null;
     }
 
     @Override
-    public S upgradeSubscription(@lombok.NonNull SubscriptionChangeTierRequest changeTierRequest,
+    public S upgradeSubscription(@lombok.NonNull SubscriptionUpgradeRequest upgradeRequest,
             @Nullable ContextInfo contextInfo) {
         return null;
+    }
+
+    protected void validateSubscriptionCreationRequest(
+            @lombok.NonNull SubscriptionCreationRequest creationRequest,
+            @Nullable ContextInfo contextInfo) {
+        if (StringUtils.isBlank(creationRequest.getUserRefType())
+                || StringUtils.isBlank(creationRequest.getUserRef())) {
+            throw new InvalidSubscriptionCreationRequestException(
+                    "A subscription must be given an owning user/account via userRefType and userRef.");
+        }
+        if (StringUtils.isBlank(creationRequest.getPeriodType())
+                && StringUtils.isBlank(creationRequest.getBillingFrequency())) {
+            throw new InvalidSubscriptionCreationRequestException(
+                    "A subscription must be given a periodType or billingFrequency.");
+        }
+        if (CollectionUtils.isEmpty(creationRequest.getItemCreationRequests())) {
+            throw new InvalidSubscriptionCreationRequestException(
+                    "Subscription items must also be defined for the subscription.");
+        }
+    }
+
+    protected void validateSubscriptionCancellationRequest(
+            @lombok.NonNull SubscriptionCancellationRequest cancellationRequest,
+            @Nullable ContextInfo contextInfo) {
+
+    }
+
+    protected void validateSubscriptionDowngradeRequest(
+            @lombok.NonNull SubscriptionCreationRequest creationRequest,
+            @Nullable ContextInfo contextInfo) {
+
     }
 
 
     @SuppressWarnings("unchecked")
     protected SWI buildSubscriptionWithItems(
-            @lombok.NonNull SubscriptionCreationRequest subscriptionCreationRequest,
+            @lombok.NonNull SubscriptionCreationRequest creationRequest,
             @Nullable ContextInfo contextInfo) {
-        S subscription = buildSubscription(subscriptionCreationRequest, contextInfo);
-        List<I> items = buildSubscriptionItems(subscriptionCreationRequest, contextInfo);
+        S subscription = buildSubscription(creationRequest, contextInfo);
+        List<I> items = buildSubscriptionItems(creationRequest, contextInfo);
 
         SWI subscriptionWithItemsToBeCreated = (SWI) typeFactory.get(SubscriptionWithItems.class);
         subscriptionWithItemsToBeCreated.setSubscription(subscription);
@@ -126,11 +162,11 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
 
     @SuppressWarnings("unchecked")
     protected List<I> buildSubscriptionItems(
-            @lombok.NonNull SubscriptionCreationRequest subscriptionCreationRequest,
+            @lombok.NonNull SubscriptionCreationRequest creationRequest,
             @Nullable ContextInfo contextInfo) {
         List<I> items = new ArrayList<>();
 
-        for (SubscriptionItemCreationRequest request : subscriptionCreationRequest
+        for (SubscriptionItemCreationRequest request : creationRequest
                 .getItemCreationRequests()) {
             I item = (I) typeFactory.get(SubscriptionItem.class);
             item.setItemRefType(request.getItemRefType());

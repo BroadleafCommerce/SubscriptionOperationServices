@@ -27,8 +27,8 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionChangeTierRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import cz.jirutka.rsql.parser.ast.Node;
 
@@ -79,10 +79,10 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
     /**
      * TODO
      *
-     * @param changeTierRequest
+     * @param upgradeRequest
      * @param contextInfo
      * @return
      */
-    S upgradeSubscription(SubscriptionChangeTierRequest changeTierRequest,
+    S upgradeSubscription(SubscriptionUpgradeRequest upgradeRequest,
             @Nullable ContextInfo contextInfo);
 }

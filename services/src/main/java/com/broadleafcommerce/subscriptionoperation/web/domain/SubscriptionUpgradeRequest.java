@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SubscriptionChangeTierRequest {
+public class SubscriptionUpgradeRequest {
 
     Subscription newSubscription;
 
