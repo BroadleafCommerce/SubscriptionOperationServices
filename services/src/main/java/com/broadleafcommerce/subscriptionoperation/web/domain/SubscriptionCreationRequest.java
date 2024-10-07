@@ -126,9 +126,9 @@ public class SubscriptionCreationRequest implements Serializable {
     private String billingFrequency;
 
     /**
-     * The frequency with which the recurring price should be charged., e.g., a value of 1
-     * combined with {@link #periodType} of MONTH would indicate to a subscription service that the
-     * price should be charged every 1 month.
+     * The frequency with which the recurring price should be charged., e.g., a value of 1 combined
+     * with {@link #periodType} of MONTH would indicate to a subscription service that the price
+     * should be charged every 1 month.
      *
      * @see #periodType
      */
@@ -147,8 +147,8 @@ public class SubscriptionCreationRequest implements Serializable {
     private Date nextBillDate;
 
     /**
-     * References an identifier of a BillingServices PaymentAccount
-     * that is considered preferred for this subscription.
+     * References an identifier of a BillingServices PaymentAccount that is considered preferred for
+     * this subscription.
      */
     private String preferredPaymentAccountId;
 

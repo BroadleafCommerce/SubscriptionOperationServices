@@ -155,9 +155,9 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private String billingFrequency;
 
     /**
-     * The frequency with which the recurring price should be charged., e.g., a value of 1
-     * combined with {@link #periodType} of MONTH would indicate to a subscription service that the
-     * price should be charged every 1 month.
+     * The frequency with which the recurring price should be charged., e.g., a value of 1 combined
+     * with {@link #periodType} of MONTH would indicate to a subscription service that the price
+     * should be charged every 1 month.
      *
      * @see #periodType
      */

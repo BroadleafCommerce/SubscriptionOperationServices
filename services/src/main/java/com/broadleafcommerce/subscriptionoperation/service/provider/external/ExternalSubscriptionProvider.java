@@ -39,16 +39,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 
 public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
-        extends AbstractExternalProvider
-        implements SubscriptionProvider<SWI> {
-
-    protected static final String SUBSCRIPTION_SOURCE_PARAM = "subscriptionSource";
-    protected static final String SUBSCRIPTION_SOURCE_REF_PARAM = "subscriptionSourceRef";
-    protected static final String INCLUDE_ITEMS_PARAM = "includeItems";
+        extends AbstractExternalProvider implements SubscriptionProvider<SWI> {
 
     @Getter(AccessLevel.PROTECTED)
     private final ExternalSubscriptionProperties properties;
-
 
     public ExternalSubscriptionProvider(WebClient webClient, ObjectMapper objectMapper,
             TypeFactory typeFactory, ExternalSubscriptionProperties properties) {
@@ -57,7 +51,7 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
     }
 
     @Override
-    public SWI create(SWI subscriptionWithItems,
+    public SWI create(@lombok.NonNull SWI subscriptionWithItems,
             @Nullable ContextInfo contextInfo) {
         return executeRequest(() -> getWebClient()
                 .post()
@@ -74,11 +68,11 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
     }
 
     @Override
-    public Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
-            String userId,
-            Pageable page,
-            Node filters,
-            ContextInfo contextInfo) {
+    public Page<SWI> readSubscriptionsForUserTypeAndUserId(@lombok.NonNull String userType,
+            @lombok.NonNull String userId,
+            @Nullable Pageable page,
+            @Nullable Node filters,
+            @Nullable ContextInfo contextInfo) {
         return executeRequest(() -> getWebClient()
                 .get()
                 .uri(getBaseUri().toUriString())
@@ -110,7 +104,6 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
         return UriComponentsBuilder.fromHttpUrl(properties.getUrl())
                 .path(properties.getSubscriptionUri());
     }
-
 
     protected String getServiceClient() {
         return properties.getServiceClient();

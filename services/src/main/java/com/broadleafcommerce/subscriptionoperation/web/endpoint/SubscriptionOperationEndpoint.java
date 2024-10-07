@@ -54,7 +54,7 @@ public class SubscriptionOperationEndpoint {
     @Getter(AccessLevel.PROTECTED)
     protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
-    @FrameworkGetMapping(params = { "userType", "userId"})
+    @FrameworkGetMapping(params = {"userType", "userId"})
     @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION")
     public Page<SubscriptionWithItems> readUserSubscriptions(
             @RequestParam("userType") String userType,

@@ -18,6 +18,7 @@ package com.broadleafcommerce.subscriptionoperation.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.EmptyNode;
@@ -30,7 +31,6 @@ import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionChange
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 
 import cz.jirutka.rsql.parser.ast.Node;
-
 
 /**
  * Service for operations on subscriptions and their items
@@ -51,9 +51,9 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      */
     Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
             String userId,
-            Pageable page,
-            Node filters,
-            ContextInfo contextInfo);
+            @Nullable Pageable page,
+            @Nullable Node filters,
+            @Nullable ContextInfo contextInfo);
 
     /**
      * Builds out a {@link SubscriptionWithItems} and calls a provider to persist them in the
@@ -64,7 +64,7 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * @return a created subscription with its items
      */
     SWI createSubscriptionWithItems(SubscriptionCreationRequest subscriptionCreationRequest,
-            ContextInfo contextInfo);
+            @Nullable ContextInfo contextInfo);
 
     /**
      * TODO
@@ -74,7 +74,7 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * @return
      */
     S cancelSubscription(SubscriptionCancellationRequest subscriptionCancellationRequest,
-            ContextInfo context);
+            @Nullable ContextInfo context);
 
     /**
      * TODO
@@ -83,5 +83,6 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * @param contextInfo
      * @return
      */
-    S upgradeSubscription(SubscriptionChangeTierRequest changeTierRequest, ContextInfo contextInfo);
+    S upgradeSubscription(SubscriptionChangeTierRequest changeTierRequest,
+            @Nullable ContextInfo contextInfo);
 }
