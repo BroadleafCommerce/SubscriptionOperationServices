@@ -132,7 +132,7 @@ public class SubscriptionCreationRequest implements Serializable {
      *
      * @see #periodType
      */
-    private int periodFrequency = 1;
+    private Integer periodFrequency = 1;
 
     /**
      * The period type for the price, e.g. MONTHLY, QUARTERLY, ANNUALLY
