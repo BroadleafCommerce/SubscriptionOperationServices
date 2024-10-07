@@ -149,8 +149,26 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
      * Frequency of billing for this subscription
      *
      * @see DefaultSubscriptionBillingFrequencyEnum
+     * @deprecated in favor of {@link #periodType} & {@link #periodFrequency}
      */
+    @Deprecated
     private String billingFrequency;
+
+    /**
+     * The frequency with which the recurring price should be charged., e.g., a value of 1
+     * combined with {@link #periodType} of MONTH would indicate to a subscription service that the
+     * price should be charged every 1 month.
+     *
+     * @see #periodType
+     */
+    private int periodFrequency = 1;
+
+    /**
+     * The period type for the price, e.g. MONTHLY, QUARTERLY, ANNUALLY
+     *
+     * @see #periodFrequency
+     */
+    private String periodType;
 
     /**
      * Next date this subscription will be billed

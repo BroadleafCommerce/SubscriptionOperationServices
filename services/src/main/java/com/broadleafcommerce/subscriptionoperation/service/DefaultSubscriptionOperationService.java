@@ -60,9 +60,10 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     }
 
     @Override
-    public SWI createSubscriptionWithItems(SubscriptionCreationRequest subscriptionCreationRequest,
+    public SWI createSubscriptionWithItems(@lombok.NonNull SubscriptionCreationRequest subscriptionCreationRequest,
             ContextInfo contextInfo) {
         SWI subscriptionWithItemsToCreate = buildSubscriptionWithItems(subscriptionCreationRequest);
+
         return subscriptionProvider.create(subscriptionWithItemsToCreate, contextInfo);
     }
 
@@ -80,18 +81,19 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
 
 
     @SuppressWarnings("unchecked")
-    protected SWI buildSubscriptionWithItems(
-            SubscriptionCreationRequest subscriptionCreationRequest) {
+    protected SWI buildSubscriptionWithItems(@lombok.NonNull SubscriptionCreationRequest subscriptionCreationRequest) {
         S subscription = buildSubscription(subscriptionCreationRequest);
         List<I> items = buildSubscriptionItems(subscriptionCreationRequest);
+
         SWI subscriptionWithItemsToBeCreated = (SWI) typeFactory.get(SubscriptionWithItems.class);
         subscriptionWithItemsToBeCreated.setSubscription(subscription);
         subscriptionWithItemsToBeCreated.setSubscriptionItems((List<SubscriptionItem>) items);
+
         return subscriptionWithItemsToBeCreated;
     }
 
     @SuppressWarnings("unchecked")
-    protected S buildSubscription(SubscriptionCreationRequest request) {
+    protected S buildSubscription(@lombok.NonNull SubscriptionCreationRequest request) {
         S subscription = (S) typeFactory.get(Subscription.class);
         subscription.setName(request.getName());
         subscription.setSubscriptionStatus(request.getSubscriptionStatus());
@@ -106,6 +108,8 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
         subscription.setSubscriptionSource(request.getSubscriptionSource());
         subscription.setSubscriptionSourceRef(request.getSubscriptionSourceRef());
         subscription.setBillingFrequency(request.getBillingFrequency());
+        subscription.setPeriodType(request.getPeriodType());
+        subscription.setPeriodFrequency(request.getPeriodFrequency());
         subscription.setNextBillDate(request.getNextBillDate());
         subscription.setPreferredPaymentAccountId(request.getPreferredPaymentAccountId());
         subscription.setCurrency(request.getCurrency());
