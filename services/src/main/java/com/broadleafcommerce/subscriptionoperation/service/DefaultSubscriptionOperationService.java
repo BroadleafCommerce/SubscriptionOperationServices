@@ -149,7 +149,7 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
         subscription.setAlternateUserRef(request.getAlternateUserRef());
         subscription.setSubscriptionSource(request.getSubscriptionSource());
         subscription.setSubscriptionSourceRef(request.getSubscriptionSourceRef());
-        subscription.setBillingFrequency(request.getBillingFrequency());
+        subscription.setBillingFrequency(StringUtils.defaultIfBlank(request.getBillingFrequency(), "USE_PERIOD_TYPE"));
         subscription.setPeriodType(request.getPeriodType());
         subscription.setPeriodFrequency(request.getPeriodFrequency());
         subscription.setNextBillDate(request.getNextBillDate());
