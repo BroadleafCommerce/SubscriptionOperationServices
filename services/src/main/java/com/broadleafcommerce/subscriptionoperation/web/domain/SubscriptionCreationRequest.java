@@ -95,7 +95,7 @@ public class SubscriptionCreationRequest implements Serializable {
     /**
      * Type of user owning this subscription
      *
-     * @see com.broadleafcommerce.cart.client.domain.enums.DefaultUserTypes
+     * @see DefaultUserTypes
      */
     private String userRefType;
 
