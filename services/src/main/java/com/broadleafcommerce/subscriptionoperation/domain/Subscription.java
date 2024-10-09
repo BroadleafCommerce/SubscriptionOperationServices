@@ -23,7 +23,7 @@ import com.broadleafcommerce.data.tracking.core.filtering.business.domain.Contex
 import com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking;
 import com.broadleafcommerce.money.CurrencyConsumer;
 import com.broadleafcommerce.money.util.MonetaryUtils;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -109,7 +109,7 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     /**
      * Type of user owning this subscription
      *
-     * @see DefaultUserTypes
+     * @see DefaultUserRefTypes
      */
     private String userRefType;
 
@@ -121,7 +121,7 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     /**
      * Type of the alternative user reference
      *
-     * @see DefaultUserTypes
+     * @see DefaultUserRefTypes
      */
     private String alternateUserRefType;
 
@@ -149,8 +149,26 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
      * Frequency of billing for this subscription
      *
      * @see DefaultSubscriptionBillingFrequencyEnum
+     * @deprecated in favor of {@link #periodType} & {@link #periodFrequency}
      */
+    @Deprecated
     private String billingFrequency;
+
+    /**
+     * The frequency with which the recurring price should be charged., e.g., a value of 1 combined
+     * with {@link #periodType} of MONTH would indicate to a subscription service that the price
+     * should be charged every 1 month.
+     *
+     * @see #periodType
+     */
+    private int periodFrequency = 1;
+
+    /**
+     * The period type for the price, e.g. MONTHLY, QUARTERLY, ANNUALLY
+     *
+     * @see #periodFrequency
+     */
+    private String periodType;
 
     /**
      * Next date this subscription will be billed

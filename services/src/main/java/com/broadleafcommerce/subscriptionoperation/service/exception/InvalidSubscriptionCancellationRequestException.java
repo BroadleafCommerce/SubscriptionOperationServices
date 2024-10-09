@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Broadleaf Commerce
+ * Copyright (C) 2021 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -14,39 +14,17 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.domain.enums;
+package com.broadleafcommerce.subscriptionoperation.service.exception;
 
-import org.apache.commons.lang3.StringUtils;
+/**
+ * Exception denoting that the request to cancel a subscription was invalid
+ *
+ * @author Chris Kittrell (ckittrell)
+ */
+public class InvalidSubscriptionCancellationRequestException extends RuntimeException {
 
-public enum DefaultUserTypes {
-
-    /**
-     * Describes an anonymous customer.
-     */
-    ANONYMOUS,
-
-    /**
-     * Describes Broadleaf's Account.
-     */
-    BLC_ACCOUNT,
-
-    /**
-     * Describes Broadleaf's Customer.
-     */
-    BLC_CUSTOMER;
-
-    public static boolean isAnonymousCustomer(String owningUserType) {
-        return StringUtils.equals(owningUserType,
-                DefaultUserTypes.ANONYMOUS.name());
+    public InvalidSubscriptionCancellationRequestException(String message) {
+        super(message);
     }
 
-    public static boolean isBroadleafAccount(String owningUserType) {
-        return StringUtils.equals(owningUserType,
-                DefaultUserTypes.BLC_ACCOUNT.name());
-    }
-
-    public static boolean isBroadleafCustomer(String owningUserType) {
-        return StringUtils.equals(owningUserType,
-                DefaultUserTypes.BLC_CUSTOMER.name());
-    }
 }

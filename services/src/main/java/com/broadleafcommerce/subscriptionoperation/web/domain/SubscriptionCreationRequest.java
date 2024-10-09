@@ -19,7 +19,7 @@ package com.broadleafcommerce.subscriptionoperation.web.domain;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAdjustment;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 
 import java.io.Serial;
@@ -83,19 +83,9 @@ public class SubscriptionCreationRequest implements Serializable {
     private String nextStatusChangeReason;
 
     /**
-     * Type of the item for which this subscription was provisioned
-     */
-    private String rootItemRefType;
-
-    /**
-     * Reference to the item id for which this subscription was provision
-     */
-    private String rootItemRef;
-
-    /**
      * Type of user owning this subscription
      *
-     * @see com.broadleafcommerce.cart.client.domain.enums.DefaultUserTypes
+     * @see DefaultUserRefTypes
      */
     private String userRefType;
 
@@ -107,7 +97,7 @@ public class SubscriptionCreationRequest implements Serializable {
     /**
      * Type of the alternative user reference
      *
-     * @see DefaultUserTypes
+     * @see DefaultUserRefTypes
      */
     private String alternateUserRefType;
 
@@ -130,8 +120,26 @@ public class SubscriptionCreationRequest implements Serializable {
      * Frequency of billing for this subscription
      *
      * @see com.broadleafcommerce.subscription.domain.DefaultSubscriptionBillingFrequencyEnum
+     * @deprecated in favor of {@link #periodType} & {@link #periodFrequency}
      */
+    @Deprecated
     private String billingFrequency;
+
+    /**
+     * The frequency with which the recurring price should be charged., e.g., a value of 1 combined
+     * with {@link #periodType} of MONTH would indicate to a subscription service that the price
+     * should be charged every 1 month.
+     *
+     * @see #periodType
+     */
+    private Integer periodFrequency = 1;
+
+    /**
+     * The period type for the price, e.g. MONTHLY, QUARTERLY, ANNUALLY
+     *
+     * @see #periodFrequency
+     */
+    private String periodType;
 
     /**
      * Next date this subscription will be billed
@@ -139,17 +147,22 @@ public class SubscriptionCreationRequest implements Serializable {
     private Date nextBillDate;
 
     /**
-     * References an identifier of a {@link com.broadleafcommerce.billing.job.domain.PaymentAccount}
-     * that is considered preferred for this subscription. Overrides the ordering of
-     * {@link com.broadleafcommerce.billing.job.domain.PaymentAccount accounts} as provided by
-     * {@link com.broadleafcommerce.billing.service.provider.SavedPaymentMethodProvider}
+     * References an identifier of a BillingServices PaymentAccount that is considered preferred for
+     * this subscription.
      */
     private String preferredPaymentAccountId;
 
     /**
-     * Currency of this subscription
+     * Type of the item for which this subscription was provisioned
      */
-    private CurrencyUnit currency;
+    private String rootItemRefType;
+
+    /**
+     * Reference to the item id for which this subscription was provision
+     */
+    private String rootItemRef;
+
+    private List<SubscriptionItemCreationRequest> itemCreationRequests = new ArrayList<>();
 
     /**
      * Adjustments for this subscription. This field is used for creation from an API request and is
@@ -158,13 +171,14 @@ public class SubscriptionCreationRequest implements Serializable {
     private List<SubscriptionAdjustment> subscriptionAdjustments = new ArrayList<>();
 
     /**
-     * Whether the system has outstanding
-     * {@link com.broadleafcommerce.subscription.domain.entitlement.Entitlement entitlements} to
-     * grant on this subscription
+     * Currency of this subscription
+     */
+    private CurrencyUnit currency;
+
+    /**
+     * Whether the system has outstanding entitlements to grant for this subscription
      */
     private boolean needGrantEntitlements = false;
-
-    private List<SubscriptionItemCreationRequest> itemCreationRequests = new ArrayList<>();
 
     /**
      * Miscellaneous attributes that can be set to this request in order to inform business logic

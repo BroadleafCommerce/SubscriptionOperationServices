@@ -18,19 +18,19 @@ package com.broadleafcommerce.subscriptionoperation.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.EmptyNode;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionChangeTierRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import cz.jirutka.rsql.parser.ast.Node;
-
 
 /**
  * Service for operations on subscriptions and their items
@@ -41,7 +41,7 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * This method reads subscriptions for a given user type and user id, additionally filtered and
      * paginated by given parameters
      *
-     * @param userType user type, see {@link DefaultUserTypes}
+     * @param userType user type, see {@link DefaultUserRefTypes}
      * @param userId id of owning user or account
      * @param page information about which page of results to return from the database.
      * @param filters additional filters to apply in the query. Should be {@link EmptyNode} if no
@@ -51,9 +51,9 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      */
     Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
             String userId,
-            Pageable page,
-            Node filters,
-            ContextInfo contextInfo);
+            @Nullable Pageable page,
+            @Nullable Node filters,
+            @Nullable ContextInfo contextInfo);
 
     /**
      * Builds out a {@link SubscriptionWithItems} and calls a provider to persist them in the
@@ -64,7 +64,7 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * @return a created subscription with its items
      */
     SWI createSubscriptionWithItems(SubscriptionCreationRequest subscriptionCreationRequest,
-            ContextInfo contextInfo);
+            @Nullable ContextInfo contextInfo);
 
     /**
      * TODO
@@ -74,14 +74,15 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * @return
      */
     S cancelSubscription(SubscriptionCancellationRequest subscriptionCancellationRequest,
-            ContextInfo context);
+            @Nullable ContextInfo context);
 
     /**
      * TODO
      *
-     * @param changeTierRequest
+     * @param upgradeRequest
      * @param contextInfo
      * @return
      */
-    S upgradeSubscription(SubscriptionChangeTierRequest changeTierRequest, ContextInfo contextInfo);
+    S upgradeSubscription(SubscriptionUpgradeRequest upgradeRequest,
+            @Nullable ContextInfo contextInfo);
 }

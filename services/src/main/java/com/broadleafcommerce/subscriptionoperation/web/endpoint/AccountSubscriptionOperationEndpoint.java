@@ -32,7 +32,7 @@ import com.broadleafcommerce.data.tracking.core.type.OperationType;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
 
 import cz.jirutka.rsql.parser.ast.Node;
@@ -60,6 +60,6 @@ public class AccountSubscriptionOperationEndpoint {
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(
-                DefaultUserTypes.BLC_ACCOUNT.name(), accountId, page, filters, contextInfo);
+                DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, page, filters, contextInfo);
     }
 }

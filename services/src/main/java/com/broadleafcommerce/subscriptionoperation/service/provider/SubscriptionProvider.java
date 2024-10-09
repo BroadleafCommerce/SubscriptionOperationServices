@@ -55,8 +55,8 @@ public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
      */
     Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
             String userId,
-            Pageable page,
-            Node filters,
-            ContextInfo contextInfo);
+            @Nullable Pageable page,
+            @Nullable Node filters,
+            @Nullable ContextInfo contextInfo);
 
 }

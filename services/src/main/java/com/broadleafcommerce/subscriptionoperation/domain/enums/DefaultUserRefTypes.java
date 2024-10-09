@@ -14,26 +14,29 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.web.autoconfigure;
+package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
-import org.broadleafcommerce.frameworkmapping.annotation.FrameworkControllerScan;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.apache.commons.lang3.StringUtils;
 
-import com.broadleafcommerce.subscriptionoperation.web.endpoint.SubscriptionOperationEndpoint;
-import com.broadleafcommerce.subscriptionoperation.web.endpoint.exception.SubscriptionOperationExceptionAdvisor;
+public enum DefaultUserRefTypes {
 
-@Configuration
-public class SubscriptionOperationWebAutoConfiguration {
+    /**
+     * Describes Broadleaf's Account.
+     */
+    BLC_ACCOUNT,
 
-    @Configuration
-    @FrameworkControllerScan(basePackageClasses = SubscriptionOperationEndpoint.class)
-    static class EnableBroadleafControllers {}
+    /**
+     * Describes Broadleaf's Customer.
+     */
+    BLC_CUSTOMER;
 
-    @Bean
-    @ConditionalOnMissingBean
-    SubscriptionOperationExceptionAdvisor subscriptionOperationExceptionAdvisor() {
-        return new SubscriptionOperationExceptionAdvisor();
+    public static boolean isBroadleafAccount(String userRefType) {
+        return StringUtils.equals(userRefType,
+                DefaultUserRefTypes.BLC_ACCOUNT.name());
+    }
+
+    public static boolean isBroadleafCustomer(String userRefType) {
+        return StringUtils.equals(userRefType,
+                DefaultUserRefTypes.BLC_CUSTOMER.name());
     }
 }
