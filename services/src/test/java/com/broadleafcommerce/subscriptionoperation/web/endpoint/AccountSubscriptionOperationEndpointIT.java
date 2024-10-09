@@ -42,7 +42,7 @@ import com.broadleafcommerce.data.tracking.core.type.OperationType;
 import com.broadleafcommerce.oauth2.resource.security.test.MockMvcOAuth2AuthenticationUtil;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.web.endpoint.util.InMemorySubscriptionProvider;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -162,7 +162,7 @@ class AccountSubscriptionOperationEndpointIT {
                 .andExpect(status().isOk())
                 .andExpect(
                         jsonPath("$.content[0].subscription.userRefType")
-                                .value(DefaultUserTypes.BLC_ACCOUNT.name()))
+                                .value(DefaultUserRefTypes.BLC_ACCOUNT.name()))
                 .andExpect(jsonPath("$.content[0].subscription.userRef")
                         .value(ACCOUNT_ID));
     }
@@ -172,7 +172,7 @@ class AccountSubscriptionOperationEndpointIT {
         Subscription subscription = new Subscription();
         subscription.setId(ULID.random());
         subscription.setName(ULID.random());
-        subscription.setUserRefType(DefaultUserTypes.BLC_ACCOUNT.name());
+        subscription.setUserRefType(DefaultUserRefTypes.BLC_ACCOUNT.name());
         subscription.setUserRef(userRef);
         subscriptionWithItems.setSubscription(subscription);
         return subscriptionWithItems;

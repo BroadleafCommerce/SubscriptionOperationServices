@@ -23,7 +23,7 @@ import com.broadleafcommerce.data.tracking.core.filtering.business.domain.Contex
 import com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking;
 import com.broadleafcommerce.money.CurrencyConsumer;
 import com.broadleafcommerce.money.util.MonetaryUtils;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -109,7 +109,7 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     /**
      * Type of user owning this subscription
      *
-     * @see DefaultUserTypes
+     * @see DefaultUserRefTypes
      */
     private String userRefType;
 
@@ -121,7 +121,7 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     /**
      * Type of the alternative user reference
      *
-     * @see DefaultUserTypes
+     * @see DefaultUserRefTypes
      */
     private String alternateUserRefType;
 

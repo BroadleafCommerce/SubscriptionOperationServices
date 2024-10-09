@@ -18,12 +18,7 @@ package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
 import org.apache.commons.lang3.StringUtils;
 
-public enum DefaultUserTypes {
-
-    /**
-     * Describes an anonymous customer.
-     */
-    ANONYMOUS,
+public enum DefaultUserRefTypes {
 
     /**
      * Describes Broadleaf's Account.
@@ -35,18 +30,13 @@ public enum DefaultUserTypes {
      */
     BLC_CUSTOMER;
 
-    public static boolean isAnonymousCustomer(String owningUserType) {
-        return StringUtils.equals(owningUserType,
-                DefaultUserTypes.ANONYMOUS.name());
+    public static boolean isBroadleafAccount(String userRefType) {
+        return StringUtils.equals(userRefType,
+                DefaultUserRefTypes.BLC_ACCOUNT.name());
     }
 
-    public static boolean isBroadleafAccount(String owningUserType) {
-        return StringUtils.equals(owningUserType,
-                DefaultUserTypes.BLC_ACCOUNT.name());
-    }
-
-    public static boolean isBroadleafCustomer(String owningUserType) {
-        return StringUtils.equals(owningUserType,
-                DefaultUserTypes.BLC_CUSTOMER.name());
+    public static boolean isBroadleafCustomer(String userRefType) {
+        return StringUtils.equals(userRefType,
+                DefaultUserRefTypes.BLC_CUSTOMER.name());
     }
 }

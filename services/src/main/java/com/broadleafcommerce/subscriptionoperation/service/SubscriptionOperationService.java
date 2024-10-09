@@ -25,7 +25,7 @@ import com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.EmptyNode;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
@@ -41,7 +41,7 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * This method reads subscriptions for a given user type and user id, additionally filtered and
      * paginated by given parameters
      *
-     * @param userType user type, see {@link DefaultUserTypes}
+     * @param userType user type, see {@link DefaultUserRefTypes}
      * @param userId id of owning user or account
      * @param page information about which page of results to return from the database.
      * @param filters additional filters to apply in the query. Should be {@link EmptyNode} if no

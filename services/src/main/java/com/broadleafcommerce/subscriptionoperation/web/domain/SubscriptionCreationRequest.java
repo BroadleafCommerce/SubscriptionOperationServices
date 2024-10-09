@@ -19,7 +19,7 @@ package com.broadleafcommerce.subscriptionoperation.web.domain;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAdjustment;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 
 import java.io.Serial;
@@ -85,7 +85,7 @@ public class SubscriptionCreationRequest implements Serializable {
     /**
      * Type of user owning this subscription
      *
-     * @see DefaultUserTypes
+     * @see DefaultUserRefTypes
      */
     private String userRefType;
 
@@ -97,7 +97,7 @@ public class SubscriptionCreationRequest implements Serializable {
     /**
      * Type of the alternative user reference
      *
-     * @see DefaultUserTypes
+     * @see DefaultUserRefTypes
      */
     private String alternateUserRefType;
 
