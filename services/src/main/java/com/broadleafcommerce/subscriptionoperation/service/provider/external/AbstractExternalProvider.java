@@ -40,7 +40,10 @@ import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiExceptio
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.security.InvalidParameterException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -208,5 +211,27 @@ public abstract class AbstractExternalProvider {
         return Optional.ofNullable(apiError.getBody())
                 .map(errorBody -> StringUtils.equals(ENTITY_NOT_FOUND, errorBody.getType()))
                 .orElse(false);
+    }
+
+    /**
+     * Convenience method to generate a map of variables.
+     *
+     * @param keysAndValues the keys and values (in pairs, alternating) to transform into a map
+     * @return the keys and values as a map
+     */
+    protected Map<String, Object> uriVars(Object... keysAndValues) {
+        if (keysAndValues.length % 2 != 0) {
+            throw new InvalidParameterException("Input must be in pairs");
+        }
+
+        Map<String, Object> uriVariables = new HashMap<>();
+
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            Object key = keysAndValues[i];
+            Object value = keysAndValues[i + 1];
+            uriVariables.put(String.valueOf(key), value);
+        }
+
+        return uriVariables;
     }
 }

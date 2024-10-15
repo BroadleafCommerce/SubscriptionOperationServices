@@ -29,6 +29,8 @@ import java.util.List;
 /**
  * Provider interfacing with Broadleaf's CatalogServices to get the product details for the
  * {@link Subscription}.
+ *
+ * @author Sunny Yu
  */
 public interface CatalogProvider<P extends Product> {
 
@@ -39,8 +41,7 @@ public interface CatalogProvider<P extends Product> {
      * @param contextInfo context information around multi-tenant state
      * @return the {@link Product}
      */
-    P readProductById(String productId,
-            @Nullable ContextInfo contextInfo);
+    P readProductById(String productId, @Nullable ContextInfo contextInfo);
 
     /**
      * Retrieves {@link Product Products} based on the given ids.

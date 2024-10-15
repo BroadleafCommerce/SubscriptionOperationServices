@@ -35,6 +35,11 @@ public class ExternalCatalogProviderProperties {
     private String productsUri = "/products";
 
     /**
+     * The base uri path to the products endpoint
+     */
+    private String productUri = productsUri + "/{productId}";
+
+    /**
      * The service client to use when calling catalog services. Default is "subscriptionopsclient".
      */
     private String serviceClient = "subscriptionopsclient";

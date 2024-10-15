@@ -35,3 +35,4 @@ broadleaf:
     catalogprovider:
       url: https://localhost:8442/catalog
       products-uri: /products
+      product-uri: /{productId}

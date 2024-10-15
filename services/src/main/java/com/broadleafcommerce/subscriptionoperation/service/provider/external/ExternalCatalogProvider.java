@@ -60,9 +60,10 @@ public class ExternalCatalogProvider<P extends Product> extends AbstractExternal
     public P readProductById(String productId,
             @Nullable ContextInfo contextInfo) {
         String uri = getBaseUri()
+                .path(properties.getProductUri())
+                .uriVariables(uriVars("productId", productId))
                 .toUriString();
 
-        // TODO: add properties and paths
         return executeRequest(() -> getWebClient()
                 .get()
                 .uri(uri)
@@ -82,7 +83,7 @@ public class ExternalCatalogProvider<P extends Product> extends AbstractExternal
         Node filters = buildReadProductsByIdsFilters(productIds);
 
         String uri = getBaseUri()
-                .queryParam("cq", filters)
+                .queryParam(RSQL_FILTER_PARAM, filters)
                 .queryParams(pageableToParams(pageable))
                 .toUriString();
 
