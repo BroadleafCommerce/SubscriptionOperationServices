@@ -21,6 +21,7 @@ import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -45,18 +46,18 @@ import lombok.RequiredArgsConstructor;
 @FrameworkMapping(AccountSubscriptionOperationEndpoint.BASE_URI)
 public class AccountSubscriptionOperationEndpoint {
 
-    public static final String BASE_URI = "/account";
+    public static final String BASE_URI = "/accounts/{accountId}/subscriptions";
 
     @Getter(AccessLevel.PROTECTED)
     protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
-    @FrameworkGetMapping(value = "/{accountId}/subscriptions")
+    @FrameworkGetMapping
     @Policy(permissionRoots = "ACCOUNT_SUBSCRIPTION",
             identityTypes = {IdentityType.ADMIN, IdentityType.OWNER},
             ownerIdentifierParam = 0, ownerIdentifier = "acct_id,parent_accts")
     public Page<SubscriptionWithItems> readAccountSubscriptions(
             @PathVariable("accountId") String accountId,
-            @PageableDefault Pageable page,
+            @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(

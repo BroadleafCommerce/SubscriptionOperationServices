@@ -60,7 +60,7 @@ import io.azam.ulidj.ULID;
 class AccountSubscriptionOperationEndpointIT {
 
     protected static final String SYSTEM_SUBSCRIPTION_URI = "/subscription-ops";
-    protected static final String ACCOUNT_URI = "/account";
+    protected static final String ACCOUNT_URI = "/accounts";
     protected static final String ACCOUNT_READ_URI = "/{accountId}/subscriptions";
 
     protected static final String CUSTOMER_SUBSCRIPTION = "CUSTOMER_SUBSCRIPTION";
