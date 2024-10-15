@@ -31,6 +31,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionOperationService;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionValidationService;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.service.SubscriptionValidationService;
 import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProvider;
@@ -45,9 +46,16 @@ public class SubscriptionOperationServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public SubscriptionValidationService subscriptionValidationService(
+            CatalogProvider<Product> catalogProvider) {
+        return new DefaultSubscriptionValidationService(catalogProvider);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService(
             SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
-            DefaultSubscriptionValidationService subscriptionValidationService,
+            SubscriptionValidationService subscriptionValidationService,
             TypeFactory typeFactory) {
         return new DefaultSubscriptionOperationService<>(subscriptionProvider,
                 subscriptionValidationService,
@@ -73,7 +81,7 @@ public class SubscriptionOperationServiceAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public CatalogProvider<Product> catalogProvider(
+        public CatalogProvider<Product> subOpsCatalogProvider(
                 @Qualifier("subscriptionOperationWebClient") WebClient webClient,
                 ObjectMapper objectMapper,
                 TypeFactory typeFactory,
