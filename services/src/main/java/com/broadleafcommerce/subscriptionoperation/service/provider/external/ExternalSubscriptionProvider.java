@@ -102,7 +102,7 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
      */
     protected UriComponentsBuilder getBaseUri() {
         return UriComponentsBuilder.fromHttpUrl(properties.getUrl())
-                .path(properties.getSubscriptionUri());
+                .path(properties.getSubscriptionsUri());
     }
 
     protected String getServiceClient() {

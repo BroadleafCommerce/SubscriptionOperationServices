@@ -43,15 +43,15 @@ public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
     SWI create(SWI subscriptionWithItems, @Nullable ContextInfo contextInfo);
 
     /**
-     * Retrieves subscription with items for a given user type and user id, taking into account the
-     * provided filters and paging
+     * Retrieves a page of subscriptions with items for a given user type and user id, taking into
+     * account the provided filters and paging
      *
      * @param userType type of user
      * @param userId user id
      * @param page pageable
      * @param filters Additional RSQL filters
      * @param contextInfo context information around multi-tenant state
-     * @return
+     * @return a page of subscriptions with items for a given user type and user id
      */
     Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
             String userId,

@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import io.azam.ulidj.ULID;
 import lombok.Getter;
@@ -99,13 +100,36 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
             Node filters,
             ContextInfo contextInfo) {
         List<SubscriptionWithItems> subscriptionWithItemsList = getStore().values().stream()
-                .filter(userMatches(userType, userId)).filter(contextMatches(contextInfo))
-                .map(this::simulateSerialization).toList();
+                .filter(userMatches(userType, userId))
+                .filter(subscriptionWithItems -> {
+                    String subscriptionIdToMatch = getSubscriptionIdToMatch(filters);
+                    String actualSubscriptionId = subscriptionWithItems.getSubscription().getId();
+
+                    return StringUtils.isBlank(subscriptionIdToMatch)
+                            || Objects.equals(actualSubscriptionId, subscriptionIdToMatch);
+                })
+                .filter(contextMatches(contextInfo))
+                .map(this::simulateSerialization)
+                .toList();
+
         if (page == null) {
             page = Pageable.unpaged();
         }
 
         return new PageImpl<>(subscriptionWithItemsList, page, subscriptionWithItemsList.size());
+    }
+
+    @Nullable
+    protected String getSubscriptionIdToMatch(Node filters) {
+        if (filters instanceof ComparisonNode) {
+            String selector = ((ComparisonNode) filters).getSelector();
+
+            if (Objects.equals("id", selector)) {
+                return ((ComparisonNode) filters).getArguments().get(0);
+            }
+        }
+
+        return null;
     }
 
     protected Predicate<SubscriptionWithItems> userMatches(String userType,

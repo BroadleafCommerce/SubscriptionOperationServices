@@ -16,6 +16,8 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
+import static com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.RsqlSearchOperation.EQUAL;
+
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -41,11 +44,16 @@ import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperation
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
+import java.util.List;
+
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @FrameworkRestController
 @FrameworkMapping(CustomerSubscriptionOperationEndpoint.BASE_URI)
@@ -67,6 +75,33 @@ public class CustomerSubscriptionOperationEndpoint {
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(
                 DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, page, filters, contextInfo);
+    }
+
+    @FrameworkGetMapping(value = "/{subscriptionId}")
+    @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
+            identityTypes = {IdentityType.OWNER},
+            ownerIdentifierParam = 0)
+    public SubscriptionWithItems readCustomerSubscription(
+            @PathVariable("customerId") String customerId,
+            @PathVariable("subscriptionId") String subscriptionId,
+            @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
+        Node subscriptionIdFilter = buildSubscriptionIdFilter(subscriptionId, contextInfo);
+
+        List<SubscriptionWithItems> subscriptions = subscriptionOperationService
+                .readSubscriptionsForUserTypeAndUserId(
+                        DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, Pageable.unpaged(),
+                        subscriptionIdFilter, contextInfo)
+                .getContent();
+
+        if (CollectionUtils.isEmpty(subscriptions)) {
+            throw new EntityMissingException();
+        } else if (subscriptions.size() > 1) {
+            log.warn(
+                    "There is more than 1 subscription with the same id for the customer. Customer ID: {} | Subscription ID: {}",
+                    customerId, subscriptionId);
+        }
+
+        return subscriptions.get(0);
     }
 
     @FrameworkPostMapping(value = "/{subscriptionId}/upgrade",
@@ -100,4 +135,10 @@ public class CustomerSubscriptionOperationEndpoint {
                 contextInfo);
     }
 
+    protected Node buildSubscriptionIdFilter(@lombok.NonNull String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
+        return new ComparisonNode(EQUAL.getOperator(),
+                "id",
+                List.of(subscriptionId));
+    }
 }

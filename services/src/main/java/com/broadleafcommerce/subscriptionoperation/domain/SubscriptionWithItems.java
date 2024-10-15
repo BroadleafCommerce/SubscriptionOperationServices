@@ -16,6 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.ArrayList;
@@ -32,10 +33,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SubscriptionWithItems {
 
     private Subscription subscription;
 
     private List<SubscriptionItem> subscriptionItems = new ArrayList<>();
+
+    // TODO: Add list of available SubscriptionActions
 
 }
