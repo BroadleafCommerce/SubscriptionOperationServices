@@ -28,7 +28,9 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionPricingService;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.service.SubscriptionPricingService;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProvider;
@@ -61,5 +63,12 @@ public class SubscriptionOperationServiceAutoConfiguration {
                     typeFactory,
                     properties);
         }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SubscriptionPricingService subscriptionPricingService(
+            TypeFactory typeFactory) {
+        return new DefaultSubscriptionPricingService(typeFactory);
     }
 }
