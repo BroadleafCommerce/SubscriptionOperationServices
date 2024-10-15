@@ -16,8 +16,8 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.ArrayList;
