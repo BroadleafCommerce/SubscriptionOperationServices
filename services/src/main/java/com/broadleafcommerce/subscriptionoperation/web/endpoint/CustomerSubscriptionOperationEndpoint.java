@@ -27,6 +27,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
@@ -62,12 +63,14 @@ public class CustomerSubscriptionOperationEndpoint {
             ownerIdentifierParam = 0)
     public Page<SubscriptionWithItems> readAllCustomerSubscriptions(
             @PathVariable("customerId") String customerId,
+            @RequestParam(value = "getActions", required = false,
+                    defaultValue = "false") boolean getActions,
             @PageableDefault(sort = "tracking.basicAudit.creationTime",
                     direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(
-                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, page, filters, contextInfo);
+                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, getActions, page, filters, contextInfo);
     }
 
     @FrameworkGetMapping(value = "/{subscriptionId}")

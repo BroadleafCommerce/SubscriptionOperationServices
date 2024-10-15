@@ -28,6 +28,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import cz.jirutka.rsql.parser.ast.Node;
@@ -43,6 +44,7 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      *
      * @param userRefType user type, see {@link DefaultUserRefTypes}
      * @param userRef id of owning user or account
+     * @param getActions whether to get available actions for the subscriptions
      * @param page information about which page of results to return from the database.
      * @param filters additional filters to apply in the query. Should be {@link EmptyNode} if no
      *        additional filters should be applied.
@@ -51,6 +53,7 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      */
     Page<SWI> readSubscriptionsForUserRefTypeAndUserRef(String userRefType,
             String userRef,
+            boolean getActions,
             @Nullable Pageable page,
             @Nullable Node filters,
             @Nullable ContextInfo contextInfo);
