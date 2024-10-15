@@ -39,6 +39,8 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
@@ -85,6 +87,22 @@ public class CustomerSubscriptionOperationEndpoint {
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readUserSubscriptionById(
                 DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, subscriptionId, contextInfo);
+    }
+
+    @FrameworkPostMapping(value = "/{subscriptionId}/actions")
+    @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
+            identityTypes = {IdentityType.OWNER},
+            ownerIdentifierParam = 0)
+    public SubscriptionActionResponse readCustomerSubscriptionActions(
+            @PathVariable("customerId") String customerId,
+            @PathVariable("subscriptionId") String subscriptionId,
+            @RequestBody SubscriptionActionRequest request,
+            @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
+        request.setSubscriptionId(subscriptionId);
+        request.setUserType(DefaultUserRefTypes.BLC_CUSTOMER.name());
+        request.setUserId(customerId);
+
+        return subscriptionOperationService.readSubscriptionActions(request, contextInfo);
     }
 
     @FrameworkPostMapping(value = "/{subscriptionId}/upgrade",

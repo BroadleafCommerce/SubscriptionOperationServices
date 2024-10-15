@@ -26,6 +26,8 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
@@ -37,6 +39,17 @@ import cz.jirutka.rsql.parser.ast.Node;
  * Service for operations on subscriptions and their items
  */
 public interface SubscriptionOperationService<S extends Subscription, I extends SubscriptionItem, SWI extends SubscriptionWithItems> {
+
+    /**
+     * This method reads subscriptions for a given user type and user id, additionally filtered and
+     * paginated by given parameters
+     *
+     * @param request the {@link SubscriptionActionRequest}
+     * @param contextInfo context information around multi-tenant state
+     * @return Subscriptions with items matching the given criteria
+     */
+    SubscriptionActionResponse readSubscriptionActions(SubscriptionActionRequest request,
+            @Nullable ContextInfo contextInfo);
 
     /**
      * This method reads subscriptions for a given user type and user id, additionally filtered and

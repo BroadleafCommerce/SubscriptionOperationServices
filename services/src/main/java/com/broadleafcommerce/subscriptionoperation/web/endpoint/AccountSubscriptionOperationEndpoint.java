@@ -21,6 +21,7 @@ import static com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.Rsql
 import org.apache.commons.collections4.CollectionUtils;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
+import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
@@ -41,6 +43,8 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 
 import java.util.List;
 

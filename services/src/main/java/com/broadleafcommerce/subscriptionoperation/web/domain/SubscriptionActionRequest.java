@@ -18,6 +18,8 @@ package com.broadleafcommerce.subscriptionoperation.web.domain;
 
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -42,6 +44,20 @@ public class SubscriptionActionRequest implements Serializable {
      * The id of the subscription to get the available actions for.
      */
     private String subscriptionId;
+
+    /**
+     * The type of the user making the request.
+     *
+     * @see DefaultUserRefTypes
+     */
+    @JsonIgnore
+    private String userType;
+
+    /**
+     * The id of the user making the request.
+     */
+    @JsonIgnore
+    private String userId;
 
     /**
      * Additional request attributes.
