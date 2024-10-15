@@ -36,11 +36,11 @@ public interface CatalogProvider<P extends Product> {
      * Retrieves {@link Product Products} based on the given ids.
      *
      * @param productIds list of product ids
-     * @param page pageable
+     * @param pageable pageable
      * @param contextInfo context information around multi-tenant state
      * @return page of {@link Product Products}
      */
     Page<P> readProductsByIds(List<String> productIds,
-            @Nullable Pageable page,
+            @Nullable Pageable pageable,
             @Nullable ContextInfo contextInfo);
 }

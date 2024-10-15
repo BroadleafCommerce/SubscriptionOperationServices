@@ -16,6 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service.provider.external;
 
+import static com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.RsqlSearchOperation.IN;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -34,8 +35,12 @@ import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvi
 import com.broadleafcommerce.subscriptionoperation.service.provider.page.ResponsePageGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import cz.jirutka.rsql.parser.ast.AndNode;
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
+import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 
@@ -53,11 +58,18 @@ public class ExternalCatalogProvider<P extends Product> extends AbstractExternal
 
     @Override
     public Page<P> readProductsByIds(@lombok.NonNull List<String> productIds,
-            @Nullable Pageable page,
+            @Nullable Pageable pageable,
             @Nullable ContextInfo contextInfo) {
+        Node filters = buildReadProductsByIdsFilters(productIds);
+
+        String uri = getBaseUri()
+                .queryParam("cq", filters)
+                .queryParams(pageableToParams(pageable))
+                .toUriString();
+
         return executeRequest(() -> getWebClient()
                 .get()
-                .uri(getBaseUri().toUriString())
+                .uri(uri)
                 .headers(headers -> headers.putAll(getHeaders(contextInfo)))
                 .attributes(clientRegistrationId(getServiceClient()))
                 .accept(MediaType.APPLICATION_JSON)
@@ -66,6 +78,20 @@ public class ExternalCatalogProvider<P extends Product> extends AbstractExternal
                 .blockOptional()
                 .map(ResponsePageGenerator::getPage)
                 .orElseThrow(EntityMissingException::new));
+    }
+
+    /**
+     * Build the {@link Node RSQL filters} used for reading the products by IDs.
+     *
+     * @param productIds the list of product ids.
+     * @return the {@link Node RSQL filters} used for reading the products by IDs
+     */
+    protected Node buildReadProductsByIdsFilters(@lombok.NonNull List<String> productIds) {
+        List<Node> allFilters = new ArrayList<>();
+        ComparisonNode idsIn =
+                new ComparisonNode(IN.getOperator(), "contextId", productIds);
+        allFilters.add(idsIn);
+        return new AndNode(allFilters);
     }
 
     /**
