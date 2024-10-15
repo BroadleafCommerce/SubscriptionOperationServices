@@ -19,12 +19,12 @@ package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
-import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPutMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -69,7 +69,8 @@ public class CustomerSubscriptionOperationEndpoint {
                 DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, page, filters, contextInfo);
     }
 
-    @FrameworkPostMapping(value = "/{subscriptionId}/upgrade")
+    @FrameworkPostMapping(value = "/{subscriptionId}/upgrade",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"},
             identityTypes = {IdentityType.OWNER},
             ownerIdentifierParam = 0,
@@ -83,7 +84,8 @@ public class CustomerSubscriptionOperationEndpoint {
         return subscriptionOperationService.upgradeSubscription(upgradeRequest, contextInfo);
     }
 
-    @FrameworkPutMapping(value = "/{subscriptionId}/cancel")
+    @FrameworkPostMapping(value = "/{subscriptionId}/cancel",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"},
             identityTypes = {IdentityType.OWNER},
             ownerIdentifierParam = 0,
