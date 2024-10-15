@@ -32,3 +32,6 @@ broadleaf:
       url: https://localhost:8467/billing
       subscriptions-path: /subscriptions
       subscription-with-items-path: /{subscriptionId}/items
+    catalogprovider:
+      url: https://localhost:8442/catalog
+      products-uri: /products
