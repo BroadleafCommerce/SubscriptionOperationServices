@@ -29,6 +29,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionValidationService;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
 import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
@@ -46,8 +47,11 @@ public class SubscriptionOperationServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService(
             SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
+            DefaultSubscriptionValidationService subscriptionValidationService,
             TypeFactory typeFactory) {
-        return new DefaultSubscriptionOperationService<>(subscriptionProvider, typeFactory);
+        return new DefaultSubscriptionOperationService<>(subscriptionProvider,
+                subscriptionValidationService,
+                typeFactory);
     }
 
     @Configuration

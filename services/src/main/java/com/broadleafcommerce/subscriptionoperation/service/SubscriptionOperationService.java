@@ -112,4 +112,14 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      */
     S upgradeSubscription(SubscriptionUpgradeRequest upgradeRequest,
             @Nullable ContextInfo contextInfo);
+
+    /**
+     * TODO
+     *
+     * @param downgradeRequest
+     * @param contextInfo
+     * @return
+     */
+    S downgradeSubscription(SubscriptionDowngradeRequest downgradeRequest,
+            @Nullable ContextInfo contextInfo);
 }

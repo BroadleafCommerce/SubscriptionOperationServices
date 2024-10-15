@@ -14,43 +14,33 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.service.provider;
+package com.broadleafcommerce.subscriptionoperation.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.subscriptionoperation.domain.Product;
-import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
-import java.util.List;
 
 /**
- * Provider interfacing with Broadleaf's CatalogServices to get the product details for the
- * {@link Subscription}.
+ * Service for validating actions against subscriptions.
+ *
+ * @author Sunny Yu
  */
-public interface CatalogProvider<P extends Product> {
+public interface SubscriptionValidationService {
 
-    /**
-     * Retrieves the {@link Product} based on the given id.
-     *
-     * @param productId the product id
-     * @param contextInfo context information around multi-tenant state
-     * @return the {@link Product}
-     */
-    P readProductById(String productId,
+    void validateSubscriptionCreation(SubscriptionCreationRequest request,
             @Nullable ContextInfo contextInfo);
 
-    /**
-     * Retrieves {@link Product Products} based on the given ids.
-     *
-     * @param productIds list of product ids
-     * @param pageable pageable
-     * @param contextInfo context information around multi-tenant state
-     * @return page of {@link Product Products}
-     */
-    Page<P> readProductsByIds(List<String> productIds,
-            @Nullable Pageable pageable,
+    void validateSubscriptionCancellation(SubscriptionCancellationRequest request,
+            @Nullable ContextInfo contextInfo);
+
+    void validateSubscriptionUpgrade(SubscriptionUpgradeRequest request,
+            @Nullable ContextInfo contextInfo);
+
+    void validateSubscriptionDowngrade(SubscriptionDowngradeRequest request,
             @Nullable ContextInfo contextInfo);
 }

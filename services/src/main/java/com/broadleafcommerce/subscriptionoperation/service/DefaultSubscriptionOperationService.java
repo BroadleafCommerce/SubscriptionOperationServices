@@ -16,7 +16,6 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +31,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscript
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionItemCreationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
@@ -55,6 +55,9 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     protected final SubscriptionProvider<SWI> subscriptionProvider;
 
     @Getter(AccessLevel.PROTECTED)
+    protected final SubscriptionValidationService subscriptionValidationService;
+
+    @Getter(AccessLevel.PROTECTED)
     protected final TypeFactory typeFactory;
 
     @Override
@@ -64,8 +67,9 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
             @Nullable Pageable page,
             @Nullable Node filters,
             @Nullable ContextInfo contextInfo) {
-        Page<SWI> subscriptions = subscriptionProvider.readSubscriptionsForUserRefTypeAndUserRef(userRefType, userRef,
-                page, filters, contextInfo);
+        Page<SWI> subscriptions =
+                subscriptionProvider.readSubscriptionsForUserRefTypeAndUserRef(userRefType, userRef, getActions, page,
+                        filters, contextInfo);
         if (getActions) {
             populateSubscriptionActions(subscriptions, contextInfo);
         }
@@ -92,7 +96,7 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     public SWI createSubscriptionWithItems(
             @lombok.NonNull SubscriptionCreationRequest creationRequest,
             @Nullable ContextInfo contextInfo) {
-        validateSubscriptionCreationRequest(creationRequest, contextInfo);
+        subscriptionValidationService.validateSubscriptionCreation(creationRequest, contextInfo);
 
         SWI subscriptionWithItemsToCreate =
                 buildSubscriptionWithItems(creationRequest, contextInfo);
@@ -103,44 +107,24 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     @Override
     public S cancelSubscription(
             @lombok.NonNull SubscriptionCancellationRequest cancellationRequest,
-            @Nullable ContextInfo context) {
+            @Nullable ContextInfo contextInfo) {
+        subscriptionValidationService.validateSubscriptionCancellation(cancellationRequest,
+                contextInfo);
         return null;
     }
 
     @Override
     public S upgradeSubscription(@lombok.NonNull SubscriptionUpgradeRequest upgradeRequest,
             @Nullable ContextInfo contextInfo) {
+        subscriptionValidationService.validateSubscriptionUpgrade(upgradeRequest, contextInfo);
         return null;
     }
 
-    protected void validateSubscriptionCreationRequest(
-            @lombok.NonNull SubscriptionCreationRequest creationRequest,
+    @Override
+    public S downgradeSubscription(@lombok.NonNull SubscriptionDowngradeRequest downgradeRequest,
             @Nullable ContextInfo contextInfo) {
-        if (StringUtils.isBlank(creationRequest.getUserRefType())
-                || StringUtils.isBlank(creationRequest.getUserRef())) {
-            throw new InvalidSubscriptionCreationRequestException(
-                    "A subscription must be given an owning user/account via userRefType and userRef.");
-        }
-        if (StringUtils.isBlank(creationRequest.getPeriodType())
-                && StringUtils.isBlank(creationRequest.getBillingFrequency())) {
-            throw new InvalidSubscriptionCreationRequestException(
-                    "A subscription must be given a periodType or billingFrequency.");
-        }
-        if (StringUtils.isBlank(creationRequest.getSubscriptionSource())
-                && StringUtils.isBlank(creationRequest.getSubscriptionSourceRef())) {
-            throw new InvalidSubscriptionCreationRequestException(
-                    "A subscription must be given a source or sourceRef.");
-        }
-        if (CollectionUtils.isEmpty(creationRequest.getItemCreationRequests())) {
-            throw new InvalidSubscriptionCreationRequestException(
-                    "Subscription items must also be defined for the subscription.");
-        }
-    }
-
-    protected void validateSubscriptionCancellationRequest(
-            @lombok.NonNull SubscriptionCancellationRequest cancellationRequest,
-            @Nullable ContextInfo contextInfo) {
-
+        subscriptionValidationService.validateSubscriptionDowngrade(downgradeRequest, contextInfo);
+        return null;
     }
 
     protected void populateSubscriptionActions(Iterable<SWI> subscriptions,

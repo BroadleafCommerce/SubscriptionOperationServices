@@ -57,6 +57,25 @@ public class ExternalCatalogProvider<P extends Product> extends AbstractExternal
     }
 
     @Override
+    public P readProductById(String productId,
+            @Nullable ContextInfo contextInfo) {
+        String uri = getBaseUri()
+                .toUriString();
+
+        // TODO: add properties and paths
+        return executeRequest(() -> getWebClient()
+                .get()
+                .uri(uri)
+                .headers(headers -> headers.putAll(getHeaders(contextInfo)))
+                .attributes(clientRegistrationId(getServiceClient()))
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<P>() {})
+                .blockOptional()
+                .orElseThrow(EntityMissingException::new));
+    }
+
+    @Override
     public Page<P> readProductsByIds(@lombok.NonNull List<String> productIds,
             @Nullable Pageable pageable,
             @Nullable ContextInfo contextInfo) {
