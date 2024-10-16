@@ -64,9 +64,8 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
             @Nullable Pageable page,
             @Nullable Node filters,
             @Nullable ContextInfo contextInfo) {
-        return subscriptionProvider.readSubscriptionsForUserTypeAndUserId(userRefType, userRef,
-                page,
-                filters, contextInfo);
+        return subscriptionProvider.readSubscriptionsForUserRefTypeAndUserRef(userRefType, userRef,
+                page, filters, contextInfo);
     }
 
     @Override

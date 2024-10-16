@@ -68,14 +68,19 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
     }
 
     @Override
-    public Page<SWI> readSubscriptionsForUserTypeAndUserId(@lombok.NonNull String userType,
-            @lombok.NonNull String userId,
+    public Page<SWI> readSubscriptionsForUserRefTypeAndUserRef(@lombok.NonNull String userRefType,
+            @lombok.NonNull String userRef,
             @Nullable Pageable page,
             @Nullable Node filters,
             @Nullable ContextInfo contextInfo) {
+        String uri = getBaseUri()
+                .queryParam("userRefType", userRefType)
+                .queryParam("userRef", userRef)
+                .toUriString();
+
         return executeRequest(() -> getWebClient()
                 .get()
-                .uri(getBaseUri().toUriString())
+                .uri(uri)
                 .headers(headers -> headers.putAll(getHeaders(contextInfo)))
                 .attributes(clientRegistrationId(getServiceClient()))
                 .accept(MediaType.APPLICATION_JSON)

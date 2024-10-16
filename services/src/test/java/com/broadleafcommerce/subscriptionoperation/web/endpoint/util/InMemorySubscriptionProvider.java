@@ -95,13 +95,13 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
     }
 
     @Override
-    public Page<SubscriptionWithItems> readSubscriptionsForUserTypeAndUserId(String userType,
-            String userId,
+    public Page<SubscriptionWithItems> readSubscriptionsForUserRefTypeAndUserRef(String userRefType,
+            String userRef,
             Pageable page,
             Node filters,
             ContextInfo contextInfo) {
         List<SubscriptionWithItems> subscriptionWithItemsList = getStore().values().stream()
-                .filter(userMatches(userType, userId))
+                .filter(userMatches(userRefType, userRef))
                 .filter(subscriptionWithItems -> {
                     String subscriptionIdToMatch = getSubscriptionIdToMatch(filters);
                     String actualSubscriptionId = subscriptionWithItems.getSubscription().getId();
@@ -145,11 +145,11 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
         return null;
     }
 
-    protected Predicate<SubscriptionWithItems> userMatches(String userType,
-            @Nullable String userId) {
+    protected Predicate<SubscriptionWithItems> userMatches(String userRefType,
+            @Nullable String userRef) {
         return sWI -> sWI.getSubscription().getUserRef() != null
-                && Objects.equals(sWI.getSubscription().getUserRefType(), userType)
-                && Objects.equals(sWI.getSubscription().getUserRef(), userId);
+                && Objects.equals(sWI.getSubscription().getUserRefType(), userRefType)
+                && Objects.equals(sWI.getSubscription().getUserRef(), userRef);
     }
 
     protected Predicate<SubscriptionWithItems> contextMatches(@Nullable ContextInfo contextInfo) {
