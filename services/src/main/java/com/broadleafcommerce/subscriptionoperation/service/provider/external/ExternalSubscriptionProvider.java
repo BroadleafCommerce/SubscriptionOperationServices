@@ -21,6 +21,7 @@ import static org.springframework.security.oauth2.client.web.reactive.function.c
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -30,6 +31,7 @@ import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
+import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiException;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.page.ResponsePageGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
+import reactor.core.publisher.Mono;
 
 public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
         extends AbstractExternalProvider implements SubscriptionProvider<SWI> {
@@ -85,6 +88,9 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
                 .attributes(clientRegistrationId(getServiceClient()))
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        response -> response.createException().flatMap(
+                                exception -> Mono.just(new ProviderApiException(exception))))
                 .bodyToMono(getPageType())
                 .blockOptional()
                 .map(ResponsePageGenerator::getPage)
@@ -103,6 +109,9 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
                 .headers(headers -> headers.putAll(getHeaders(contextInfo)))
                 .attributes(clientRegistrationId(getServiceClient()))
                 .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        response -> response.createException().flatMap(
+                                exception -> Mono.just(new ProviderApiException(exception))))
                 .bodyToMono(getType())
                 .blockOptional()
                 .orElseThrow(EntityMissingException::new));

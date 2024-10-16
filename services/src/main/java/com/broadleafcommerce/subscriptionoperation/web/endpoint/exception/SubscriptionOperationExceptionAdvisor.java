@@ -24,10 +24,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.broadleafcommerce.common.error.ApiError;
 import com.broadleafcommerce.common.error.validation.web.FrameworkExceptionAdvisor;
+import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AccessLevel;
@@ -58,6 +61,35 @@ public class SubscriptionOperationExceptionAdvisor {
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST)
                         .toResponseEntity();
+    }
+
+    @ExceptionHandler({ProviderApiException.class})
+    public ResponseEntity<ApiError> handleProviderApiError(ProviderApiException ex,
+            WebRequest request) {
+        final WebClientResponseException receivedException = ex.getReceivedException();
+
+        if (receivedException != null) {
+            try {
+                String rawResponse = receivedException.getResponseBodyAsString();
+                ResponseEntity<ApiError> apiError = mapper.readValue(rawResponse,
+                        ApiError.class)
+                        .toResponseEntity();
+                String requestURL =
+                        ((ServletWebRequest) request).getRequest().getRequestURL().toString();
+                log.error("Request to {} raised an exception: {}", requestURL, rawResponse);
+                return apiError;
+            } catch (JsonProcessingException ignored) {
+                logError(ex, request);
+                return new ApiError("PROVIDER_API_ERROR",
+                        receivedException.getMessage(),
+                        receivedException.getStatusCode())
+                                .toResponseEntity();
+            }
+        }
+
+        logError(ex, request);
+        return new ApiError("PROVIDER_API_ERROR", ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR)
+                .toResponseEntity();
     }
 
     protected void logDebug(Exception ex, WebRequest request) {
