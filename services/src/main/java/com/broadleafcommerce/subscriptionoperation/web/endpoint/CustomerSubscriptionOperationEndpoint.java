@@ -16,9 +16,6 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
-import static com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.RsqlSearchOperation.EQUAL;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
@@ -28,13 +25,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
-import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.data.tracking.core.policy.IdentityType;
 import com.broadleafcommerce.data.tracking.core.policy.Policy;
 import com.broadleafcommerce.data.tracking.core.type.OperationType;
@@ -46,16 +41,11 @@ import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperation
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
-import java.util.List;
-
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RequiredArgsConstructor
 @FrameworkRestController
 @FrameworkMapping(CustomerSubscriptionOperationEndpoint.BASE_URI)
@@ -75,7 +65,7 @@ public class CustomerSubscriptionOperationEndpoint {
             @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
-        return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(
+        return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(
                 DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, page, filters, contextInfo);
     }
 
@@ -87,23 +77,8 @@ public class CustomerSubscriptionOperationEndpoint {
             @PathVariable("customerId") String customerId,
             @PathVariable("subscriptionId") String subscriptionId,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
-        Node subscriptionIdFilter = buildSubscriptionIdFilter(subscriptionId, contextInfo);
-
-        List<SubscriptionWithItems> subscriptions = subscriptionOperationService
-                .readSubscriptionsForUserTypeAndUserId(
-                        DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, Pageable.unpaged(),
-                        subscriptionIdFilter, contextInfo)
-                .getContent();
-
-        if (CollectionUtils.isEmpty(subscriptions)) {
-            throw new EntityMissingException();
-        } else if (subscriptions.size() > 1) {
-            log.warn(
-                    "There is more than 1 subscription with the same id for the customer. Customer ID: {} | Subscription ID: {}",
-                    customerId, subscriptionId);
-        }
-
-        return subscriptions.get(0);
+        return subscriptionOperationService.readUserSubscriptionById(
+                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, subscriptionId, contextInfo);
     }
 
     @FrameworkPostMapping(value = "/{subscriptionId}/upgrade",
@@ -135,12 +110,5 @@ public class CustomerSubscriptionOperationEndpoint {
         subscriptionCancellationRequest.setSubscriptionId(subscriptionId);
         return subscriptionOperationService.cancelSubscription(subscriptionCancellationRequest,
                 contextInfo);
-    }
-
-    protected Node buildSubscriptionIdFilter(@lombok.NonNull String subscriptionId,
-            @Nullable ContextInfo contextInfo) {
-        return new ComparisonNode(EQUAL.getOperator(),
-                "id",
-                List.of(subscriptionId));
     }
 }

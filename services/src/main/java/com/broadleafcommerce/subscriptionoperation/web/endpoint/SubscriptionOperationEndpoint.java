@@ -64,7 +64,8 @@ public class SubscriptionOperationEndpoint {
             @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
-        return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(userType, userId,
+        return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(userType,
+                userId,
                 page, filters, contextInfo);
     }
 

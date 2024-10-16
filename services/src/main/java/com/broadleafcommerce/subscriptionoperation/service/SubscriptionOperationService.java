@@ -41,18 +41,33 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * This method reads subscriptions for a given user type and user id, additionally filtered and
      * paginated by given parameters
      *
-     * @param userType user type, see {@link DefaultUserRefTypes}
-     * @param userId id of owning user or account
+     * @param userRefType user type, see {@link DefaultUserRefTypes}
+     * @param userRef id of owning user or account
      * @param page information about which page of results to return from the database.
      * @param filters additional filters to apply in the query. Should be {@link EmptyNode} if no
      *        additional filters should be applied.
      * @param contextInfo context information around multi-tenant state
      * @return Subscriptions with items matching the given criteria
      */
-    Page<SWI> readSubscriptionsForUserTypeAndUserId(String userType,
-            String userId,
+    Page<SWI> readSubscriptionsForUserRefTypeAndUserRef(String userRefType,
+            String userRef,
             @Nullable Pageable page,
             @Nullable Node filters,
+            @Nullable ContextInfo contextInfo);
+
+    /**
+     * This method attempts to find a {@link SubscriptionWithItems} by id which is owned by the
+     * user/account
+     *
+     * @param userRefType user type, see {@link DefaultUserRefTypes}
+     * @param userRef id of owning user or account
+     * @param subscriptionId The id of the {@link Subscription} that is intended to be gathered
+     * @param contextInfo context information around multi-tenant state
+     * @return Subscriptions with items matching the given criteria
+     */
+    SWI readUserSubscriptionById(String userRefType,
+            String userRef,
+            String subscriptionId,
             @Nullable ContextInfo contextInfo);
 
     /**
