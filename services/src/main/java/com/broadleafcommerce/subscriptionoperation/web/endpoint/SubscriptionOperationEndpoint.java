@@ -24,6 +24,7 @@ import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPutMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,7 +60,7 @@ public class SubscriptionOperationEndpoint {
     public Page<SubscriptionWithItems> readUserSubscriptions(
             @RequestParam("userType") String userType,
             @RequestParam("userId") String userId,
-            @PageableDefault Pageable page,
+            @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(userType, userId,

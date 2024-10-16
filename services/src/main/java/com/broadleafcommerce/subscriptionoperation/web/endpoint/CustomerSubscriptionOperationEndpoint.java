@@ -19,11 +19,12 @@ package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
-import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPutMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -50,25 +51,26 @@ import lombok.RequiredArgsConstructor;
 @FrameworkMapping(CustomerSubscriptionOperationEndpoint.BASE_URI)
 public class CustomerSubscriptionOperationEndpoint {
 
-    public static final String BASE_URI = "/customer/{customerId}/subscriptions";
+    public static final String BASE_URI = "/customers/{customerId}/subscriptions";
 
     @Getter(AccessLevel.PROTECTED)
     protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
-    @FrameworkGetMapping()
+    @FrameworkGetMapping
     @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
             identityTypes = {IdentityType.OWNER},
             ownerIdentifierParam = 0)
     public Page<SubscriptionWithItems> readCustomerSubscriptions(
             @PathVariable("customerId") String customerId,
-            @PageableDefault Pageable page,
+            @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(
                 DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, page, filters, contextInfo);
     }
 
-    @FrameworkPostMapping(value = "/{subscriptionId}/upgrade")
+    @FrameworkPostMapping(value = "/{subscriptionId}/upgrade",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"},
             identityTypes = {IdentityType.OWNER},
             ownerIdentifierParam = 0,
@@ -82,7 +84,8 @@ public class CustomerSubscriptionOperationEndpoint {
         return subscriptionOperationService.upgradeSubscription(upgradeRequest, contextInfo);
     }
 
-    @FrameworkPutMapping(value = "/{subscriptionId}/cancel")
+    @FrameworkPostMapping(value = "/{subscriptionId}/cancel",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"},
             identityTypes = {IdentityType.OWNER},
             ownerIdentifierParam = 0,
