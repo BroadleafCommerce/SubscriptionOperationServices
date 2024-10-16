@@ -58,8 +58,7 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
     /**
      * This method reads a subscription for the given id
      *
-     * @param subscriptionId additional filters to apply in the query. Should be {@link EmptyNode}
-     *        if no additional filters should be applied.
+     * @param subscriptionId The id of the {@link Subscription} that is intended to be gathered
      * @param contextInfo context information around multi-tenant state
      * @return a subscription with items identified by the subscription id
      */
