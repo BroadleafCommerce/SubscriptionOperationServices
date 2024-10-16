@@ -17,9 +17,12 @@
 package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
 import static com.broadleafcommerce.data.tracking.core.context.ContextInfoHandlerMethodArgumentResolver.CONTEXT_REQUEST_HEADER;
+import static org.hamcrest.Matchers.contains;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -42,8 +45,10 @@ import com.broadleafcommerce.data.tracking.core.type.OperationType;
 import com.broadleafcommerce.oauth2.resource.security.test.MockMvcOAuth2AuthenticationUtil;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.endpoint.util.InMemorySubscriptionProvider;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -286,6 +291,178 @@ class CustomerSubscriptionOperationEndpointIT {
                 .andExpect(jsonPath("$.subscription.userRefType")
                         .value(DefaultUserRefTypes.BLC_CUSTOMER.name()))
                 .andExpect(jsonPath("$.subscription.userRef").value(REGISTERED_CUSTOMER_ID));
+    }
+
+    @Test
+    void cannotReadSubscriptionActionsWithoutPermissionAndWrongCustomer() throws Exception {
+        SubscriptionWithItems subscriptionWithItems =
+                getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID);
+        String subscriptionId = subscriptionWithItems.getSubscription().getId();
+        inMemorySubscriptionProvider.create(subscriptionWithItems,
+                createContextInfo());
+
+        SubscriptionActionRequest request = new SubscriptionActionRequest();
+        request.setSubscriptionId(subscriptionId);
+
+        Map<String, Object> authDetails = new HashMap<>();
+        authDetails.put("customer_id", "2");
+
+        mockMvc.perform(
+                post(CUSTOMER_URI + CUSTOMER_READ_BY_ID_URI + "/actions", "2", subscriptionId)
+                        .with(authUtil.withAuthoritiesAndDetails(Sets.newSet("RANDOM_PERMISSION"),
+                                authDetails))
+                        .contentType(APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request))
+                        .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void cannotReadSubscriptionActionsWithoutPermissionWithCorrectCustomer() throws Exception {
+        SubscriptionWithItems subscriptionWithItems =
+                getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID);
+        String subscriptionId = subscriptionWithItems.getSubscription().getId();
+        inMemorySubscriptionProvider.create(subscriptionWithItems,
+                createContextInfo());
+
+        SubscriptionActionRequest request = new SubscriptionActionRequest();
+        request.setSubscriptionId(subscriptionId);
+
+
+        Map<String, Object> authDetails = new HashMap<>();
+        authDetails.put("customer_id", REGISTERED_CUSTOMER_ID);
+
+        mockMvc.perform(
+                post(CUSTOMER_URI + CUSTOMER_READ_BY_ID_URI + "/actions", REGISTERED_CUSTOMER_ID,
+                        subscriptionId)
+                                .with(authUtil.withAuthoritiesAndDetails(
+                                        Sets.newSet("RANDOM_PERMISSION"),
+                                        authDetails))
+                                .contentType(APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(request))
+                                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void cannotReadSubscriptionActionsWithPermissionWithWrongAuthCustomer() throws Exception {
+        SubscriptionWithItems subscriptionWithItems =
+                getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID);
+        String subscriptionId = subscriptionWithItems.getSubscription().getId();
+        inMemorySubscriptionProvider.create(subscriptionWithItems,
+                createContextInfo());
+
+        SubscriptionActionRequest request = new SubscriptionActionRequest();
+        request.setSubscriptionId(subscriptionId);
+
+        Map<String, Object> authDetails = new HashMap<>();
+        authDetails.put("customer_id", "2");
+
+        mockMvc.perform(
+                post(CUSTOMER_URI + CUSTOMER_READ_BY_ID_URI + "/actions", REGISTERED_CUSTOMER_ID,
+                        subscriptionId)
+                                .with(authUtil.withAuthoritiesAndDetails(
+                                        Sets.newSet("READ_CUSTOMER_SUBSCRIPTION"),
+                                        authDetails))
+                                .contentType(APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(request))
+                                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void cannotReadSubscriptionActionsWithPermissionWithWrongCustomer() throws Exception {
+        SubscriptionWithItems subscriptionWithItems =
+                getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID);
+        String subscriptionId = subscriptionWithItems.getSubscription().getId();
+        inMemorySubscriptionProvider.create(subscriptionWithItems,
+                createContextInfo());
+
+        SubscriptionActionRequest request = new SubscriptionActionRequest();
+        request.setSubscriptionId(subscriptionId);
+
+        Map<String, Object> authDetails = new HashMap<>();
+        authDetails.put("customer_id", "2");
+
+        mockMvc.perform(
+                post(CUSTOMER_URI + CUSTOMER_READ_BY_ID_URI + "/actions", "2", subscriptionId)
+                        .with(authUtil.withAuthoritiesAndDetails(
+                                Sets.newSet("READ_CUSTOMER_SUBSCRIPTION"),
+                                authDetails))
+                        .contentType(APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(request))
+                        .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void cannotReadSubscriptionActionsWithPermissionWithUnknownSubscriptionId() throws Exception {
+        SubscriptionWithItems subscriptionWithItems =
+                getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID);
+        String subscriptionId = subscriptionWithItems.getSubscription().getId();
+        inMemorySubscriptionProvider.create(subscriptionWithItems,
+                createContextInfo());
+
+        SubscriptionActionRequest request = new SubscriptionActionRequest();
+
+        Map<String, Object> authDetails = new HashMap<>();
+        authDetails.put("customer_id", REGISTERED_CUSTOMER_ID);
+
+        mockMvc.perform(
+                post(CUSTOMER_URI + CUSTOMER_READ_BY_ID_URI + "/actions", REGISTERED_CUSTOMER_ID,
+                        "unknownSubscriptionId")
+                                .with(authUtil.withAuthoritiesAndDetails(
+                                        Sets.newSet("READ_CUSTOMER_SUBSCRIPTION"),
+                                        authDetails))
+                                .contentType(APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(request))
+                                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void readsSubscriptionActionsWithPermission() throws Exception {
+        SubscriptionWithItems subscriptionWithItems =
+                getSubscriptionForCustomer(REGISTERED_CUSTOMER_ID);
+        String subscriptionId = subscriptionWithItems.getSubscription().getId();
+        inMemorySubscriptionProvider.create(subscriptionWithItems,
+                createContextInfo());
+
+        SubscriptionActionRequest request = new SubscriptionActionRequest();
+        request.setSubscriptionId(subscriptionId);
+
+        Map<String, Object> authDetails = new HashMap<>();
+        authDetails.put("customer_id", REGISTERED_CUSTOMER_ID);
+
+        mockMvc.perform(
+                post(CUSTOMER_URI + CUSTOMER_READ_BY_ID_URI + "/actions", REGISTERED_CUSTOMER_ID,
+                        subscriptionId)
+                                .with(authUtil.withAuthoritiesAndDetails(
+                                        Sets.newSet("READ_CUSTOMER_SUBSCRIPTION"),
+                                        authDetails))
+                                .contentType(APPLICATION_JSON)
+                                .content(mapper.writeValueAsString(request))
+                                .header(CONTEXT_REQUEST_HEADER, getContextRequest(TENANT))
+                                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                // TODO: Update tests once action logic is implemented
+                .andExpect(jsonPath("$.availableActions[*].actionType",
+                        contains(DefaultSubscriptionActionTypes.EDIT.name(),
+                                DefaultSubscriptionActionTypes.CHANGE_AUTO_RENEWAL.name(),
+                                DefaultSubscriptionActionTypes.UPGRADE.name(),
+                                DefaultSubscriptionActionTypes.PAUSE.name(),
+                                DefaultSubscriptionActionTypes.RESUME.name(),
+                                DefaultSubscriptionActionTypes.SUSPEND.name(),
+                                DefaultSubscriptionActionTypes.TERMINATE.name(),
+                                DefaultSubscriptionActionTypes.REACTIVATE.name(),
+                                DefaultSubscriptionActionTypes.CANCEL.name())))
+                .andExpect(jsonPath("$.unavailableReasonsByActionType.DOWNGRADE[0]")
+                        .value("Downgrade is not supported"));
     }
 
     private SubscriptionWithItems getSubscriptionForCustomer(String userRef) {
