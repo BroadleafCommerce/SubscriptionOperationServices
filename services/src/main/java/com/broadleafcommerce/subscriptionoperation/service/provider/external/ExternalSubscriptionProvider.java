@@ -86,6 +86,23 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
                 .orElseThrow(EntityMissingException::new));
     }
 
+    @Override
+    public SWI readSubscriptionById(String subscriptionId, ContextInfo contextInfo) {
+        String uri = getBaseUri()
+                .pathSegment(subscriptionId)
+                .toUriString();
+
+        return executeRequest(() -> getWebClient()
+                .get()
+                .uri(uri)
+                .headers(headers -> headers.putAll(getHeaders(contextInfo)))
+                .attributes(clientRegistrationId(getServiceClient()))
+                .retrieve()
+                .bodyToMono(getType())
+                .blockOptional()
+                .orElseThrow(EntityMissingException::new));
+    }
+
     /**
      * Gets the type reference for a page generator of item list items.
      *
@@ -103,6 +120,10 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
     protected UriComponentsBuilder getBaseUri() {
         return UriComponentsBuilder.fromHttpUrl(properties.getUrl())
                 .path(properties.getSubscriptionsUri());
+    }
+
+    protected ParameterizedTypeReference<SWI> getType() {
+        return new ParameterizedTypeReference<>() {};
     }
 
     protected String getServiceClient() {

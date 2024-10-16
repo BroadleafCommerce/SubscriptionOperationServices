@@ -26,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -57,7 +58,7 @@ public class SubscriptionOperationEndpoint {
 
     @FrameworkGetMapping(params = {"userType", "userId"})
     @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION")
-    public Page<SubscriptionWithItems> readUserSubscriptions(
+    public Page<SubscriptionWithItems> readAllUserOwnedSubscriptions(
             @RequestParam("userType") String userType,
             @RequestParam("userId") String userId,
             @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
@@ -65,6 +66,14 @@ public class SubscriptionOperationEndpoint {
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(userType, userId,
                 page, filters, contextInfo);
+    }
+
+    @FrameworkGetMapping(value = "/{subscriptionId}")
+    @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION")
+    public SubscriptionWithItems readCustomerSubscription(
+            @PathVariable("subscriptionId") String subscriptionId,
+            @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
+        return subscriptionOperationService.readSubscriptionById(subscriptionId, contextInfo);
     }
 
     @FrameworkPostMapping

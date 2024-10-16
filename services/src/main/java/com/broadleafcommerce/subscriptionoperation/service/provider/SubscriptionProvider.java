@@ -59,4 +59,12 @@ public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
             @Nullable Node filters,
             @Nullable ContextInfo contextInfo);
 
+    /**
+     * Retrieves a subscriptions with items for a given id
+     *
+     * @param subscriptionId The id of the subscription
+     * @param contextInfo context information around multi-tenant state
+     * @return a subscription with items for the given id
+     */
+    SWI readSubscriptionById(String subscriptionId, @Nullable ContextInfo contextInfo);
 }

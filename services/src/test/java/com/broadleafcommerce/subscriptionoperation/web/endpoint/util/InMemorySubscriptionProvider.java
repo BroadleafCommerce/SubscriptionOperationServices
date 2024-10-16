@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.data.tracking.core.filtering.business.domain.ContextState;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
@@ -117,6 +118,18 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
         }
 
         return new PageImpl<>(subscriptionWithItemsList, page, subscriptionWithItemsList.size());
+    }
+
+    @Override
+    public SubscriptionWithItems readSubscriptionById(String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
+        return getStore().values().stream()
+                .filter(subscriptionWithItems -> Objects
+                        .equals(subscriptionWithItems.getSubscription().getId(), subscriptionId))
+                .filter(contextMatches(contextInfo))
+                .map(this::simulateSerialization)
+                .findFirst()
+                .orElseThrow(EntityMissingException::new);
     }
 
     @Nullable

@@ -56,6 +56,16 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
             @Nullable ContextInfo contextInfo);
 
     /**
+     * This method reads a subscription for the given id
+     *
+     * @param subscriptionId additional filters to apply in the query. Should be {@link EmptyNode}
+     *        if no additional filters should be applied.
+     * @param contextInfo context information around multi-tenant state
+     * @return a subscription with items identified by the subscription id
+     */
+    SWI readSubscriptionById(String subscriptionId, @Nullable ContextInfo contextInfo);
+
+    /**
      * Builds out a {@link SubscriptionWithItems} and calls a provider to persist them in the
      * resource-tier service
      *

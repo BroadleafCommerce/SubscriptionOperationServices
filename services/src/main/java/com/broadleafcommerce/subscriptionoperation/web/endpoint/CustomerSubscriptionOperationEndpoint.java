@@ -68,7 +68,7 @@ public class CustomerSubscriptionOperationEndpoint {
     @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
             identityTypes = {IdentityType.OWNER},
             ownerIdentifierParam = 0)
-    public Page<SubscriptionWithItems> readCustomerSubscriptions(
+    public Page<SubscriptionWithItems> readAllCustomerSubscriptions(
             @PathVariable("customerId") String customerId,
             @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
             Node filters,

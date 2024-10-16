@@ -65,7 +65,7 @@ public class AccountSubscriptionOperationEndpoint {
     @Policy(permissionRoots = "ACCOUNT_SUBSCRIPTION",
             identityTypes = {IdentityType.ADMIN, IdentityType.OWNER},
             ownerIdentifierParam = 0, ownerIdentifier = "acct_id,parent_accts")
-    public Page<SubscriptionWithItems> readAccountSubscriptions(
+    public Page<SubscriptionWithItems> readAllAccountSubscriptions(
             @PathVariable("accountId") String accountId,
             @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
             Node filters,
@@ -74,7 +74,7 @@ public class AccountSubscriptionOperationEndpoint {
                 DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, page, filters, contextInfo);
     }
 
-    @FrameworkGetMapping(value = "/{accountId}/subscriptions/{subscriptionId}")
+    @FrameworkGetMapping(value = "/{subscriptionId}")
     @Policy(permissionRoots = "ACCOUNT_SUBSCRIPTION",
             identityTypes = {IdentityType.ADMIN, IdentityType.OWNER},
             ownerIdentifierParam = 0, ownerIdentifier = "acct_id,parent_accts")

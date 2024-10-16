@@ -63,6 +63,12 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     }
 
     @Override
+    public SWI readSubscriptionById(@lombok.NonNull String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
+        return subscriptionProvider.readSubscriptionById(subscriptionId, contextInfo);
+    }
+
+    @Override
     public SWI createSubscriptionWithItems(
             @lombok.NonNull SubscriptionCreationRequest creationRequest,
             @Nullable ContextInfo contextInfo) {
@@ -99,6 +105,11 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
                 && StringUtils.isBlank(creationRequest.getBillingFrequency())) {
             throw new InvalidSubscriptionCreationRequestException(
                     "A subscription must be given a periodType or billingFrequency.");
+        }
+        if (StringUtils.isBlank(creationRequest.getSubscriptionSource())
+                && StringUtils.isBlank(creationRequest.getSubscriptionSourceRef())) {
+            throw new InvalidSubscriptionCreationRequestException(
+                    "A subscription must be given a source or sourceRef.");
         }
         if (CollectionUtils.isEmpty(creationRequest.getItemCreationRequests())) {
             throw new InvalidSubscriptionCreationRequestException(
