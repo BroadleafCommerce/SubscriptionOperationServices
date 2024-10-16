@@ -117,6 +117,31 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
                 .orElseThrow(EntityMissingException::new));
     }
 
+    @Override
+    public SWI readUserSubscriptionById(@lombok.NonNull String userRefType,
+            @lombok.NonNull String userRef,
+            @lombok.NonNull String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
+        String uri = getBaseUri()
+                .pathSegment(subscriptionId)
+                .queryParam("userRefType", userRefType)
+                .queryParam("userRef", userRef)
+                .toUriString();
+
+        return executeRequest(() -> getWebClient()
+                .get()
+                .uri(uri)
+                .headers(headers -> headers.putAll(getHeaders(contextInfo)))
+                .attributes(clientRegistrationId(getServiceClient()))
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        response -> response.createException().flatMap(
+                                exception -> Mono.just(new ProviderApiException(exception))))
+                .bodyToMono(getType())
+                .blockOptional()
+                .orElseThrow(EntityMissingException::new));
+    }
+
     /**
      * Gets the type reference for a page generator of item list items.
      *

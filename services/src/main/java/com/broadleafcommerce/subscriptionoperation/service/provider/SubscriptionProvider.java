@@ -46,8 +46,8 @@ public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
      * Retrieves a page of subscriptions with items for a given user type and user id, taking into
      * account the provided filters and paging
      *
-     * @param userRefType type of user
-     * @param userRef user id
+     * @param userRefType type of the owning user
+     * @param userRef id of the owning user
      * @param page pageable
      * @param filters Additional RSQL filters
      * @param contextInfo context information around multi-tenant state
@@ -60,11 +60,25 @@ public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
             @Nullable ContextInfo contextInfo);
 
     /**
-     * Retrieves a subscriptions with items for a given id
+     * Retrieves a subscription with items for a given id
      *
      * @param subscriptionId The id of the subscription
      * @param contextInfo context information around multi-tenant state
      * @return a subscription with items for the given id
      */
     SWI readSubscriptionById(String subscriptionId, @Nullable ContextInfo contextInfo);
+
+    /**
+     * Retrieves a user-owned subscription with items for a given id
+     *
+     * @param userRefType type of the owning user
+     * @param userRef id of the owning user
+     * @param subscriptionId The id of the subscription
+     * @param contextInfo context information around multi-tenant state
+     * @return a user-owned subscription with items for a given id
+     */
+    SWI readUserSubscriptionById(String userRefType,
+            String userRef,
+            String subscriptionId,
+            @Nullable ContextInfo contextInfo);
 }

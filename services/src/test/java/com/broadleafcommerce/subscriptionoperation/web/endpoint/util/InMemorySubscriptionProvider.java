@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import io.azam.ulidj.ULID;
 import lombok.Getter;
@@ -102,13 +101,6 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
             ContextInfo contextInfo) {
         List<SubscriptionWithItems> subscriptionWithItemsList = getStore().values().stream()
                 .filter(userMatches(userRefType, userRef))
-                .filter(subscriptionWithItems -> {
-                    String subscriptionIdToMatch = getSubscriptionIdToMatch(filters);
-                    String actualSubscriptionId = subscriptionWithItems.getSubscription().getId();
-
-                    return StringUtils.isBlank(subscriptionIdToMatch)
-                            || Objects.equals(actualSubscriptionId, subscriptionIdToMatch);
-                })
                 .filter(contextMatches(contextInfo))
                 .map(this::simulateSerialization)
                 .toList();
@@ -132,17 +124,19 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
                 .orElseThrow(EntityMissingException::new);
     }
 
-    @Nullable
-    protected String getSubscriptionIdToMatch(Node filters) {
-        if (filters instanceof ComparisonNode) {
-            String selector = ((ComparisonNode) filters).getSelector();
-
-            if (Objects.equals("id", selector)) {
-                return ((ComparisonNode) filters).getArguments().get(0);
-            }
-        }
-
-        return null;
+    @Override
+    public SubscriptionWithItems readUserSubscriptionById(String userRefType,
+            String userRef,
+            String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
+        return getStore().values().stream()
+                .filter(userMatches(userRefType, userRef))
+                .filter(subscriptionWithItems -> Objects
+                        .equals(subscriptionWithItems.getSubscription().getId(), subscriptionId))
+                .filter(contextMatches(contextInfo))
+                .map(this::simulateSerialization)
+                .findFirst()
+                .orElseThrow(EntityMissingException::new);
     }
 
     protected Predicate<SubscriptionWithItems> userMatches(String userRefType,
