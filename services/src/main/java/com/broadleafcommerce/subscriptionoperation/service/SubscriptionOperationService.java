@@ -78,12 +78,14 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * @param userRefType user type, see {@link DefaultUserRefTypes}
      * @param userRef id of owning user or account
      * @param subscriptionId The id of the {@link Subscription} that is intended to be gathered
+     * @param getActions whether to get available actions for the subscription
      * @param contextInfo context information around multi-tenant state
      * @return Subscriptions with items matching the given criteria
      */
     SWI readUserSubscriptionById(String userRefType,
             String userRef,
             String subscriptionId,
+            boolean getActions,
             @Nullable ContextInfo contextInfo);
 
     /**

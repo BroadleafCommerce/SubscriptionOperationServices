@@ -71,6 +71,11 @@ public class DefaultSubscriptionValidationService implements SubscriptionValidat
             throw new InvalidSubscriptionCreationRequestException(
                     "A subscription must be given a periodType or billingFrequency.");
         }
+        if (StringUtils.isBlank(creationRequest.getSubscriptionSource())
+                && StringUtils.isBlank(creationRequest.getSubscriptionSourceRef())) {
+            throw new InvalidSubscriptionCreationRequestException(
+                    "A subscription must be given a source or sourceRef.");
+        }
         if (CollectionUtils.isEmpty(creationRequest.getItemCreationRequests())) {
             throw new InvalidSubscriptionCreationRequestException(
                     "Subscription items must also be defined for the subscription.");

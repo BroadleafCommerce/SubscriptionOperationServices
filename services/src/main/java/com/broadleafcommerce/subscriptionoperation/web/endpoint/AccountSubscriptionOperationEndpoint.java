@@ -16,25 +16,19 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
-import static com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.RsqlSearchOperation.EQUAL;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
-import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
-import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.data.tracking.core.policy.IdentityType;
 import com.broadleafcommerce.data.tracking.core.policy.Policy;
 import com.broadleafcommerce.data.tracking.core.type.OperationType;
@@ -43,12 +37,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 
-import java.util.List;
-
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -79,7 +68,8 @@ public class AccountSubscriptionOperationEndpoint {
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(
-                DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, getActions, page, filters, contextInfo);
+                DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, getActions, page, filters,
+                contextInfo);
     }
 
     @FrameworkGetMapping(value = "/{subscriptionId}")
@@ -93,6 +83,7 @@ public class AccountSubscriptionOperationEndpoint {
                     defaultValue = "false") boolean getActions,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readUserSubscriptionById(
-                DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, subscriptionId, contextInfo);
+                DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, subscriptionId, getActions,
+                contextInfo);
     }
 }

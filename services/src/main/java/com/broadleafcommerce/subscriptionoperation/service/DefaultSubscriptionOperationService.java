@@ -16,9 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
-import static com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.RsqlSearchOperation.EQUAL;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +24,6 @@ import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
@@ -45,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -71,39 +67,28 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     public SubscriptionActionResponse readSubscriptionActions(
             @NonNull SubscriptionActionRequest request,
             @Nullable ContextInfo contextInfo) {
-        Node idFilter = buildSubscriptionIdFilter(request.getSubscriptionId(), contextInfo);
+        SWI subscription =
+                subscriptionProvider.readSubscriptionById(request.getSubscriptionId(), contextInfo);
 
-        List<SWI> subscriptions = subscriptionProvider.readSubscriptionsForUserTypeAndUserId(
-                request.getUserType(), request.getUserId(),
-                Pageable.unpaged(), idFilter, contextInfo)
-                .getContent();
-
-        if (CollectionUtils.isEmpty(subscriptions)) {
-            throw new EntityMissingException();
-        } else if (subscriptions.size() > 1) {
-            log.warn(
-                    "There is more than 1 subscription with the same id for the user type and id. (userType: {} | userId: {} | subscriptionId: {})",
-                    request.getUserType(), request.getUserId(), request.getSubscriptionId());
-        }
-
-        populateSubscriptionActions(subscriptions, contextInfo);
+        populateSubscriptionActions(subscription, contextInfo);
 
         SubscriptionActionResponse response = typeFactory.get(SubscriptionActionResponse.class);
-        response.setAvailableActions(subscriptions.get(0).getAvailableActions());
+        response.setAvailableActions(subscription.getAvailableActions());
         response.setUnavailableReasonsByActionType(
-                subscriptions.get(0).getUnavailableReasonsByActionType());
+                subscription.getUnavailableReasonsByActionType());
         return response;
     }
 
     @Override
     public Page<SWI> readSubscriptionsForUserRefTypeAndUserRef(@lombok.NonNull String userRefType,
             @lombok.NonNull String userRef,
-                                                               boolean getActions,
+            boolean getActions,
             @Nullable Pageable page,
             @Nullable Node filters,
             @Nullable ContextInfo contextInfo) {
         Page<SWI> subscriptions =
-                subscriptionProvider.readSubscriptionsForUserRefTypeAndUserRef(userRefType, userRef, getActions, page,
+                subscriptionProvider.readSubscriptionsForUserRefTypeAndUserRef(userRefType, userRef,
+                        page,
                         filters, contextInfo);
         if (getActions) {
             populateSubscriptionActions(subscriptions, contextInfo);
@@ -116,9 +101,15 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     public SWI readUserSubscriptionById(@lombok.NonNull String userRefType,
             @lombok.NonNull String userRef,
             @lombok.NonNull String subscriptionId,
+            boolean getActions,
             @Nullable ContextInfo contextInfo) {
-        return subscriptionProvider.readUserSubscriptionById(userRefType, userRef, subscriptionId,
-                contextInfo);
+        SWI subscription =
+                subscriptionProvider.readUserSubscriptionById(userRefType, userRef, subscriptionId,
+                        contextInfo);
+        if (getActions) {
+            populateSubscriptionActions(subscription, contextInfo);
+        }
+        return subscription;
     }
 
     @Override
@@ -164,10 +155,13 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
 
     protected void populateSubscriptionActions(Iterable<SWI> subscriptions,
             @Nullable ContextInfo contextInfo) {
-        List<String> actionTypes = getAllActionTypes();
-        subscriptions.forEach(subscription -> {
-            actionTypes.forEach(action -> populateActionAvailability(subscription, action));
-        });
+        subscriptions
+                .forEach(subscription -> populateSubscriptionActions(subscription, contextInfo));
+    }
+
+    protected void populateSubscriptionActions(SWI subscription,
+            @Nullable ContextInfo contextInfo) {
+        getAllActionTypes().forEach(action -> populateActionAvailability(subscription, action));
     }
 
     protected List<String> getAllActionTypes() {
@@ -257,12 +251,5 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
         }
 
         return items;
-    }
-
-    protected Node buildSubscriptionIdFilter(@lombok.NonNull String subscriptionId,
-            @Nullable ContextInfo contextInfo) {
-        return new ComparisonNode(EQUAL.getOperator(),
-                "id",
-                List.of(subscriptionId));
     }
 }

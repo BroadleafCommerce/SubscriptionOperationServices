@@ -72,7 +72,8 @@ public class CustomerSubscriptionOperationEndpoint {
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(
-                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, getActions, page, filters, contextInfo);
+                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, getActions, page, filters,
+                contextInfo);
     }
 
     @FrameworkGetMapping(value = "/{subscriptionId}")
@@ -86,7 +87,8 @@ public class CustomerSubscriptionOperationEndpoint {
                     defaultValue = "false") boolean getActions,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readUserSubscriptionById(
-                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, subscriptionId, contextInfo);
+                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, subscriptionId, getActions,
+                contextInfo);
     }
 
     @FrameworkPostMapping(value = "/{subscriptionId}/actions")
