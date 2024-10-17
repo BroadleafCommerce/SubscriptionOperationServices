@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Broadleaf Commerce
+ * Copyright (C) 2024 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -17,42 +17,34 @@
 package com.broadleafcommerce.subscriptionoperation.domain;
 
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.ArrayList;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
- * This is a container for a {@link Subscription} and a list of {@link SubscriptionItem}
+ * Represents an action that can be taken against a {@link Subscription}.
+ *
+ * @author Sunny Yu
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class SubscriptionWithItems {
+public class SubscriptionAction implements Serializable {
 
-    private Subscription subscription;
-
-    private List<SubscriptionItem> subscriptionItems = new ArrayList<>();
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
-     * The available {@link SubscriptionAction SubscriptionActions} that may be possible for this
-     * subscription.
+     * The type of action.
+     *
+     * @see DefaultSubscriptionActionTypes
      */
-    private List<SubscriptionAction> availableActions = new ArrayList<>();
+    private String actionType;
 
     /**
-     * The unavailable {@link DefaultSubscriptionActionTypes SubscriptionActionTypes} along with
-     * unavailable reasons for this subscription.
+     * A map that may contain additional information about the action.
      */
-    private Map<String, List<String>> unavailableReasonsByActionType = new HashMap<>();
-
+    private Map<String, Object> actionInfo = new HashMap<>();
 }

@@ -24,12 +24,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.broadleafcommerce.common.extension.TypeFactory;
+import com.broadleafcommerce.subscriptionoperation.domain.Product;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionValidationService;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.service.SubscriptionValidationService;
+import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
+import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProvider;
+import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProviderProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,14 +46,25 @@ public class SubscriptionOperationServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    public SubscriptionValidationService subscriptionValidationService(
+            CatalogProvider<Product> catalogProvider) {
+        return new DefaultSubscriptionValidationService(catalogProvider);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService(
             SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
+            SubscriptionValidationService subscriptionValidationService,
             TypeFactory typeFactory) {
-        return new DefaultSubscriptionOperationService<>(subscriptionProvider, typeFactory);
+        return new DefaultSubscriptionOperationService<>(subscriptionProvider,
+                subscriptionValidationService,
+                typeFactory);
     }
 
     @Configuration
-    @EnableConfigurationProperties({ExternalSubscriptionProperties.class})
+    @EnableConfigurationProperties({ExternalSubscriptionProperties.class,
+            ExternalCatalogProviderProperties.class})
     public static class SubscriptionProviderConfiguration {
         @Bean
         @ConditionalOnMissingBean
@@ -57,6 +74,19 @@ public class SubscriptionOperationServiceAutoConfiguration {
                 TypeFactory typeFactory,
                 ExternalSubscriptionProperties properties) {
             return new ExternalSubscriptionProvider<>(webClient,
+                    objectMapper,
+                    typeFactory,
+                    properties);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public CatalogProvider<Product> subOpsCatalogProvider(
+                @Qualifier("subscriptionOperationWebClient") WebClient webClient,
+                ObjectMapper objectMapper,
+                TypeFactory typeFactory,
+                ExternalCatalogProviderProperties properties) {
+            return new ExternalCatalogProvider<>(webClient,
                     objectMapper,
                     typeFactory,
                     properties);

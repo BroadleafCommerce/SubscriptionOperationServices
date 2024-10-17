@@ -29,6 +29,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import com.broadleafcommerce.common.error.ApiError;
 import com.broadleafcommerce.common.error.validation.web.FrameworkExceptionAdvisor;
 import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,6 +61,17 @@ public class SubscriptionOperationExceptionAdvisor {
         return new ApiError("INVALID_SUBSCRIPTION_CREATION_REQUEST",
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST)
+                        .toResponseEntity();
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiError> handleInvalidSubscriptionAccessException(
+            InsufficientSubscriptionAccessException ex,
+            WebRequest request) {
+        logDebug(ex, request);
+        return new ApiError("INSUFFICIENT_SUBSCRIPTION_ACCESS",
+                ex.getMessage(),
+                HttpStatus.FORBIDDEN)
                         .toResponseEntity();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Broadleaf Commerce
+ * Copyright (C) 2024 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -14,45 +14,53 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.domain;
+package com.broadleafcommerce.subscriptionoperation.web.domain;
 
+import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.ArrayList;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
- * This is a container for a {@link Subscription} and a list of {@link SubscriptionItem}
+ * A request DTO to see what actions are available for a {@link Subscription}.
+ *
+ * @see DefaultSubscriptionActionTypes
+ * @author Sunny Yu
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class SubscriptionWithItems {
+public class SubscriptionActionRequest implements Serializable {
 
-    private Subscription subscription;
-
-    private List<SubscriptionItem> subscriptionItems = new ArrayList<>();
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
-     * The available {@link SubscriptionAction SubscriptionActions} that may be possible for this
-     * subscription.
+     * The id of the subscription to get the available actions for.
      */
-    private List<SubscriptionAction> availableActions = new ArrayList<>();
+    private String subscriptionId;
 
     /**
-     * The unavailable {@link DefaultSubscriptionActionTypes SubscriptionActionTypes} along with
-     * unavailable reasons for this subscription.
+     * The type of the user making the request.
+     *
+     * @see DefaultUserRefTypes
      */
-    private Map<String, List<String>> unavailableReasonsByActionType = new HashMap<>();
+    @JsonIgnore
+    private String userRefType;
 
+    /**
+     * The reference to the user making the request.
+     */
+    @JsonIgnore
+    private String userRef;
+
+    /**
+     * Additional request attributes.
+     */
+    private Map<String, Object> requestAttributes = new HashMap<>();
 }
