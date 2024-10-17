@@ -51,13 +51,13 @@ public class SubscriptionActionRequest implements Serializable {
      * @see DefaultUserRefTypes
      */
     @JsonIgnore
-    private String userType;
+    private String userRefType;
 
     /**
-     * The id of the user making the request.
+     * The reference to the user making the request.
      */
     @JsonIgnore
-    private String userId;
+    private String userRef;
 
     /**
      * Additional request attributes.

@@ -101,8 +101,8 @@ public class CustomerSubscriptionOperationEndpoint {
             @RequestBody SubscriptionActionRequest request,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         request.setSubscriptionId(subscriptionId);
-        request.setUserType(DefaultUserRefTypes.BLC_CUSTOMER.name());
-        request.setUserId(customerId);
+        request.setUserRefType(DefaultUserRefTypes.BLC_CUSTOMER.name());
+        request.setUserRef(customerId);
 
         return subscriptionOperationService.readSubscriptionActions(request, contextInfo);
     }

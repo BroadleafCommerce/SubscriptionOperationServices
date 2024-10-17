@@ -68,7 +68,8 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
             @NonNull SubscriptionActionRequest request,
             @Nullable ContextInfo contextInfo) {
         SWI subscription =
-                subscriptionProvider.readSubscriptionById(request.getSubscriptionId(), contextInfo);
+                subscriptionProvider.readUserSubscriptionById(request.getUserRefType(),
+                        request.getUserRef(), request.getSubscriptionId(), contextInfo);
 
         populateSubscriptionActions(subscription, contextInfo);
 
