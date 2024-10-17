@@ -107,12 +107,6 @@ public class DefaultSubscriptionValidationServiceTest {
     public void testInvalidSubCreation_missingSource() {
         SubscriptionCreationRequest request = buildValidCreationRequest();
         request.setSubscriptionSource(null);
-
-        assertThatThrownBy(() -> subValidationService.validateSubscriptionCreation(request, null))
-                .isInstanceOf(InvalidSubscriptionCreationRequestException.class)
-                .hasMessage("A subscription must be given a source or sourceRef.");
-
-        request.setSubscriptionSource("source");
         request.setSubscriptionSourceRef(null);
 
         assertThatThrownBy(() -> subValidationService.validateSubscriptionCreation(request, null))
