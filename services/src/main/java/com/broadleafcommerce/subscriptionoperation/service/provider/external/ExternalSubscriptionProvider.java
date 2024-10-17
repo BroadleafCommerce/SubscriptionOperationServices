@@ -36,6 +36,8 @@ import com.broadleafcommerce.subscriptionoperation.service.provider.Subscription
 import com.broadleafcommerce.subscriptionoperation.service.provider.page.ResponsePageGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Map;
+
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -98,9 +100,11 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
     }
 
     @Override
-    public SWI readSubscriptionById(String subscriptionId, ContextInfo contextInfo) {
+    public SWI readSubscriptionById(@lombok.NonNull String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
         String uri = getBaseUri()
-                .pathSegment(subscriptionId)
+                .path(properties.getSubscriptionWithItemsPath())
+                .uriVariables(Map.of("subscriptionId", subscriptionId))
                 .toUriString();
 
         return executeRequest(() -> getWebClient()
@@ -123,7 +127,8 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
             @lombok.NonNull String subscriptionId,
             @Nullable ContextInfo contextInfo) {
         String uri = getBaseUri()
-                .pathSegment(subscriptionId)
+                .path(properties.getSubscriptionWithItemsPath())
+                .uriVariables(Map.of("subscriptionId", subscriptionId))
                 .queryParam("userRefType", userRefType)
                 .queryParam("userRef", userRef)
                 .toUriString();
@@ -158,7 +163,7 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
      */
     protected UriComponentsBuilder getBaseUri() {
         return UriComponentsBuilder.fromHttpUrl(properties.getUrl())
-                .path(properties.getSubscriptionsUri());
+                .path(properties.getSubscriptionsPath());
     }
 
     protected ParameterizedTypeReference<SWI> getType() {

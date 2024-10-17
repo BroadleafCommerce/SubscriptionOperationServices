@@ -32,7 +32,12 @@ public class ExternalSubscriptionProperties {
     /**
      * The base uri path to the subscription endpoint
      */
-    private String subscriptionsUri = "/subscriptions";
+    private String subscriptionsPath = "/subscriptions";
+
+    /**
+     * The uri to gather a specific subscription with items
+     */
+    private String subscriptionWithItemsPath = "/{subscriptionId}/items";
 
     /**
      * The service client to use when calling billing services. Default is "subscriptionopsclient".
