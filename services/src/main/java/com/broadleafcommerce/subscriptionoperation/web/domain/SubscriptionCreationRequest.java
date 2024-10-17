@@ -19,6 +19,7 @@ package com.broadleafcommerce.subscriptionoperation.web.domain;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAdjustment;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionSourceType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 
@@ -107,19 +108,38 @@ public class SubscriptionCreationRequest implements Serializable {
     private String alternateUserRef;
 
     /**
-     * This field shows from which process or user action this subscription originated
+     * This field shows from which process or user action this subscription originated.
+     *
+     * @see #subscriptionSourceRef
+     * @see DefaultSubscriptionSourceType
      */
     private String subscriptionSource;
 
     /**
-     * This field shows the identifier of the process or user action this subscription originated
+     * This field shows the identifier of the process or user action this subscription originated.
+     *
+     * @see #subscriptionSource
      */
     private String subscriptionSourceRef;
 
     /**
+     * The type of the secondary source to reference, e.g, an Order Item on an Order. Optional.
+     *
+     * @see #secondarySourceRef
+     * @see DefaultSubscriptionSourceType
+     */
+    private String secondarySourceType;
+
+    /**
+     * The secondary source to reference, e.g, an Order Item on an Order. Optional.
+     *
+     * @see #secondarySourceType
+     */
+    private String secondarySourceRef;
+
+    /**
      * Frequency of billing for this subscription
      *
-     * @see com.broadleafcommerce.subscription.domain.DefaultSubscriptionBillingFrequencyEnum
      * @deprecated in favor of {@link #periodType} & {@link #periodFrequency}
      */
     @Deprecated

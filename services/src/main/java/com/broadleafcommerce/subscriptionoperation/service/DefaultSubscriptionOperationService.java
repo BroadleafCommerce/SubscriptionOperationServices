@@ -168,9 +168,12 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
         subscription.setRootItemRef(request.getRootItemRef());
         subscription.setUserRefType(request.getUserRefType());
         subscription.setUserRef(request.getUserRef());
+        subscription.setAlternateUserRefType(request.getAlternateUserRefType());
         subscription.setAlternateUserRef(request.getAlternateUserRef());
         subscription.setSubscriptionSource(request.getSubscriptionSource());
         subscription.setSubscriptionSourceRef(request.getSubscriptionSourceRef());
+        subscription.setSecondarySourceType(request.getSecondarySourceType());
+        subscription.setSecondarySourceRef(request.getSecondarySourceRef());
         subscription.setBillingFrequency(
                 StringUtils.defaultIfBlank(request.getBillingFrequency(), "USE_PERIOD_TYPE"));
         subscription.setPeriodType(request.getPeriodType());
