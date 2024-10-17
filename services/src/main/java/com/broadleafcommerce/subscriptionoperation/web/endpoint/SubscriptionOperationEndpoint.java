@@ -56,17 +56,16 @@ public class SubscriptionOperationEndpoint {
     @Getter(AccessLevel.PROTECTED)
     protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
-    @FrameworkGetMapping(params = {"userType", "userId"})
+    @FrameworkGetMapping(params = {"userRefType", "userRef"})
     @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION")
     public Page<SubscriptionWithItems> readAllUserOwnedSubscriptions(
-            @RequestParam("userType") String userType,
-            @RequestParam("userId") String userId,
+            @RequestParam("userRefType") String userRefType,
+            @RequestParam("userRef") String userRef,
             @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
-        return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(userType,
-                userId,
-                page, filters, contextInfo);
+        return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(userRefType,
+                userRef, page, filters, contextInfo);
     }
 
     @FrameworkGetMapping(value = "/{subscriptionId}")
