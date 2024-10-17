@@ -26,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -55,16 +56,25 @@ public class SubscriptionOperationEndpoint {
     @Getter(AccessLevel.PROTECTED)
     protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
-    @FrameworkGetMapping(params = {"userType", "userId"})
+    @FrameworkGetMapping(params = {"userRefType", "userRef"})
     @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION")
-    public Page<SubscriptionWithItems> readUserSubscriptions(
-            @RequestParam("userType") String userType,
-            @RequestParam("userId") String userId,
-            @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
+    public Page<SubscriptionWithItems> readAllUserOwnedSubscriptions(
+            @RequestParam("userRefType") String userRefType,
+            @RequestParam("userRef") String userRef,
+            @PageableDefault(sort = "tracking.basicAudit.creationTime",
+                    direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
-        return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(userType, userId,
-                page, filters, contextInfo);
+        return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(userRefType,
+                userRef, page, filters, contextInfo);
+    }
+
+    @FrameworkGetMapping(value = "/{subscriptionId}")
+    @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION")
+    public SubscriptionWithItems readSubscriptionById(
+            @PathVariable("subscriptionId") String subscriptionId,
+            @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
+        return subscriptionOperationService.readSubscriptionById(subscriptionId, contextInfo);
     }
 
     @FrameworkPostMapping

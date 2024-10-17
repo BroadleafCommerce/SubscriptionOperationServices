@@ -30,4 +30,5 @@ broadleaf:
   subscriptionoperation:
     subscriptionprovider:
       url: https://localhost:8467/billing
-      subscription-uri: /subscriptions
+      subscriptions-path: /subscriptions
+      subscription-with-items-path: /{subscriptionId}/items

@@ -41,7 +41,9 @@ import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class DefaultSubscriptionOperationService<S extends Subscription, I extends SubscriptionItem, SWI extends SubscriptionWithItems>
         implements SubscriptionOperationService<S, I, SWI> {
@@ -53,13 +55,28 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     protected final TypeFactory typeFactory;
 
     @Override
-    public Page<SWI> readSubscriptionsForUserTypeAndUserId(@lombok.NonNull String userType,
-            @lombok.NonNull String userId,
+    public Page<SWI> readSubscriptionsForUserRefTypeAndUserRef(@lombok.NonNull String userRefType,
+            @lombok.NonNull String userRef,
             @Nullable Pageable page,
             @Nullable Node filters,
             @Nullable ContextInfo contextInfo) {
-        return subscriptionProvider.readSubscriptionsForUserTypeAndUserId(userType, userId, page,
-                filters, contextInfo);
+        return subscriptionProvider.readSubscriptionsForUserRefTypeAndUserRef(userRefType, userRef,
+                page, filters, contextInfo);
+    }
+
+    @Override
+    public SWI readUserSubscriptionById(@lombok.NonNull String userRefType,
+            @lombok.NonNull String userRef,
+            @lombok.NonNull String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
+        return subscriptionProvider.readUserSubscriptionById(userRefType, userRef, subscriptionId,
+                contextInfo);
+    }
+
+    @Override
+    public SWI readSubscriptionById(@lombok.NonNull String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
+        return subscriptionProvider.readSubscriptionById(subscriptionId, contextInfo);
     }
 
     @Override
@@ -99,6 +116,11 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
                 && StringUtils.isBlank(creationRequest.getBillingFrequency())) {
             throw new InvalidSubscriptionCreationRequestException(
                     "A subscription must be given a periodType or billingFrequency.");
+        }
+        if (StringUtils.isBlank(creationRequest.getSubscriptionSource())
+                && StringUtils.isBlank(creationRequest.getSubscriptionSourceRef())) {
+            throw new InvalidSubscriptionCreationRequestException(
+                    "A subscription must be given a source or sourceRef.");
         }
         if (CollectionUtils.isEmpty(creationRequest.getItemCreationRequests())) {
             throw new InvalidSubscriptionCreationRequestException(

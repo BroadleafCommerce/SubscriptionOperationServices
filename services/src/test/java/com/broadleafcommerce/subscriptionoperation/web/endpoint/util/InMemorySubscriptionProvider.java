@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.data.tracking.core.filtering.business.domain.ContextState;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
@@ -93,14 +94,17 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
     }
 
     @Override
-    public Page<SubscriptionWithItems> readSubscriptionsForUserTypeAndUserId(String userType,
-            String userId,
+    public Page<SubscriptionWithItems> readSubscriptionsForUserRefTypeAndUserRef(String userRefType,
+            String userRef,
             Pageable page,
             Node filters,
             ContextInfo contextInfo) {
         List<SubscriptionWithItems> subscriptionWithItemsList = getStore().values().stream()
-                .filter(userMatches(userType, userId)).filter(contextMatches(contextInfo))
-                .map(this::simulateSerialization).toList();
+                .filter(userMatches(userRefType, userRef))
+                .filter(contextMatches(contextInfo))
+                .map(this::simulateSerialization)
+                .toList();
+
         if (page == null) {
             page = Pageable.unpaged();
         }
@@ -108,11 +112,38 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
         return new PageImpl<>(subscriptionWithItemsList, page, subscriptionWithItemsList.size());
     }
 
-    protected Predicate<SubscriptionWithItems> userMatches(String userType,
-            @Nullable String userId) {
+    @Override
+    public SubscriptionWithItems readSubscriptionById(String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
+        return getStore().values().stream()
+                .filter(subscriptionWithItems -> Objects
+                        .equals(subscriptionWithItems.getSubscription().getId(), subscriptionId))
+                .filter(contextMatches(contextInfo))
+                .map(this::simulateSerialization)
+                .findFirst()
+                .orElseThrow(EntityMissingException::new);
+    }
+
+    @Override
+    public SubscriptionWithItems readUserSubscriptionById(String userRefType,
+            String userRef,
+            String subscriptionId,
+            @Nullable ContextInfo contextInfo) {
+        return getStore().values().stream()
+                .filter(userMatches(userRefType, userRef))
+                .filter(subscriptionWithItems -> Objects
+                        .equals(subscriptionWithItems.getSubscription().getId(), subscriptionId))
+                .filter(contextMatches(contextInfo))
+                .map(this::simulateSerialization)
+                .findFirst()
+                .orElseThrow(EntityMissingException::new);
+    }
+
+    protected Predicate<SubscriptionWithItems> userMatches(String userRefType,
+            @Nullable String userRef) {
         return sWI -> sWI.getSubscription().getUserRef() != null
-                && Objects.equals(sWI.getSubscription().getUserRefType(), userType)
-                && Objects.equals(sWI.getSubscription().getUserRef(), userId);
+                && Objects.equals(sWI.getSubscription().getUserRefType(), userRefType)
+                && Objects.equals(sWI.getSubscription().getUserRef(), userRef);
     }
 
     protected Predicate<SubscriptionWithItems> contextMatches(@Nullable ContextInfo contextInfo) {

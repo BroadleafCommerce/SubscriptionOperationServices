@@ -60,13 +60,26 @@ public class CustomerSubscriptionOperationEndpoint {
     @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
             identityTypes = {IdentityType.OWNER},
             ownerIdentifierParam = 0)
-    public Page<SubscriptionWithItems> readCustomerSubscriptions(
+    public Page<SubscriptionWithItems> readAllCustomerSubscriptions(
             @PathVariable("customerId") String customerId,
-            @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
+            @PageableDefault(sort = "tracking.basicAudit.creationTime",
+                    direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
-        return subscriptionOperationService.readSubscriptionsForUserTypeAndUserId(
+        return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(
                 DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, page, filters, contextInfo);
+    }
+
+    @FrameworkGetMapping(value = "/{subscriptionId}")
+    @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
+            identityTypes = {IdentityType.OWNER},
+            ownerIdentifierParam = 0)
+    public SubscriptionWithItems readCustomerSubscription(
+            @PathVariable("customerId") String customerId,
+            @PathVariable("subscriptionId") String subscriptionId,
+            @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
+        return subscriptionOperationService.readUserSubscriptionById(
+                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, subscriptionId, contextInfo);
     }
 
     @FrameworkPostMapping(value = "/{subscriptionId}/upgrade",
@@ -99,5 +112,4 @@ public class CustomerSubscriptionOperationEndpoint {
         return subscriptionOperationService.cancelSubscription(subscriptionCancellationRequest,
                 contextInfo);
     }
-
 }
