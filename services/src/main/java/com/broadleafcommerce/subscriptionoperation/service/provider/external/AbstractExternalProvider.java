@@ -36,6 +36,7 @@ import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.data.tracking.core.filtering.NarrowedPageable;
+import com.broadleafcommerce.data.tracking.core.filtering.UnnumberedPageable;
 import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -121,23 +122,35 @@ public abstract class AbstractExternalProvider {
             // It's unpaged so get all results.
             // Unpaged is not the same as null: Null would indicate to use the defaults configured
             // at the endpoint. Whereas unpaged means all the results should be returned.
-            params.add("offset", "0");
+            if (pageable instanceof UnnumberedPageable) {
+                params.add("offset", "0");
+            } else {
+                params.add("page", "0");
+            }
             params.add("size", String.valueOf(Integer.MAX_VALUE));
 
             return params;
         }
 
-        try {
-            params.add("number", String.valueOf(pageable.getPageNumber()));
-        } catch (UnsupportedOperationException ignored) {
-            // just means this particular implementation of Pageable doesn't support page number
-            // example is UnnumberedPageable
-        }
+        addOffsetOrPageNumber(params, pageable);
 
-        params.add("offset", String.valueOf(pageable.getOffset()));
         params.add("size", String.valueOf(pageable.getPageSize()));
 
         return params;
+    }
+
+    protected void addOffsetOrPageNumber(@lombok.NonNull MultiValueMap<String, String> params,
+            @lombok.NonNull Pageable pageable) {
+        if (pageable instanceof UnnumberedPageable) {
+            params.add("offset", String.valueOf(pageable.getOffset()));
+        } else {
+            try {
+                params.add("page", String.valueOf(pageable.getPageNumber()));
+            } catch (UnsupportedOperationException ignored) {
+                // just means this particular implementation of Pageable doesn't support page number
+                // example is UnnumberedPageable
+            }
+        }
     }
 
     /**

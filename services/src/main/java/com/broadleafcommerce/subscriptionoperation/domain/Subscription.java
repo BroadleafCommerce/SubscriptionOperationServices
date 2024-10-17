@@ -23,6 +23,7 @@ import com.broadleafcommerce.data.tracking.core.filtering.business.domain.Contex
 import com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking;
 import com.broadleafcommerce.money.CurrencyConsumer;
 import com.broadleafcommerce.money.util.MonetaryUtils;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionSourceType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 import com.fasterxml.jackson.annotation.JsonAlias;
@@ -131,14 +132,34 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private String alternateUserRef;
 
     /**
-     * This field shows from which process or user action this subscription originated
+     * This field shows from which process or user action this subscription originated.
+     *
+     * @see #subscriptionSourceRef
+     * @see DefaultSubscriptionSourceType
      */
     private String subscriptionSource;
 
     /**
-     * This field shows the identifier of the process or user action this subscription originated
+     * This field shows the identifier of the process or user action this subscription originated.
+     *
+     * @see #subscriptionSource
      */
     private String subscriptionSourceRef;
+
+    /**
+     * The type of the secondary source to reference, e.g, an Order Item on an Order. Optional.
+     *
+     * @see #secondarySourceRef
+     * @see DefaultSubscriptionSourceType
+     */
+    private String secondarySourceType;
+
+    /**
+     * The secondary source to reference, e.g, an Order Item on an Order. Optional.
+     *
+     * @see #secondarySourceType
+     */
+    private String secondarySourceRef;
 
     /**
      * Multi-tenancy support
@@ -148,7 +169,6 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     /**
      * Frequency of billing for this subscription
      *
-     * @see DefaultSubscriptionBillingFrequencyEnum
      * @deprecated in favor of {@link #periodType} & {@link #periodFrequency}
      */
     @Deprecated
@@ -198,10 +218,7 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private String lastBillingBatchId;
 
     /**
-     * The most current status of the last {@link com.broadleafcommerce.billing.domain.BillingEvent}
-     * for this subscription
-     *
-     * @see PaymentStatusEnum
+     * The most current status of the last billing event for this subscription
      */
     private String lastBillingOperationStatus;
 
@@ -228,12 +245,7 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private Integer nextPeriod;
 
     /**
-     * Whether the system has outstanding
-     * {@link com.broadleafcommerce.subscription.domain.entitlement.Entitlement entitlements} to
-     * grant on this subscription
-     * <p>
-     * Note that this field does not have any effects if Entitlements are disabled in
-     * {@link BillingJobProperties#getEntitlements()#isEnabled()}
+     * Whether the system has outstanding entitlements to grant on this subscription
      */
     private boolean needGrantEntitlements = false;
 
