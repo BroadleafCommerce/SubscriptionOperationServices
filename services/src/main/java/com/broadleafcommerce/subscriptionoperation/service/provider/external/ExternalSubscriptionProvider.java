@@ -81,6 +81,8 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
         String uri = getBaseUri()
                 .queryParam("userRefType", userRefType)
                 .queryParam("userRef", userRef)
+                .queryParam("cq", filters)
+                .queryParams(pageableToParams(page))
                 .toUriString();
 
         return executeRequest(() -> getWebClient()
