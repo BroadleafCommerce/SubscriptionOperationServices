@@ -62,7 +62,8 @@ public class CustomerSubscriptionOperationEndpoint {
             ownerIdentifierParam = 0)
     public Page<SubscriptionWithItems> readAllCustomerSubscriptions(
             @PathVariable("customerId") String customerId,
-            @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
+            @PageableDefault(sort = "tracking.basicAudit.creationTime",
+                    direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(

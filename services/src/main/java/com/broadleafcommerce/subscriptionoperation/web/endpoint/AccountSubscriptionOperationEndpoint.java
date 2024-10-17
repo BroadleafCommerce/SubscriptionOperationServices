@@ -57,7 +57,8 @@ public class AccountSubscriptionOperationEndpoint {
             ownerIdentifierParam = 0, ownerIdentifier = "acct_id,parent_accts")
     public Page<SubscriptionWithItems> readAllAccountSubscriptions(
             @PathVariable("accountId") String accountId,
-            @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
+            @PageableDefault(sort = "tracking.basicAudit.creationTime",
+                    direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(

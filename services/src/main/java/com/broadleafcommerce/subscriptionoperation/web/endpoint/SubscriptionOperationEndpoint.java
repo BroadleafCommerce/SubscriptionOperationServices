@@ -61,7 +61,8 @@ public class SubscriptionOperationEndpoint {
     public Page<SubscriptionWithItems> readAllUserOwnedSubscriptions(
             @RequestParam("userRefType") String userRefType,
             @RequestParam("userRef") String userRef,
-            @PageableDefault(sort = "createdDate", direction = Sort.Direction.DESC) Pageable page,
+            @PageableDefault(sort = "tracking.basicAudit.creationTime",
+                    direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(userRefType,
@@ -70,7 +71,7 @@ public class SubscriptionOperationEndpoint {
 
     @FrameworkGetMapping(value = "/{subscriptionId}")
     @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION")
-    public SubscriptionWithItems readCustomerSubscription(
+    public SubscriptionWithItems readSubscriptionById(
             @PathVariable("subscriptionId") String subscriptionId,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionById(subscriptionId, contextInfo);
