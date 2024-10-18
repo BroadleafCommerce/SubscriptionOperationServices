@@ -16,14 +16,18 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
+
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
+import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
@@ -35,12 +39,16 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @FrameworkRestController
 @FrameworkMapping(AccountSubscriptionOperationEndpoint.BASE_URI)
@@ -57,12 +65,15 @@ public class AccountSubscriptionOperationEndpoint {
             ownerIdentifierParam = 0, ownerIdentifier = "acct_id,parent_accts")
     public Page<SubscriptionWithItems> readAllAccountSubscriptions(
             @PathVariable("accountId") String accountId,
+            @RequestParam(value = "getActions", required = false,
+                    defaultValue = "false") boolean getActions,
             @PageableDefault(sort = "tracking.basicAudit.creationTime",
                     direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(
-                DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, page, filters, contextInfo);
+                DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, getActions, page, filters,
+                contextInfo);
     }
 
     @FrameworkGetMapping(value = "/{subscriptionId}")
@@ -72,8 +83,27 @@ public class AccountSubscriptionOperationEndpoint {
     public SubscriptionWithItems readAccountSubscription(
             @PathVariable("accountId") String accountId,
             @PathVariable("subscriptionId") String subscriptionId,
+            @RequestParam(value = "getActions", required = false,
+                    defaultValue = "true") boolean getActions,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readUserSubscriptionById(
-                DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, subscriptionId, contextInfo);
+                DefaultUserRefTypes.BLC_ACCOUNT.name(), accountId, subscriptionId, getActions,
+                contextInfo);
+    }
+
+    @FrameworkPostMapping(value = "/{subscriptionId}/actions")
+    @Policy(permissionRoots = "ACCOUNT_SUBSCRIPTION",
+            identityTypes = {IdentityType.ADMIN, IdentityType.OWNER},
+            ownerIdentifierParam = 0, ownerIdentifier = "acct_id,parent_accts")
+    public SubscriptionActionResponse readAccountSubscriptionActions(
+            @PathVariable("accountId") String accountId,
+            @PathVariable("subscriptionId") String subscriptionId,
+            @RequestBody SubscriptionActionRequest request,
+            @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
+        request.setSubscriptionId(subscriptionId);
+        request.setUserRefType(DefaultUserRefTypes.BLC_ACCOUNT.name());
+        request.setUserRef(accountId);
+
+        return subscriptionOperationService.readSubscriptionActions(request, contextInfo);
     }
 }

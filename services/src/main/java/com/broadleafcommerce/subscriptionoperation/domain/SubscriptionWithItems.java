@@ -16,11 +16,14 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain;
 
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,6 +43,16 @@ public class SubscriptionWithItems {
 
     private List<SubscriptionItem> subscriptionItems = new ArrayList<>();
 
-    // TODO: Add list of available SubscriptionActions
+    /**
+     * The available {@link SubscriptionAction SubscriptionActions} that may be possible for this
+     * subscription.
+     */
+    private List<SubscriptionAction> availableActions = new ArrayList<>();
+
+    /**
+     * The unavailable {@link DefaultSubscriptionActionType SubscriptionActionTypes} along with
+     * unavailable reasons for this subscription.
+     */
+    private Map<String, List<String>> unavailableReasonsByActionType = new HashMap<>();
 
 }

@@ -16,44 +16,39 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
+
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
- * TODO
+ * A response DTO containing the available {@link SubscriptionAction SubscriptionActions} and
+ * unavailable {@link SubscriptionAction SubscriptionActions} along with the unavailable reasons.
+ *
+ * @author Sunny Yu
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class SubscriptionCancellationRequest implements Serializable {
+public class SubscriptionActionResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * TODO
+     * The available {@link SubscriptionAction SubscriptionActions} that may be possible for this
+     * subscription.
      */
-    private String subscriptionId;
+    private List<SubscriptionAction> availableActions = new ArrayList<>();
 
     /**
-     * TODO
+     * The unavailable {@link DefaultSubscriptionActionType SubscriptionActionTypes} along with
+     * unavailable reasons for this subscription.
      */
-    private String reason;
-
-    /**
-     * TODO
-     */
-    private boolean immediateCancellation;
-
-    /**
-     * Miscellaneous attributes that can be set to this request in order to inform business logic
-     */
-    private Map<String, Object> additionalAttributes = new HashMap<>();
-
+    private Map<String, List<String>> unavailableReasonsByActionType = new HashMap<>();
 }

@@ -16,44 +16,22 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
+import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
+
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * TODO
- */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class SubscriptionCancellationRequest implements Serializable {
+public class SubscriptionDowngradeRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * TODO
-     */
-    private String subscriptionId;
+    private Subscription newSubscription;
 
-    /**
-     * TODO
-     */
-    private String reason;
-
-    /**
-     * TODO
-     */
-    private boolean immediateCancellation;
-
-    /**
-     * Miscellaneous attributes that can be set to this request in order to inform business logic
-     */
-    private Map<String, Object> additionalAttributes = new HashMap<>();
-
+    private String priorSubscriptionId;
 }

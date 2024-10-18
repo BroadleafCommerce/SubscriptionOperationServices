@@ -16,7 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
-import org.apache.commons.collections4.CollectionUtils;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,21 +25,27 @@ import org.springframework.lang.Nullable;
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
-import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionItemCreationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,25 +58,59 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     protected final SubscriptionProvider<SWI> subscriptionProvider;
 
     @Getter(AccessLevel.PROTECTED)
+    protected final SubscriptionValidationService subscriptionValidationService;
+
+    @Getter(AccessLevel.PROTECTED)
     protected final TypeFactory typeFactory;
+
+    @Override
+    public SubscriptionActionResponse readSubscriptionActions(
+            @NonNull SubscriptionActionRequest request,
+            @Nullable ContextInfo contextInfo) {
+        SWI subscription =
+                subscriptionProvider.readUserSubscriptionById(request.getUserRefType(),
+                        request.getUserRef(), request.getSubscriptionId(), contextInfo);
+
+        populateSubscriptionActions(subscription, contextInfo);
+
+        SubscriptionActionResponse response = typeFactory.get(SubscriptionActionResponse.class);
+        response.setAvailableActions(subscription.getAvailableActions());
+        response.setUnavailableReasonsByActionType(
+                subscription.getUnavailableReasonsByActionType());
+        return response;
+    }
 
     @Override
     public Page<SWI> readSubscriptionsForUserRefTypeAndUserRef(@lombok.NonNull String userRefType,
             @lombok.NonNull String userRef,
+            boolean getActions,
             @Nullable Pageable page,
             @Nullable Node filters,
             @Nullable ContextInfo contextInfo) {
-        return subscriptionProvider.readSubscriptionsForUserRefTypeAndUserRef(userRefType, userRef,
-                page, filters, contextInfo);
+        Page<SWI> subscriptions =
+                subscriptionProvider.readSubscriptionsForUserRefTypeAndUserRef(userRefType, userRef,
+                        page,
+                        filters, contextInfo);
+        if (getActions) {
+            populateSubscriptionActions(subscriptions, contextInfo);
+        }
+
+        return subscriptions;
     }
 
     @Override
     public SWI readUserSubscriptionById(@lombok.NonNull String userRefType,
             @lombok.NonNull String userRef,
             @lombok.NonNull String subscriptionId,
+            boolean getActions,
             @Nullable ContextInfo contextInfo) {
-        return subscriptionProvider.readUserSubscriptionById(userRefType, userRef, subscriptionId,
-                contextInfo);
+        SWI subscription =
+                subscriptionProvider.readUserSubscriptionById(userRefType, userRef, subscriptionId,
+                        contextInfo);
+        if (getActions) {
+            populateSubscriptionActions(subscription, contextInfo);
+        }
+        return subscription;
     }
 
     @Override
@@ -83,7 +123,7 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     public SWI createSubscriptionWithItems(
             @lombok.NonNull SubscriptionCreationRequest creationRequest,
             @Nullable ContextInfo contextInfo) {
-        validateSubscriptionCreationRequest(creationRequest, contextInfo);
+        subscriptionValidationService.validateSubscriptionCreation(creationRequest, contextInfo);
 
         SWI subscriptionWithItemsToCreate =
                 buildSubscriptionWithItems(creationRequest, contextInfo);
@@ -94,52 +134,58 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     @Override
     public S cancelSubscription(
             @lombok.NonNull SubscriptionCancellationRequest cancellationRequest,
-            @Nullable ContextInfo context) {
+            @Nullable ContextInfo contextInfo) {
+        subscriptionValidationService.validateSubscriptionCancellation(cancellationRequest,
+                contextInfo);
         return null;
     }
 
     @Override
     public S upgradeSubscription(@lombok.NonNull SubscriptionUpgradeRequest upgradeRequest,
             @Nullable ContextInfo contextInfo) {
+        subscriptionValidationService.validateSubscriptionUpgrade(upgradeRequest, contextInfo);
         return null;
     }
 
-    protected void validateSubscriptionCreationRequest(
-            @lombok.NonNull SubscriptionCreationRequest creationRequest,
+    @Override
+    public S downgradeSubscription(@lombok.NonNull SubscriptionDowngradeRequest downgradeRequest,
             @Nullable ContextInfo contextInfo) {
-        if (StringUtils.isBlank(creationRequest.getUserRefType())
-                || StringUtils.isBlank(creationRequest.getUserRef())) {
-            throw new InvalidSubscriptionCreationRequestException(
-                    "A subscription must be given an owning user/account via userRefType and userRef.");
-        }
-        if (StringUtils.isBlank(creationRequest.getPeriodType())
-                && StringUtils.isBlank(creationRequest.getBillingFrequency())) {
-            throw new InvalidSubscriptionCreationRequestException(
-                    "A subscription must be given a periodType or billingFrequency.");
-        }
-        if (StringUtils.isBlank(creationRequest.getSubscriptionSource())
-                && StringUtils.isBlank(creationRequest.getSubscriptionSourceRef())) {
-            throw new InvalidSubscriptionCreationRequestException(
-                    "A subscription must be given a source or sourceRef.");
-        }
-        if (CollectionUtils.isEmpty(creationRequest.getItemCreationRequests())) {
-            throw new InvalidSubscriptionCreationRequestException(
-                    "Subscription items must also be defined for the subscription.");
+        subscriptionValidationService.validateSubscriptionDowngrade(downgradeRequest, contextInfo);
+        return null;
+    }
+
+    protected void populateSubscriptionActions(Iterable<SWI> subscriptions,
+            @Nullable ContextInfo contextInfo) {
+        subscriptions
+                .forEach(subscription -> populateSubscriptionActions(subscription, contextInfo));
+    }
+
+    protected void populateSubscriptionActions(SWI subscription,
+            @Nullable ContextInfo contextInfo) {
+        getAllActionTypes().forEach(action -> populateActionAvailability(subscription, action));
+    }
+
+    protected List<String> getAllActionTypes() {
+        return Arrays.stream(DefaultSubscriptionActionType.values())
+                .map(Enum::name)
+                .toList();
+    }
+
+    protected void populateActionAvailability(SWI subscription, String actionType) {
+        // TODO: Add actual logic
+        if (!DefaultSubscriptionActionType.isDowngrade(actionType)) {
+            subscription.getAvailableActions().add(buildAvailableAction(actionType));
+        } else {
+            subscription.getUnavailableReasonsByActionType().put(actionType,
+                    List.of("Downgrade is not supported"));
         }
     }
 
-    protected void validateSubscriptionCancellationRequest(
-            @lombok.NonNull SubscriptionCancellationRequest cancellationRequest,
-            @Nullable ContextInfo contextInfo) {
-
+    protected SubscriptionAction buildAvailableAction(String actionType) {
+        SubscriptionAction action = typeFactory.get(SubscriptionAction.class);
+        action.setActionType(actionType);
+        return action;
     }
-
-    protected void validateSubscriptionDowngradeRequest(
-            @lombok.NonNull SubscriptionCreationRequest creationRequest,
-            @Nullable ContextInfo contextInfo) {
-
-    }
-
 
     @SuppressWarnings("unchecked")
     protected SWI buildSubscriptionWithItems(

@@ -18,16 +18,20 @@ package com.broadleafcommerce.subscriptionoperation.web.domain;
 
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 
-import lombok.AllArgsConstructor;
+import java.io.Serial;
+import java.io.Serializable;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class SubscriptionUpgradeRequest {
+public class SubscriptionUpgradeRequest implements Serializable {
 
-    Subscription newSubscription;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    String priorSubscriptionId;
+    private Subscription newSubscription;
+
+    private String priorSubscriptionId;
 }

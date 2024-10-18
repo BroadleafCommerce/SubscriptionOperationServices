@@ -14,46 +14,37 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.web.domain;
+package com.broadleafcommerce.subscriptionoperation.domain;
+
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
- * TODO
+ * Represents an action that can be taken against a {@link Subscription}.
+ *
+ * @author Sunny Yu
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class SubscriptionCancellationRequest implements Serializable {
+public class SubscriptionAction implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * TODO
+     * The type of action.
+     *
+     * @see DefaultSubscriptionActionType
      */
-    private String subscriptionId;
+    private String actionType;
 
     /**
-     * TODO
+     * A map that may contain additional information about the action.
      */
-    private String reason;
-
-    /**
-     * TODO
-     */
-    private boolean immediateCancellation;
-
-    /**
-     * Miscellaneous attributes that can be set to this request in order to inform business logic
-     */
-    private Map<String, Object> additionalAttributes = new HashMap<>();
-
+    private Map<String, Object> actionInfo = new HashMap<>();
 }

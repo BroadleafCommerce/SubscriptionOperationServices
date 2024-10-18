@@ -14,46 +14,33 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.web.domain;
+package com.broadleafcommerce.subscriptionoperation.service.provider.external;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-/**
- * TODO
- */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class SubscriptionCancellationRequest implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
+@ConfigurationProperties("broadleaf.subscriptionoperation.catalogprovider")
+public class ExternalCatalogProviderProperties {
 
     /**
-     * TODO
+     * The base url for an external service holding products.
      */
-    private String subscriptionId;
+    private String url;
 
     /**
-     * TODO
+     * The base uri path to the products endpoint
      */
-    private String reason;
+    private String productsUri = "/products";
 
     /**
-     * TODO
+     * The base uri path to the products endpoint
      */
-    private boolean immediateCancellation;
+    private String productUri = productsUri + "/{productId}";
 
     /**
-     * Miscellaneous attributes that can be set to this request in order to inform business logic
+     * The service client to use when calling catalog services. Default is "subscriptionopsclient".
      */
-    private Map<String, Object> additionalAttributes = new HashMap<>();
-
+    private String serviceClient = "subscriptionopsclient";
 }

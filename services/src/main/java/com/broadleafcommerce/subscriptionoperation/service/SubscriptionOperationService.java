@@ -26,8 +26,11 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import cz.jirutka.rsql.parser.ast.Node;
@@ -41,8 +44,20 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * This method reads subscriptions for a given user type and user id, additionally filtered and
      * paginated by given parameters
      *
+     * @param request the {@link SubscriptionActionRequest}
+     * @param contextInfo context information around multi-tenant state
+     * @return Subscriptions with items matching the given criteria
+     */
+    SubscriptionActionResponse readSubscriptionActions(SubscriptionActionRequest request,
+            @Nullable ContextInfo contextInfo);
+
+    /**
+     * This method reads subscriptions for a given user type and user id, additionally filtered and
+     * paginated by given parameters
+     *
      * @param userRefType user type, see {@link DefaultUserRefTypes}
      * @param userRef id of owning user or account
+     * @param getActions whether to get available actions for the subscriptions
      * @param page information about which page of results to return from the database.
      * @param filters additional filters to apply in the query. Should be {@link EmptyNode} if no
      *        additional filters should be applied.
@@ -51,6 +66,7 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      */
     Page<SWI> readSubscriptionsForUserRefTypeAndUserRef(String userRefType,
             String userRef,
+            boolean getActions,
             @Nullable Pageable page,
             @Nullable Node filters,
             @Nullable ContextInfo contextInfo);
@@ -62,12 +78,14 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * @param userRefType user type, see {@link DefaultUserRefTypes}
      * @param userRef id of owning user or account
      * @param subscriptionId The id of the {@link Subscription} that is intended to be gathered
+     * @param getActions whether to get available actions for the subscription
      * @param contextInfo context information around multi-tenant state
      * @return Subscriptions with items matching the given criteria
      */
     SWI readUserSubscriptionById(String userRefType,
             String userRef,
             String subscriptionId,
+            boolean getActions,
             @Nullable ContextInfo contextInfo);
 
     /**
@@ -108,5 +126,15 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * @return
      */
     S upgradeSubscription(SubscriptionUpgradeRequest upgradeRequest,
+            @Nullable ContextInfo contextInfo);
+
+    /**
+     * TODO
+     *
+     * @param downgradeRequest
+     * @param contextInfo
+     * @return
+     */
+    S downgradeSubscription(SubscriptionDowngradeRequest downgradeRequest,
             @Nullable ContextInfo contextInfo);
 }

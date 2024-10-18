@@ -27,6 +27,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
@@ -38,6 +39,8 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
@@ -62,12 +65,15 @@ public class CustomerSubscriptionOperationEndpoint {
             ownerIdentifierParam = 0)
     public Page<SubscriptionWithItems> readAllCustomerSubscriptions(
             @PathVariable("customerId") String customerId,
+            @RequestParam(value = "getActions", required = false,
+                    defaultValue = "false") boolean getActions,
             @PageableDefault(sort = "tracking.basicAudit.creationTime",
                     direction = Sort.Direction.DESC) Pageable page,
             Node filters,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readSubscriptionsForUserRefTypeAndUserRef(
-                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, page, filters, contextInfo);
+                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, getActions, page, filters,
+                contextInfo);
     }
 
     @FrameworkGetMapping(value = "/{subscriptionId}")
@@ -77,9 +83,28 @@ public class CustomerSubscriptionOperationEndpoint {
     public SubscriptionWithItems readCustomerSubscription(
             @PathVariable("customerId") String customerId,
             @PathVariable("subscriptionId") String subscriptionId,
+            @RequestParam(value = "getActions", required = false,
+                    defaultValue = "true") boolean getActions,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readUserSubscriptionById(
-                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, subscriptionId, contextInfo);
+                DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, subscriptionId, getActions,
+                contextInfo);
+    }
+
+    @FrameworkPostMapping(value = "/{subscriptionId}/actions")
+    @Policy(permissionRoots = "CUSTOMER_SUBSCRIPTION",
+            identityTypes = {IdentityType.OWNER},
+            ownerIdentifierParam = 0)
+    public SubscriptionActionResponse readCustomerSubscriptionActions(
+            @PathVariable("customerId") String customerId,
+            @PathVariable("subscriptionId") String subscriptionId,
+            @RequestBody SubscriptionActionRequest request,
+            @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
+        request.setSubscriptionId(subscriptionId);
+        request.setUserRefType(DefaultUserRefTypes.BLC_CUSTOMER.name());
+        request.setUserRef(customerId);
+
+        return subscriptionOperationService.readSubscriptionActions(request, contextInfo);
     }
 
     @FrameworkPostMapping(value = "/{subscriptionId}/upgrade",

@@ -16,44 +16,51 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
+import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
- * TODO
+ * A request DTO to see what actions are available for a {@link Subscription}.
+ *
+ * @see DefaultSubscriptionActionType
+ * @author Sunny Yu
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class SubscriptionCancellationRequest implements Serializable {
+public class SubscriptionActionRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * TODO
+     * The id of the subscription to get the available actions for.
      */
     private String subscriptionId;
 
     /**
-     * TODO
+     * The type of the user making the request.
+     *
+     * @see DefaultUserRefTypes
      */
-    private String reason;
+    @JsonIgnore
+    private String userRefType;
 
     /**
-     * TODO
+     * The reference to the user making the request.
      */
-    private boolean immediateCancellation;
+    @JsonIgnore
+    private String userRef;
 
     /**
-     * Miscellaneous attributes that can be set to this request in order to inform business logic
+     * Additional request attributes.
      */
-    private Map<String, Object> additionalAttributes = new HashMap<>();
-
+    private Map<String, Object> requestAttributes = new HashMap<>();
 }
