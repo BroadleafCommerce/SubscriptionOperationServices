@@ -72,7 +72,8 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 .isPresent();
     }
 
-    protected SubscriptionPriceResponse priceSubscription(@lombok.NonNull CartItem subscriptionRootItem,
+    protected SubscriptionPriceResponse priceSubscription(
+            @lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
         SubscriptionPriceResponse response = typeFactory.get(SubscriptionPriceResponse.class);
 
