@@ -55,11 +55,8 @@ public class SubscriptionOperationServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService(
             SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
-            SubscriptionValidationService subscriptionValidationService,
             TypeFactory typeFactory) {
-        return new DefaultSubscriptionOperationService<>(subscriptionProvider,
-                subscriptionValidationService,
-                typeFactory);
+        return new DefaultSubscriptionOperationService<>(subscriptionProvider, typeFactory);
     }
 
     @Configuration

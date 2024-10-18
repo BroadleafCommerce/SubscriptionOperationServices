@@ -257,6 +257,11 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private List<SubscriptionAdjustment> subscriptionAdjustments = new ArrayList<>();
 
     /**
+     * Whether this subscription automatically renews at the end of the current billing cycle.
+     */
+    private boolean autoRenewalEnabled = false;
+
+    /**
      * The version of this subscription. Used for checking if the requested version of the
      * subscription is up-to-date before saving changes. This should never be manually
      * decremented/incremented.

@@ -29,6 +29,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpdateDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -139,6 +140,21 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
                 .orElseThrow(EntityMissingException::new);
     }
 
+    @Override
+    public Subscription patch(String subscriptionId,
+            SubscriptionUpdateDTO subscriptionUpdateDTO,
+            ContextInfo contextInfo) {
+        SubscriptionWithItems swi = getStore().values().stream()
+                .filter(subscriptionWithItems -> Objects
+                        .equals(subscriptionWithItems.getSubscription().getId(), subscriptionId))
+                .filter(contextMatches(contextInfo))
+                .findFirst()
+                .orElseThrow(EntityMissingException::new);
+        Subscription subscription = swi.getSubscription();
+        mapUpdatesToSubscription(subscriptionUpdateDTO, subscription);
+        return subscription;
+    }
+
     protected Predicate<SubscriptionWithItems> userMatches(String userRefType,
             @Nullable String userRef) {
         return sWI -> sWI.getSubscription().getUserRef() != null
@@ -171,5 +187,50 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
         }
     }
 
-
+    @SuppressWarnings("OptionalAssignedToNull")
+    private void mapUpdatesToSubscription(SubscriptionUpdateDTO updateRequest,
+            Subscription subscription) {
+        if (updateRequest.getName() != null) {
+            subscription.setName(updateRequest.getName().orElse(null));
+        }
+        if (updateRequest.getSubscriptionStatus() != null) {
+            subscription.setSubscriptionStatus(updateRequest.getSubscriptionStatus().orElse(null));
+        }
+        if (updateRequest.getSubscriptionNextStatus() != null) {
+            subscription.setSubscriptionNextStatus(
+                    updateRequest.getSubscriptionNextStatus().orElse(null));
+        }
+        if (updateRequest.getNextStatusChangeDate() != null) {
+            subscription
+                    .setNextStatusChangeDate(updateRequest.getNextStatusChangeDate().orElse(null));
+        }
+        if (updateRequest.getNextStatusChangeReason() != null) {
+            subscription.setNextStatusChangeReason(
+                    updateRequest.getNextStatusChangeReason().orElse(null));
+        }
+        if (updateRequest.getResumeDate() != null) {
+            subscription.setResumeDate(updateRequest.getResumeDate().orElse(null));
+        }
+        if (updateRequest.getBillingFrequency() != null) {
+            subscription.setBillingFrequency(updateRequest.getBillingFrequency().orElse(null));
+        }
+        if (updateRequest.getPeriodFrequency() != null) {
+            subscription.setPeriodFrequency(updateRequest.getPeriodFrequency().orElse(null));
+        }
+        if (updateRequest.getPeriodType() != null) {
+            subscription.setPeriodType(updateRequest.getPeriodType().orElse(null));
+        }
+        if (updateRequest.getNextBillDate() != null) {
+            subscription.setNextBillDate(updateRequest.getNextBillDate().orElse(null));
+        }
+        if (updateRequest.getNextSubscription() != null) {
+            subscription.setNextSubscription(updateRequest.getNextSubscription().orElse(null));
+        }
+        if (updateRequest.getChargeback() != null) {
+            subscription.setChargeback(updateRequest.getChargeback().orElse(null));
+        }
+        if (updateRequest.getAutoRenewalEnabled() != null) {
+            subscription.setAutoRenewalEnabled(updateRequest.getAutoRenewalEnabled().orElse(false));
+        }
+    }
 }

@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpdateDTO;
 
 import cz.jirutka.rsql.parser.ast.Node;
 
@@ -80,5 +81,16 @@ public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
     SWI readUserSubscriptionById(String userRefType,
             String userRef,
             String subscriptionId,
+            @Nullable ContextInfo contextInfo);
+
+    /**
+     * Patches a subscription.
+     *
+     * @param subscriptionUpdateDTO the {@link SubscriptionUpdateDTO} used for the patch operation
+     * @param contextInfo context information around multi-tenant state
+     * @return the updated subscription
+     */
+    Subscription patch(String subscriptionId,
+            SubscriptionUpdateDTO subscriptionUpdateDTO,
             @Nullable ContextInfo contextInfo);
 }
