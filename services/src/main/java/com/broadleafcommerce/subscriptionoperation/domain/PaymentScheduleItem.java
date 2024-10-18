@@ -40,7 +40,8 @@ public class PaymentScheduleItem implements Serializable {
     private Instant invoiceDate;
 
     /**
-     * Amount due on the payment schedule date. Equal to proratedAmount + priorUnbilledAmount - creditedAmount.
+     * Amount due on the payment schedule date. Equal to proratedAmount + priorUnbilledAmount -
+     * creditedAmount.
      */
     private MonetaryAmount amount;
 
@@ -51,17 +52,19 @@ public class PaymentScheduleItem implements Serializable {
 
     /**
      * For edits, upgrades, and downgrades, the system has partial credits to the prorated amount
-     * that the customer already paid. Typically only impacts the first period in the estimatedFuturePaymentsList.
-     * For example, consider a customer who is upgrading from 10 to 20 licenses at $1 each half-way through a
-     * 30 day month. The user prorated amount would be $10 for 20 licenses. This user has already partially paid
-     * for 10 of the licenses, so they will be due a credit of $5 toward the amount.
+     * that the customer already paid. Typically only impacts the first period in the
+     * estimatedFuturePaymentsList. For example, consider a customer who is upgrading from 10 to 20
+     * licenses at $1 each half-way through a 30 day month. The user prorated amount would be $10
+     * for 20 licenses. This user has already partially paid for 10 of the licenses, so they will be
+     * due a credit of $5 toward the amount.
      */
     private MonetaryAmount creditedAmount;
 
     /**
-     * Prior to an upgrade, downgrade, or edit, the system may have prior unbilled charges that will be
-     * part of the next invoice. In this case, the user will owe this in addition to the prorated charges
-     * for the changes being made. Typically only impacts the first period in the estimatedFuturePaymentsList.
+     * Prior to an upgrade, downgrade, or edit, the system may have prior unbilled charges that will
+     * be part of the next invoice. In this case, the user will owe this in addition to the prorated
+     * charges for the changes being made. Typically only impacts the first period in the
+     * estimatedFuturePaymentsList.
      */
     private MonetaryAmount priorUnbilledAmount;
 

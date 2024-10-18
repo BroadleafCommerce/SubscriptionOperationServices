@@ -28,5 +28,6 @@ import java.util.List;
  * TODO
  */
 public interface SubscriptionPricingService {
-    List<SubscriptionPriceResponse> priceSubscriptions(Cart cart, @Nullable ContextInfo contextInfo);
+    List<SubscriptionPriceResponse> priceSubscriptions(Cart cart,
+            @Nullable ContextInfo contextInfo);
 }
