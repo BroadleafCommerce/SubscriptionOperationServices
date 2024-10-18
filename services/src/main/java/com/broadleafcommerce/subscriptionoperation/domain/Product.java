@@ -20,9 +20,14 @@ import com.broadleafcommerce.data.tracking.core.ContextStateAware;
 import com.broadleafcommerce.data.tracking.core.filtering.business.domain.ContextState;
 import com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking;
 import com.broadleafcommerce.money.CurrencyConsumer;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.money.CurrencySupplier;
 import javax.money.CurrencyUnit;
@@ -86,4 +91,33 @@ public class Product
      * @return a subset of {@link Tracking} information to expose the context state for this object
      */
     private ContextState contextState;
+
+    /**
+     * Map holding any additional attributes passed in the request not matching any defined
+     * properties.
+     */
+    @JsonIgnore
+    private Map<String, Object> attributes = new HashMap<>();
+
+    /**
+     * Takes in any additional attributes passed in the request not matching any defined properties.
+     *
+     * @param name Name of the additional attribute
+     *
+     * @param value Value of the additional attribute
+     */
+    @JsonAnySetter
+    public void addAttribute(String name, Object value) {
+        attributes.put(name, value);
+    }
+
+    /**
+     * Return any additional attributes passed in the request not matching any defined properties.
+     *
+     * @return any additional attributes passed in the request not matching any defined properties.
+     */
+    @JsonAnyGetter
+    public Map<String, Object> getAttribute() {
+        return attributes;
+    }
 }

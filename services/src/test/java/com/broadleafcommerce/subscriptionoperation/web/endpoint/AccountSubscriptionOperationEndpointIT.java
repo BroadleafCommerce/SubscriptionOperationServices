@@ -45,7 +45,7 @@ import com.broadleafcommerce.data.tracking.core.type.OperationType;
 import com.broadleafcommerce.oauth2.resource.security.test.MockMvcOAuth2AuthenticationUtil;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
@@ -440,15 +440,15 @@ class AccountSubscriptionOperationEndpointIT {
                 .andExpect(status().isOk())
                 // TODO: Update tests once action logic is implemented
                 .andExpect(jsonPath("$.availableActions[*].actionType",
-                        contains(DefaultSubscriptionActionTypes.EDIT.name(),
-                                DefaultSubscriptionActionTypes.CHANGE_AUTO_RENEWAL.name(),
-                                DefaultSubscriptionActionTypes.UPGRADE.name(),
-                                DefaultSubscriptionActionTypes.PAUSE.name(),
-                                DefaultSubscriptionActionTypes.RESUME.name(),
-                                DefaultSubscriptionActionTypes.SUSPEND.name(),
-                                DefaultSubscriptionActionTypes.TERMINATE.name(),
-                                DefaultSubscriptionActionTypes.REACTIVATE.name(),
-                                DefaultSubscriptionActionTypes.CANCEL.name())))
+                        contains(DefaultSubscriptionActionType.EDIT.name(),
+                                DefaultSubscriptionActionType.CHANGE_AUTO_RENEWAL.name(),
+                                DefaultSubscriptionActionType.UPGRADE.name(),
+                                DefaultSubscriptionActionType.PAUSE.name(),
+                                DefaultSubscriptionActionType.RESUME.name(),
+                                DefaultSubscriptionActionType.SUSPEND.name(),
+                                DefaultSubscriptionActionType.TERMINATE.name(),
+                                DefaultSubscriptionActionType.REACTIVATE.name(),
+                                DefaultSubscriptionActionType.CANCEL.name())))
                 .andExpect(jsonPath("$.unavailableReasonsByActionType.DOWNGRADE[0]")
                         .value("Downgrade is not supported"));
     }

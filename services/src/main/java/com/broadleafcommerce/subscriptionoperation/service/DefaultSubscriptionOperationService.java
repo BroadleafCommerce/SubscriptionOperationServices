@@ -28,7 +28,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
@@ -166,14 +166,14 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     }
 
     protected List<String> getAllActionTypes() {
-        return Arrays.stream(DefaultSubscriptionActionTypes.values())
+        return Arrays.stream(DefaultSubscriptionActionType.values())
                 .map(Enum::name)
                 .toList();
     }
 
     protected void populateActionAvailability(SWI subscription, String actionType) {
         // TODO: Add actual logic
-        if (!DefaultSubscriptionActionTypes.isDowngrade(actionType)) {
+        if (!DefaultSubscriptionActionType.isDowngrade(actionType)) {
             subscription.getAvailableActions().add(buildAvailableAction(actionType));
         } else {
             subscription.getUnavailableReasonsByActionType().put(actionType,

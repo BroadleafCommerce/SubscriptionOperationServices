@@ -21,7 +21,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 /**
  * The default reasons on why an action is unavailable for a {@link Subscription}.
  *
- * @see DefaultSubscriptionActionTypes
+ * @see DefaultSubscriptionActionType
  * @author Sunny Yu
  */
 public enum DefaultSubscriptionActionUnavailableReasons {
@@ -50,10 +50,10 @@ public enum DefaultSubscriptionActionUnavailableReasons {
     /**
      * The subscription is in an incorrect state for the given action.
      * <p>
-     * For example, you can only {@link DefaultSubscriptionActionTypes#RESUME RESUME} a
-     * {@link DefaultSubscriptionActionTypes#PAUSE PAUSED} subscription, and you can only
-     * {@link DefaultSubscriptionActionTypes#REACTIVATE REACTIVATE} a
-     * {@link DefaultSubscriptionActionTypes#TERMINATE TERMINATED} subscription.
+     * For example, you can only {@link DefaultSubscriptionActionType#RESUME RESUME} a
+     * {@link DefaultSubscriptionActionType#PAUSE PAUSED} subscription, and you can only
+     * {@link DefaultSubscriptionActionType#REACTIVATE REACTIVATE} a
+     * {@link DefaultSubscriptionActionType#TERMINATE TERMINATED} subscription.
      */
     INCORRECT_STATE;
 

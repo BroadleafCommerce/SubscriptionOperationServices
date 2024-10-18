@@ -16,7 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain;
 
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -50,7 +50,7 @@ public class SubscriptionWithItems {
     private List<SubscriptionAction> availableActions = new ArrayList<>();
 
     /**
-     * The unavailable {@link DefaultSubscriptionActionTypes SubscriptionActionTypes} along with
+     * The unavailable {@link DefaultSubscriptionActionType SubscriptionActionTypes} along with
      * unavailable reasons for this subscription.
      */
     private Map<String, List<String>> unavailableReasonsByActionType = new HashMap<>();

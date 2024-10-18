@@ -16,9 +16,9 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes.CANCEL;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes.DOWNGRADE;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes.UPGRADE;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.CANCEL;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.DOWNGRADE;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.UPGRADE;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +29,7 @@ import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.policy.PolicyResponse;
 import com.broadleafcommerce.data.tracking.core.policy.trackable.TrackablePolicyUtils;
 import com.broadleafcommerce.subscriptionoperation.domain.Product;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionDowngradeRequestException;
@@ -132,6 +132,16 @@ public class DefaultSubscriptionValidationService implements SubscriptionValidat
         // hook point
     }
 
+    /**
+     * Validates the user's access to the subscription.
+     *
+     * @param subscriptionId the id of the subscription being accessed
+     * @param actionType the type of action being taken against the subscription. See
+     *        {@link DefaultSubscriptionActionType}
+     * @param contextInfo the current context
+     * @throws InsufficientSubscriptionAccessException if the user does not have access to the
+     *         subscription
+     */
     protected void validateUserAccessToSubscription(String subscriptionId,
             String actionType,
             @Nullable ContextInfo contextInfo) {
@@ -155,7 +165,7 @@ public class DefaultSubscriptionValidationService implements SubscriptionValidat
 
     protected String[] getRequiredPermissions(String actionType) {
         // TODO Implement this method
-        if (DefaultSubscriptionActionTypes.isEdit(actionType)) {
+        if (DefaultSubscriptionActionType.isEdit(actionType)) {
             return new String[] {"EDIT_SUBSCRIPTION"};
         } else {
             return new String[] {};

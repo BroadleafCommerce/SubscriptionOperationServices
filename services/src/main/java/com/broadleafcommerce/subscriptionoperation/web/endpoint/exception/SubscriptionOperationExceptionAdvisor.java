@@ -31,6 +31,8 @@ import com.broadleafcommerce.common.error.validation.web.FrameworkExceptionAdvis
 import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionDowngradeRequestException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionUpgradeRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -59,6 +61,28 @@ public class SubscriptionOperationExceptionAdvisor {
             WebRequest request) {
         logDebug(ex, request);
         return new ApiError("INVALID_SUBSCRIPTION_CREATION_REQUEST",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST)
+                        .toResponseEntity();
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiError> handleInvalidSubscriptionUpgradeRequestException(
+            InvalidSubscriptionUpgradeRequestException ex,
+            WebRequest request) {
+        logDebug(ex, request);
+        return new ApiError("INVALID_SUBSCRIPTION_UPGRADE_REQUEST",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST)
+                        .toResponseEntity();
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiError> handleInvalidSubscriptionDowngradeRequestException(
+            InvalidSubscriptionDowngradeRequestException ex,
+            WebRequest request) {
+        logDebug(ex, request);
+        return new ApiError("INVALID_SUBSCRIPTION_DOWNGRADE_REQUEST",
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST)
                         .toResponseEntity();

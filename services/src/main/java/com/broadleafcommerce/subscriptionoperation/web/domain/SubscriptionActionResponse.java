@@ -17,7 +17,7 @@
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -47,7 +47,7 @@ public class SubscriptionActionResponse implements Serializable {
     private List<SubscriptionAction> availableActions = new ArrayList<>();
 
     /**
-     * The unavailable {@link DefaultSubscriptionActionTypes SubscriptionActionTypes} along with
+     * The unavailable {@link DefaultSubscriptionActionType SubscriptionActionTypes} along with
      * unavailable reasons for this subscription.
      */
     private Map<String, List<String>> unavailableReasonsByActionType = new HashMap<>();

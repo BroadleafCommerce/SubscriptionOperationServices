@@ -16,6 +16,8 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +31,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SubscriptionCancellationRequest {
+public class SubscriptionCancellationRequest implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * TODO

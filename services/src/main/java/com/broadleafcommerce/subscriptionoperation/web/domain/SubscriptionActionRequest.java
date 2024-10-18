@@ -17,7 +17,7 @@
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -31,7 +31,7 @@ import lombok.Data;
 /**
  * A request DTO to see what actions are available for a {@link Subscription}.
  *
- * @see DefaultSubscriptionActionTypes
+ * @see DefaultSubscriptionActionType
  * @author Sunny Yu
  */
 @Data

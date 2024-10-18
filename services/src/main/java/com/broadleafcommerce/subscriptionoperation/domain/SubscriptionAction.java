@@ -16,7 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain;
 
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -39,7 +39,7 @@ public class SubscriptionAction implements Serializable {
     /**
      * The type of action.
      *
-     * @see DefaultSubscriptionActionTypes
+     * @see DefaultSubscriptionActionType
      */
     private String actionType;
 

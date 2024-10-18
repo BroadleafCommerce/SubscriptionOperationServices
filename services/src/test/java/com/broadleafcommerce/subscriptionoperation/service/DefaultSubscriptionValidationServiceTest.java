@@ -16,9 +16,9 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes.CANCEL;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes.DOWNGRADE;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionTypes.UPGRADE;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.CANCEL;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.DOWNGRADE;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.UPGRADE;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;

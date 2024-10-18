@@ -19,6 +19,10 @@ package com.broadleafcommerce.subscriptionoperation.service;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionDowngradeRequestException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionUpgradeRequestException;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
@@ -32,15 +36,48 @@ import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgrad
  */
 public interface SubscriptionValidationService {
 
+    /**
+     * Validates the creation of a subscription.
+     *
+     * @param request the {@link SubscriptionCreationRequest}
+     * @param contextInfo context information around multitenant state
+     * @throws InvalidSubscriptionCreationRequestException if the request is invalid
+     */
     void validateSubscriptionCreation(SubscriptionCreationRequest request,
             @Nullable ContextInfo contextInfo);
 
+    /**
+     * Validates the cancellation of a subscription.
+     *
+     * @param request the {@link SubscriptionCancellationRequest}
+     * @param contextInfo context information around multitenant state
+     * @throws InsufficientSubscriptionAccessException if the user does not have access to the
+     *         subscription
+     */
     void validateSubscriptionCancellation(SubscriptionCancellationRequest request,
             @Nullable ContextInfo contextInfo);
 
+    /**
+     * Validates the upgrade of a subscription.
+     *
+     * @param request the {@link SubscriptionUpgradeRequest}
+     * @param contextInfo context information around multitenant state
+     * @throws InsufficientSubscriptionAccessException if the user does not have access to the
+     *         subscription
+     * @throws InvalidSubscriptionUpgradeRequestException if the request is invalid
+     */
     void validateSubscriptionUpgrade(SubscriptionUpgradeRequest request,
             @Nullable ContextInfo contextInfo);
 
+    /**
+     * Validates the downgrade of a subscription.
+     *
+     * @param request the {@link SubscriptionDowngradeRequest}
+     * @param contextInfo context information around multitenant state
+     * @throws InsufficientSubscriptionAccessException if the user does not have access to the
+     *         subscription
+     * @throws InvalidSubscriptionDowngradeRequestException if the request is invalid
+     */
     void validateSubscriptionDowngrade(SubscriptionDowngradeRequest request,
             @Nullable ContextInfo contextInfo);
 }

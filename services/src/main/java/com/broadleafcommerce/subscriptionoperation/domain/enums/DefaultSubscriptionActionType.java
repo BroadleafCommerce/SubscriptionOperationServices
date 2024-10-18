@@ -23,7 +23,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
  *
  * @author Sunny Yu
  */
-public enum DefaultSubscriptionActionTypes {
+public enum DefaultSubscriptionActionType {
 
     /**
      * Whether the user can edit this subscription.
