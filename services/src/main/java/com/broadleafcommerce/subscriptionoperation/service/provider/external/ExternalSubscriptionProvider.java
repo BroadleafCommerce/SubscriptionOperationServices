@@ -30,10 +30,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
+import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiException;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.page.ResponsePageGenerator;
+import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpdateDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map;
@@ -145,6 +147,32 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
                         response -> response.createException().flatMap(
                                 exception -> Mono.just(new ProviderApiException(exception))))
                 .bodyToMono(getType())
+                .blockOptional()
+                .orElseThrow(EntityMissingException::new));
+    }
+
+    @Override
+    public Subscription patch(@lombok.NonNull String subscriptionId,
+            @lombok.NonNull SubscriptionUpdateDTO subscriptionUpdateDTO,
+            @Nullable ContextInfo contextInfo) {
+        String uri = getBaseUri()
+                .path(properties.getSubscriptionPath())
+                .uriVariables(Map.of("subscriptionId", subscriptionId))
+                .toUriString();
+
+        return executeRequest(() -> getWebClient()
+                .patch()
+                .uri(uri)
+                .headers(headers -> headers.putAll(getHeaders(contextInfo)))
+                .attributes(clientRegistrationId(getServiceClient()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(subscriptionUpdateDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        response -> response.createException().flatMap(
+                                exception -> Mono.just(new ProviderApiException(exception))))
+                .bodyToMono(new ParameterizedTypeReference<Subscription>() {})
                 .blockOptional()
                 .orElseThrow(EntityMissingException::new));
     }

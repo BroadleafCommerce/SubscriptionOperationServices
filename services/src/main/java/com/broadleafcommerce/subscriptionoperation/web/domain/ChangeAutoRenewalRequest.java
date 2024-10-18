@@ -14,38 +14,40 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.service.provider.external;
+package com.broadleafcommerce.subscriptionoperation.web.domain;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * A request DTO used to change the auto renewal setting of a subscription.
+ *
+ * @author Sunny Yu
+ */
 @Data
-@ConfigurationProperties("broadleaf.subscriptionoperation.subscriptionprovider")
-public class ExternalSubscriptionProperties {
+public class ChangeAutoRenewalRequest implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
-     * The base url for an external service holding subscriptions.
+     * The id of the subscription to change the auto renewal setting for
      */
-    private String url;
+    @NotNull
+    private String subscriptionId;
 
     /**
-     * The base uri path to the subscription endpoint
+     * The state of the auto renewal setting to change to
      */
-    private String subscriptionsPath = "/subscriptions";
+    private boolean autoRenewalEnabled = false;
 
     /**
-     * The uri to gather a specific subscription
+     * Additional attributes to be used in the request
      */
-    private String subscriptionPath = "/{subscriptionId}";
-
-    /**
-     * The uri to gather a specific subscription with items
-     */
-    private String subscriptionWithItemsPath = "/{subscriptionId}/items";
-
-    /**
-     * The service client to use when calling billing services. Default is "subscriptionopsclient".
-     */
-    private String serviceClient = "subscriptionopsclient";
+    private Map<String, Object> additionalAttributes = new HashMap<>();
 }

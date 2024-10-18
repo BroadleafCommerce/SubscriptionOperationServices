@@ -20,9 +20,11 @@ import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidChangeAutoRenewalRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionDowngradeRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionUpgradeRequestException;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ChangeAutoRenewalRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
@@ -79,5 +81,17 @@ public interface SubscriptionValidationService {
      * @throws InvalidSubscriptionDowngradeRequestException if the request is invalid
      */
     void validateSubscriptionDowngrade(SubscriptionDowngradeRequest request,
+            @Nullable ContextInfo contextInfo);
+
+    /**
+     * Validates the request to change the auto renewal state of a subscription.
+     *
+     * @param request the {@link ChangeAutoRenewalRequest}
+     * @param contextInfo context information around multitenant state
+     * @throws InsufficientSubscriptionAccessException if the user does not have access to the
+     *         subscription
+     * @throws InvalidChangeAutoRenewalRequestException if the request is invalid
+     */
+    void validateSubscriptionChangeAutoRenewal(ChangeAutoRenewalRequest request,
             @Nullable ContextInfo contextInfo);
 }

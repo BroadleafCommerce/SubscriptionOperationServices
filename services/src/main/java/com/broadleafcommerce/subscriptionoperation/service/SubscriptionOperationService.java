@@ -26,6 +26,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ChangeAutoRenewalRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
@@ -136,5 +137,16 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
      * @return
      */
     S downgradeSubscription(SubscriptionDowngradeRequest downgradeRequest,
+            @Nullable ContextInfo contextInfo);
+
+    /**
+     * Changes the auto-renewal state of a subscription.
+     *
+     * @param changeRequest the {@link ChangeAutoRenewalRequest} containing the new auto renewal
+     *        state
+     * @param contextInfo context information around multi-tenant state
+     * @return the updated {@link Subscription}
+     */
+    Subscription changeAutoRenewal(ChangeAutoRenewalRequest changeRequest,
             @Nullable ContextInfo contextInfo);
 }

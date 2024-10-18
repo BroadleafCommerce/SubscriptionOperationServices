@@ -39,6 +39,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ChangeAutoRenewalRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
@@ -136,5 +137,20 @@ public class CustomerSubscriptionOperationEndpoint {
         subscriptionCancellationRequest.setSubscriptionId(subscriptionId);
         return subscriptionOperationService.cancelSubscription(subscriptionCancellationRequest,
                 contextInfo);
+    }
+
+    @FrameworkPostMapping(value = "/{subscriptionId}/changeAutoRenewal",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Policy(permissionRoots = {"CUSTOMER_SUBSCRIPTION"},
+            identityTypes = {IdentityType.OWNER},
+            ownerIdentifierParam = 0,
+            operationTypes = OperationType.UPDATE)
+    public Subscription changeAutoRenewal(
+            @PathVariable("customerId") String customerId,
+            @PathVariable(value = "subscriptionId") String subscriptionId,
+            @RequestBody ChangeAutoRenewalRequest autoRenewalRequest,
+            @ContextOperation(OperationType.READ) final ContextInfo context) {
+        autoRenewalRequest.setSubscriptionId(subscriptionId);
+        return subscriptionOperationService.changeAutoRenewal(autoRenewalRequest, context);
     }
 }
