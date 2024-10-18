@@ -84,7 +84,7 @@ public class CustomerSubscriptionOperationEndpoint {
             @PathVariable("customerId") String customerId,
             @PathVariable("subscriptionId") String subscriptionId,
             @RequestParam(value = "getActions", required = false,
-                    defaultValue = "false") boolean getActions,
+                    defaultValue = "true") boolean getActions,
             @ContextOperation(OperationType.READ) final ContextInfo contextInfo) {
         return subscriptionOperationService.readUserSubscriptionById(
                 DefaultUserRefTypes.BLC_CUSTOMER.name(), customerId, subscriptionId, getActions,

@@ -16,7 +16,6 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service.provider.external;
 
-import static com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.RsqlSearchOperation.IN;
 import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -35,17 +34,15 @@ import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvi
 import com.broadleafcommerce.subscriptionoperation.service.provider.page.ResponsePageGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import cz.jirutka.rsql.parser.ast.AndNode;
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
-import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
 
 public class ExternalCatalogProvider<P extends Product> extends AbstractExternalProvider
         implements CatalogProvider<P> {
+
+    protected static final String ID_IN_QUERY_PARAM = "contextId=in=(%s)";
 
     @Getter(AccessLevel.PROTECTED)
     private final ExternalCatalogProviderProperties properties;
@@ -80,7 +77,7 @@ public class ExternalCatalogProvider<P extends Product> extends AbstractExternal
     public Page<P> readProductsByIds(@lombok.NonNull List<String> productIds,
             @Nullable Pageable pageable,
             @Nullable ContextInfo contextInfo) {
-        Node filters = buildReadProductsByIdsFilters(productIds);
+        String filters = buildReadProductsByIdsFilters(productIds);
 
         String uri = getBaseUri()
                 .queryParam(RSQL_FILTER_PARAM, filters)
@@ -101,17 +98,13 @@ public class ExternalCatalogProvider<P extends Product> extends AbstractExternal
     }
 
     /**
-     * Build the {@link Node RSQL filters} used for reading the products by IDs.
+     * Build the RSQL filters in a String form used for reading the products by IDs.
      *
      * @param productIds the list of product ids.
-     * @return the {@link Node RSQL filters} used for reading the products by IDs
+     * @return the RSQL filters in a String form used for reading the products by IDs
      */
-    protected Node buildReadProductsByIdsFilters(@lombok.NonNull List<String> productIds) {
-        List<Node> allFilters = new ArrayList<>();
-        ComparisonNode idsIn =
-                new ComparisonNode(IN.getOperator(), "contextId", productIds);
-        allFilters.add(idsIn);
-        return new AndNode(allFilters);
+    protected String buildReadProductsByIdsFilters(@lombok.NonNull List<String> productIds) {
+        return String.format(ID_IN_QUERY_PARAM, String.join(",", productIds));
     }
 
     /**
