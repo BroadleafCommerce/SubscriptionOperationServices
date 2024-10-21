@@ -35,7 +35,6 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiException;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.page.ResponsePageGenerator;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpdateDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map;
@@ -43,6 +42,7 @@ import java.util.Map;
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import reactor.core.publisher.Mono;
 
 public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
@@ -152,8 +152,8 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
     }
 
     @Override
-    public Subscription patch(@lombok.NonNull String subscriptionId,
-            @lombok.NonNull SubscriptionUpdateDTO subscriptionUpdateDTO,
+    public Subscription replaceSubscription(@NonNull String subscriptionId,
+            Subscription subscription,
             @Nullable ContextInfo contextInfo) {
         String uri = getBaseUri()
                 .path(properties.getSubscriptionPath())
@@ -161,12 +161,12 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
                 .toUriString();
 
         return executeRequest(() -> getWebClient()
-                .patch()
+                .put()
                 .uri(uri)
                 .headers(headers -> headers.putAll(getHeaders(contextInfo)))
                 .attributes(clientRegistrationId(getServiceClient()))
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(subscriptionUpdateDTO)
+                .bodyValue(subscription)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError,

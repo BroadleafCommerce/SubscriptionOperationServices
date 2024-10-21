@@ -137,15 +137,14 @@ public class DefaultSubscriptionValidationService implements SubscriptionValidat
     }
 
     @Override
-    public void validateSubscriptionChangeAutoRenewal(ChangeAutoRenewalRequest request,
+    public void validateSubscriptionChangeAutoRenewal(
+            @lombok.NonNull ChangeAutoRenewalRequest request,
+            @lombok.NonNull SubscriptionWithItems subWithItems,
             @Nullable ContextInfo contextInfo) {
         validateUserAccessToSubscription(request.getSubscriptionId(), CHANGE_AUTO_RENEWAL.name(),
                 contextInfo);
 
         // TODO Implement this method
-
-        SubscriptionWithItems subWithItems = subscriptionOperationService
-                .readSubscriptionById(request.getSubscriptionId(), contextInfo);
         Subscription subscription = subWithItems.getSubscription();
 
         if (request.isAutoRenewalEnabled() == subscription.isAutoRenewalEnabled()) {

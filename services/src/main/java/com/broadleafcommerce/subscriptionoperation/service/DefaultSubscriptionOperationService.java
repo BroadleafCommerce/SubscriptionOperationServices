@@ -40,13 +40,11 @@ import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancel
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionItemCreationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpdateDTO;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
@@ -165,33 +163,32 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     @Override
     public Subscription changeAutoRenewal(ChangeAutoRenewalRequest changeRequest,
             @Nullable ContextInfo contextInfo) {
+        SubscriptionWithItems subWithItems =
+                readSubscriptionById(changeRequest.getSubscriptionId(), contextInfo);
+        Subscription subscription = subWithItems.getSubscription();
         subscriptionValidationService.validateSubscriptionChangeAutoRenewal(changeRequest,
-                contextInfo);
-        SubscriptionUpdateDTO updateDTO = typeFactory.get(SubscriptionUpdateDTO.class);
-        updateDTO.setAutoRenewalEnabled(Optional.of(changeRequest.isAutoRenewalEnabled()));
+                subWithItems, contextInfo);
+        subscription.setAutoRenewalEnabled(changeRequest.isAutoRenewalEnabled());
 
         // TODO: Implement actual renewal logic
         if (changeRequest.isAutoRenewalEnabled()) {
-            updateDTO.setSubscriptionNextStatus(Optional.ofNullable("SOME_TEST"));
-            updateDTO.setNextStatusChangeDate(Optional.ofNullable(null));
+            subscription.setSubscriptionNextStatus(null);
+            subscription.setNextStatusChangeDate(null);
 
             // TODO: enum here or use the action type?
-            updateDTO.setNextStatusChangeReason(Optional.of("Enabled auto-renewal"));
+            subscription.setNextStatusChangeReason("Enabled auto-renewal");
         } else {
-            updateDTO.setSubscriptionNextStatus(Optional.of(SubscriptionStatuses.CANCELLED.name()));
-
-            SubscriptionWithItems subWithItems =
-                    readSubscriptionById(changeRequest.getSubscriptionId(), contextInfo);
-            Subscription subscription = subWithItems.getSubscription();
+            subscription.setSubscriptionNextStatus(SubscriptionStatuses.CANCELLED.name());
 
             // TODO: Use next subscription renewal/end of contract date
-            updateDTO.setNextStatusChangeDate(Optional.of(subscription.getNextBillDate()));
+            subscription.setNextStatusChangeDate(subscription.getNextBillDate());
 
             // TODO: enum here or use the action type?
-            updateDTO.setNextStatusChangeReason(Optional.of("Disabled auto-renewal"));
+            subscription.setNextStatusChangeReason("Disabled auto-renewal");
         }
 
-        return subscriptionProvider.patch(changeRequest.getSubscriptionId(), updateDTO,
+        return subscriptionProvider.replaceSubscription(changeRequest.getSubscriptionId(),
+                subscription,
                 contextInfo);
     }
 

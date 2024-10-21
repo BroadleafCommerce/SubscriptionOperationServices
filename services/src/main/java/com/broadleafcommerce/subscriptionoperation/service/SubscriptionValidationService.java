@@ -19,6 +19,7 @@ package com.broadleafcommerce.subscriptionoperation.service;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidChangeAutoRenewalRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
@@ -93,5 +94,6 @@ public interface SubscriptionValidationService {
      * @throws InvalidChangeAutoRenewalRequestException if the request is invalid
      */
     void validateSubscriptionChangeAutoRenewal(ChangeAutoRenewalRequest request,
+            SubscriptionWithItems subWithItems,
             @Nullable ContextInfo contextInfo);
 }
