@@ -54,11 +54,13 @@ public class ResponsePageGenerator<T> {
     public ResponsePageGenerator(
             @JsonProperty("content") List<T> content,
             @JsonProperty("total") Long total,
+            @JsonProperty("totalElements") Long totalElements,
             @JsonProperty("pageable") JsonNode rawPageable) {
         Pageable pageable = resolvePageable(rawPageable);
         if (pageable instanceof UnnumberedPageable) {
             page = new DefaultUntotalledPage<>(content, pageable);
         } else {
+            total = total == null ? totalElements : total;
             page = new PageImpl<>(content, pageable, total == null ? content.size() : total);
         }
     }
