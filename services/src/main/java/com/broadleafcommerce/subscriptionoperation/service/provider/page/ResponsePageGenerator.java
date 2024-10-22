@@ -53,7 +53,7 @@ public class ResponsePageGenerator<T> {
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public ResponsePageGenerator(
             @JsonProperty("content") List<T> content,
-            @JsonProperty("total") Long total,
+            @JsonProperty("totalElements") Long total,
             @JsonProperty("pageable") JsonNode rawPageable) {
         Pageable pageable = resolvePageable(rawPageable);
         if (pageable instanceof UnnumberedPageable) {
