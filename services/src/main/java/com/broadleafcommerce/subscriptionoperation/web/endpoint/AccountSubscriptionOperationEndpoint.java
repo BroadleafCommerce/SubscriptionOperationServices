@@ -19,6 +19,7 @@ package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
+import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPatchMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
@@ -109,7 +110,7 @@ public class AccountSubscriptionOperationEndpoint {
         return subscriptionOperationService.readSubscriptionActions(request, contextInfo);
     }
 
-    @FrameworkPostMapping(value = "/{subscriptionId}/changeAutoRenewal",
+    @FrameworkPatchMapping(value = "/{subscriptionId}/auto-renewal",
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = "ACCOUNT_SUBSCRIPTION",
             identityTypes = {IdentityType.ADMIN, IdentityType.OWNER},

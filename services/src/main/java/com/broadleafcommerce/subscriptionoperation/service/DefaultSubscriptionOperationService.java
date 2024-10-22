@@ -17,9 +17,14 @@
 package com.broadleafcommerce.subscriptionoperation.service;
 
 
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionNextStatusChangeReason.DISABLED_AUTO_RENEWAL;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionNextStatusChangeReason.ENABLED_AUTO_RENEWAL;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -64,6 +69,9 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
 
     @Getter(AccessLevel.PROTECTED)
     protected final TypeFactory typeFactory;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final MessageSource messageSource;
 
     @Getter(AccessLevel.PROTECTED)
     @Setter(onMethod_ = {@Autowired, @Lazy})
@@ -175,16 +183,18 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
             subscription.setSubscriptionNextStatus(null);
             subscription.setNextStatusChangeDate(null);
 
-            // TODO: enum here or use the action type?
-            subscription.setNextStatusChangeReason("Enabled auto-renewal");
+            String reason = getMessageSource().getMessage(ENABLED_AUTO_RENEWAL.getMessagePath(),
+                    null, LocaleContextHolder.getLocale());
+            subscription.setNextStatusChangeReason(reason);
         } else {
             subscription.setSubscriptionNextStatus(SubscriptionStatuses.CANCELLED.name());
 
             // TODO: Use next subscription renewal/end of contract date
             subscription.setNextStatusChangeDate(subscription.getNextBillDate());
 
-            // TODO: enum here or use the action type?
-            subscription.setNextStatusChangeReason("Disabled auto-renewal");
+            String reason = getMessageSource().getMessage(DISABLED_AUTO_RENEWAL.getMessagePath(),
+                    null, LocaleContextHolder.getLocale());
+            subscription.setNextStatusChangeReason(reason);
         }
 
         return subscriptionProvider.replaceSubscription(changeRequest.getSubscriptionId(),

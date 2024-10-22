@@ -19,6 +19,7 @@ package com.broadleafcommerce.subscriptionoperation.service.autoconfigure;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -55,8 +56,11 @@ public class SubscriptionOperationServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService(
             SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
-            TypeFactory typeFactory) {
-        return new DefaultSubscriptionOperationService<>(subscriptionProvider, typeFactory);
+            TypeFactory typeFactory,
+            MessageSource messageSource) {
+        return new DefaultSubscriptionOperationService<>(subscriptionProvider,
+                typeFactory,
+                messageSource);
     }
 
     @Configuration
