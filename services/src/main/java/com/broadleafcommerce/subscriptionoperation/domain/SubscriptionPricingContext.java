@@ -104,6 +104,12 @@ public class SubscriptionPricingContext implements Serializable {
     @NotNull
     private CurrencyUnit currency;
 
+    /**
+     * Miscellaneous attributes that can be added to the context in order to provide more
+     * information.
+     */
+    private Map<String, Object> additionalAttributes = new HashMap<>();
+
     public PeriodDefinition getPeriodDefinition(Integer period) {
         return getPeriodDefinitions().get(period);
     }
