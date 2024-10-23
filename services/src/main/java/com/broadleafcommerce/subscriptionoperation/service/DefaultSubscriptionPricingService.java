@@ -29,6 +29,7 @@ import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSu
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType.isQuarterly;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.cart.client.domain.Cart;
@@ -59,7 +60,6 @@ import java.util.stream.Stream;
 
 import javax.money.MonetaryAmount;
 
-import io.micrometer.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
