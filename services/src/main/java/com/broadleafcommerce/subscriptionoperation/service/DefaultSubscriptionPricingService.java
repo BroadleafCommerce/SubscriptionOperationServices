@@ -154,7 +154,6 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return context;
     }
 
-
     protected String getSubscriptionActionFlow(@lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
         return MapUtils.getString(subscriptionRootItem.getInternalAttributes(),
@@ -180,6 +179,36 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         }
 
         return subscriptionPaymentStrategy;
+    }
+
+    /**
+     * Returns a non-typical next bill date for the subscription or null if a date is not
+     * applicable. The assumption is that this date is sometime in the future.
+     *
+     * @param subscriptionRootItem The {@link CartItem} that represents the root of the subscription
+     *        items
+     * @param pricingContext The {@link SubscriptionPricingContext} in which this operation is
+     *        occurring
+     * @param contextInfo context surrounding the multi-tenant state
+     * @return a non-typical next bill date for the subscription or null if one is not applicable.
+     */
+    protected Instant determineAtypicalNextBillDate(@lombok.NonNull CartItem subscriptionRootItem,
+            @lombok.NonNull SubscriptionPricingContext pricingContext,
+            @Nullable ContextInfo contextInfo) {
+        if (!isCreate(pricingContext.getFlow())) {
+            return getExistingSubscriptionNextBillDate(subscriptionRootItem, pricingContext,
+                    contextInfo);
+        }
+
+        return null;
+    }
+
+    protected Instant getExistingSubscriptionNextBillDate(
+            @lombok.NonNull CartItem subscriptionRootItem,
+            @lombok.NonNull SubscriptionPricingContext pricingContext,
+            @Nullable ContextInfo contextInfo) {
+        return (Instant) MapUtils.getObject(subscriptionRootItem.getInternalAttributes(),
+                EXISTING_SUBSCRIPTION_NEXT_BILL_DATE);
     }
 
     protected Map<Integer, PeriodDefinition> buildPeriodDefinitions(
@@ -317,34 +346,6 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 .minusNanos(1);
     }
 
-    /**
-     * Returns a non-typical next bill date for the subscription or null if a date is not
-     * applicable. The assumption is that this date is sometime in the future.
-     *
-     * @param subscriptionRootItem The {@link CartItem} that represents the root of the subscription
-     *        items
-     * @param pricingContext The {@link SubscriptionPricingContext} in which this operation is
-     *        occurring
-     * @param contextInfo context surrounding the multi-tenant state
-     * @return a non-typical next bill date for the subscription or null if one is not applicable.
-     */
-    protected Instant determineAtypicalNextBillDate(@lombok.NonNull CartItem subscriptionRootItem,
-            @lombok.NonNull SubscriptionPricingContext pricingContext,
-            @Nullable ContextInfo contextInfo) {
-        if (!isCreate(pricingContext.getFlow())) {
-            return getSubscriptionNextBillDate(subscriptionRootItem, pricingContext, contextInfo);
-        }
-
-        return null;
-    }
-
-    protected Instant getSubscriptionNextBillDate(@lombok.NonNull CartItem subscriptionRootItem,
-            @lombok.NonNull SubscriptionPricingContext pricingContext,
-            @Nullable ContextInfo contextInfo) {
-        return (Instant) MapUtils.getObject(subscriptionRootItem.getInternalAttributes(),
-                EXISTING_SUBSCRIPTION_NEXT_BILL_DATE);
-    }
-
     protected SubscriptionPriceResponse populateDueNowDetails(
             @lombok.NonNull SubscriptionPriceResponse response,
             @lombok.NonNull CartItem subscriptionRootItem,
@@ -400,23 +401,22 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return itemDetails;
     }
 
-    protected List<SubscriptionPriceItemDetail> buildItemDetailsForDependentCartItems(
-            @lombok.NonNull CartItem cartItem,
-            @Nullable Integer period,
-            @lombok.NonNull SubscriptionPricingContext pricingContext,
-            @Nullable ContextInfo contextInfo) {
-        return cartItem.getDependentCartItems().stream()
-                .filter(doi -> !isSeparateFromPrimaryItem(doi))
-                .map(doi -> buildItemDetailForCartItem(doi, cartItem, period, pricingContext,
-                        contextInfo))
-                .toList();
-    }
-
     protected SubscriptionPriceItemDetail buildItemDetailForCartItem(CartItem cartItem,
             @Nullable CartItem parentCartItem,
             @Nullable Integer period,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
+        RecurringPriceDetail recurringPriceDetail = cartItem.getRecurringPrice();
+        if (!hasMatchingBillingFrequency(recurringPriceDetail, pricingContext)) {
+            throw new IllegalArgumentException(String.format(
+                    "Each subscription item's RecurringPriceDetail must have the same billing frequency as the overall "
+                            +
+                            "subscription. Subscription period type & frequency: %s & %s. Item period type & frequency: %s & %s.",
+                    pricingContext.getPeriodType(), pricingContext.getPeriodFrequency(),
+                    recurringPriceDetail.getPeriodType(),
+                    recurringPriceDetail.getPeriodFrequency()));
+        }
+
         SubscriptionPriceItemDetail itemDetail =
                 typeFactory.get(SubscriptionPriceItemDetail.class);
         itemDetail.setItemRefType(DefaultSubscriptionItemReferenceType.BLC_PRODUCT.name());
@@ -448,23 +448,34 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return itemDetail;
     }
 
+    protected boolean hasMatchingBillingFrequency(
+            @lombok.NonNull RecurringPriceDetail recurringPriceDetail,
+            @lombok.NonNull SubscriptionPricingContext pricingContext) {
+        return Objects.equals(recurringPriceDetail.getPeriodType(),
+                pricingContext.getPeriodType())
+                && Objects.equals(recurringPriceDetail.getPeriodFrequency(),
+                        pricingContext.getPeriodFrequency());
+    }
+
+    protected List<SubscriptionPriceItemDetail> buildItemDetailsForDependentCartItems(
+            @lombok.NonNull CartItem cartItem,
+            @Nullable Integer period,
+            @lombok.NonNull SubscriptionPricingContext pricingContext,
+            @Nullable ContextInfo contextInfo) {
+        return cartItem.getDependentCartItems().stream()
+                .filter(doi -> !isSeparateFromPrimaryItem(doi))
+                .map(doi -> buildItemDetailForCartItem(doi, cartItem, period, pricingContext,
+                        contextInfo))
+                .toList();
+    }
+
     protected MonetaryAmount determineProratedAmount(@NonNull CartItem cartItem,
             @Nullable Integer period,
             @NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         RecurringPriceDetail recurringPriceDetail = cartItem.getRecurringPrice();
-
-        if (!hasMatchingBillingFrequency(recurringPriceDetail, pricingContext)) {
-            throw new IllegalArgumentException(String.format(
-                    "Each subscription item's RecurringPriceDetail must have the same billing frequency as the overall "
-                            +
-                            "subscription. Subscription period type & frequency: %s & %s. Item period type & frequency: %s & %s.",
-                    pricingContext.getPeriodType(), pricingContext.getPeriodFrequency(),
-                    recurringPriceDetail.getPeriodType(),
-                    recurringPriceDetail.getPeriodFrequency()));
-        }
-
         MonetaryAmount typicalRecurringPrice = recurringPriceDetail.getPrice();
+
         if (isCreate(pricingContext.getFlow())) {
             return determineProratedAmountForCreateFlow(cartItem, period, pricingContext,
                     contextInfo);
@@ -514,15 +525,6 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 .truncatedTo(ChronoUnit.DAYS);
 
         return ChronoUnit.DAYS.between(beginningOfStartDate, endOfEndDate);
-    }
-
-    protected boolean hasMatchingBillingFrequency(
-            @lombok.NonNull RecurringPriceDetail recurringPriceDetail,
-            @lombok.NonNull SubscriptionPricingContext pricingContext) {
-        return Objects.equals(recurringPriceDetail.getPeriodType(),
-                pricingContext.getPeriodType())
-                && Objects.equals(recurringPriceDetail.getPeriodFrequency(),
-                        pricingContext.getPeriodFrequency());
     }
 
     protected MonetaryAmount determinePricePerDay(@lombok.NonNull CartItem cartItem,
