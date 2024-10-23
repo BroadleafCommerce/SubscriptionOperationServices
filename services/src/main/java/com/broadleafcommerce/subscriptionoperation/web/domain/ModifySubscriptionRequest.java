@@ -77,7 +77,7 @@ public class ModifySubscriptionRequest implements Serializable {
     /**
      * The value to change {@link Subscription#isAutoRenewalEnabled()} to.
      */
-    private boolean autoRenewalEnabled = false;
+    private boolean autoRenewalEnabled = true;
 
     /**
      * Holds the {@link SubscriptionWithItems} referenced by {@link #subscriptionId}. This should be

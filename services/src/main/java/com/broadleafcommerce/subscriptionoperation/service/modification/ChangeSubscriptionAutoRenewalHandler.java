@@ -16,7 +16,12 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service.modification;
 
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionNextStatusChangeReason.DISABLED_AUTO_RENEWAL;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionNextStatusChangeReason.ENABLED_AUTO_RENEWAL;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.Errors;
 
@@ -26,8 +31,12 @@ import com.broadleafcommerce.data.tracking.core.policy.trackable.TrackablePolicy
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
+import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionResponse;
+
+import java.sql.Date;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -46,10 +55,15 @@ public class ChangeSubscriptionAutoRenewalHandler extends AbstractModifySubscrip
     @Getter(value = AccessLevel.PROTECTED)
     private final TypeFactory typeFactory;
 
+    @Getter(value = AccessLevel.PROTECTED)
+    private final SubscriptionProvider<SubscriptionWithItems> subscriptionProvider;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final MessageSource messageSource;
+
     @Getter(value = AccessLevel.PROTECTED, onMethod_ = @Nullable)
     @Setter(onMethod_ = @Autowired(required = false))
     private TrackablePolicyUtils policyUtils;
-
 
     @Override
     public boolean canHandle(@lombok.NonNull ModifySubscriptionRequest request,
@@ -64,7 +78,34 @@ public class ChangeSubscriptionAutoRenewalHandler extends AbstractModifySubscrip
         SubscriptionWithItems subscriptionWithItems = request.getSubscription();
         Subscription subscription = subscriptionWithItems.getSubscription();
         subscription.setAutoRenewalEnabled(request.isAutoRenewalEnabled());
-        return typeFactory.get(ModifySubscriptionResponse.class);
+
+        if (request.isAutoRenewalEnabled()) {
+            subscription.setSubscriptionNextStatus(null);
+            subscription.setNextStatusChangeDate(null);
+
+            String reason = getMessageSource().getMessage(ENABLED_AUTO_RENEWAL.getMessagePath(),
+                    null, LocaleContextHolder.getLocale());
+            subscription.setNextStatusChangeReason(reason);
+        } else {
+            subscription.setSubscriptionNextStatus(SubscriptionStatuses.CANCELLED.name());
+            subscription.setNextStatusChangeDate(Date.from(subscription.getEndOfTermDate()));
+
+            String reason = getMessageSource().getMessage(DISABLED_AUTO_RENEWAL.getMessagePath(),
+                    null, LocaleContextHolder.getLocale());
+            subscription.setNextStatusChangeReason(reason);
+        }
+
+        Subscription updatedSubscription =
+                subscriptionProvider.replaceSubscription(subscription.getId(),
+                        subscription,
+                        contextInfo);
+
+        // todo: refresh the actions too?
+        ModifySubscriptionResponse response = typeFactory.get(
+                ModifySubscriptionResponse.class);
+        subscriptionWithItems.setSubscription(updatedSubscription);
+        response.setSubscription(subscriptionWithItems);
+        return response;
     }
 
     @Override

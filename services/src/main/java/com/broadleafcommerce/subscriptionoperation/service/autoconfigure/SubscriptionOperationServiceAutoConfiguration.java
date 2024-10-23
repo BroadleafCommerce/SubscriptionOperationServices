@@ -32,6 +32,7 @@ import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionVa
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionValidationService;
 import com.broadleafcommerce.subscriptionoperation.service.modification.CancelSubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.service.modification.ChangeSubscriptionAutoRenewalHandler;
 import com.broadleafcommerce.subscriptionoperation.service.modification.DowngradeSubscriptionHandler;
 import com.broadleafcommerce.subscriptionoperation.service.modification.ModifySubscriptionHandler;
 import com.broadleafcommerce.subscriptionoperation.service.modification.UpgradeSubscriptionHandler;
@@ -74,18 +75,27 @@ public class SubscriptionOperationServiceAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "changeSubscriptionAutoRenewalModificationHandler")
+    ChangeSubscriptionAutoRenewalHandler changeSubscriptionAutoRenewalModificationHandler(
+            TypeFactory typeFactory,
+            SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
+            MessageSource messageSource) {
+        return new ChangeSubscriptionAutoRenewalHandler(typeFactory,
+                subscriptionProvider,
+                messageSource);
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     public SubscriptionOperationService<SubscriptionWithItems> subscriptionOperationService(
             SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
             SubscriptionValidationService subscriptionValidationService,
             TypeFactory typeFactory,
-            List<ModifySubscriptionHandler> modifySubscriptionHandlers,
-            MessageSource messageSource) {
+            List<ModifySubscriptionHandler> modifySubscriptionHandlers) {
         return new DefaultSubscriptionOperationService<>(subscriptionProvider,
                 subscriptionValidationService,
                 typeFactory,
-                modifySubscriptionHandlers,
-                messageSource);
+                modifySubscriptionHandlers);
     }
 
     @Configuration

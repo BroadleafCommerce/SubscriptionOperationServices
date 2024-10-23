@@ -17,7 +17,6 @@
 package com.broadleafcommerce.subscriptionoperation.service;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -41,7 +40,6 @@ import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionItemCr
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import cz.jirutka.rsql.parser.ast.Node;
@@ -67,9 +65,6 @@ public class DefaultSubscriptionOperationService<SWI extends SubscriptionWithIte
 
     @Getter(AccessLevel.PROTECTED)
     private final List<ModifySubscriptionHandler> modifySubscriptionHandlers;
-
-    @Getter(AccessLevel.PROTECTED)
-    private final MessageSource messageSource;
 
     @Override
     public SubscriptionActionResponse readSubscriptionActions(
