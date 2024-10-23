@@ -155,20 +155,20 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
     }
 
 
-    private String getSubscriptionActionFlow(@lombok.NonNull CartItem subscriptionRootItem,
+    protected String getSubscriptionActionFlow(@lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
         return MapUtils.getString(subscriptionRootItem.getInternalAttributes(),
                 SUBSCRIPTION_ACTION_FLOW, DefaultSubscriptionActionFlow.CREATE.name());
     }
 
     @Nullable
-    private String getExistingSubscriptionId(@lombok.NonNull CartItem subscriptionRootItem,
+    protected String getExistingSubscriptionId(@lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
         return MapUtils.getString(subscriptionRootItem.getInternalAttributes(),
                 EXISTING_SUBSCRIPTION_ID);
     }
 
-    private String getSubscriptionPaymentStrategy(@lombok.NonNull CartItem subscriptionRootItem,
+    protected String getSubscriptionPaymentStrategy(@lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
         String subscriptionPaymentStrategy = MapUtils.getString(
                 subscriptionRootItem.getInternalAttributes(), SUBSCRIPTION_PAYMENT_STRATEGY);
@@ -195,9 +195,6 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         int estimatedFuturePaymentCount =
                 getEstimatedFuturePaymentCount(subscriptionRootItem, pricingContext, contextInfo);
         for (int period = 1; period <= estimatedFuturePaymentCount; period++) {
-
-            // VFE Customization: remove isPostpaid(pricingContext.getPricingStrategy() from
-            // if-condition
             if (period == 1 && pricingContext.getAtypicalNextBillDate() != null
                     && isPostpaid(pricingContext.getPaymentStrategy())) {
                 PeriodDefinition periodDefinition = typeFactory.get(PeriodDefinition.class);
@@ -250,7 +247,6 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             @NonNull Instant startDate,
             @NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
-        // TODO: remove for VFE customization
         if (period == 1 && isInAdvance(pricingContext.getPaymentStrategy())) {
             return startDate;
         }
@@ -295,7 +291,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         }
     }
 
-    private Instant determinePeriodEndDate(int period,
+    protected Instant determinePeriodEndDate(int period,
             PeriodDefinition periodDefinition,
             SubscriptionPricingContext pricingContext,
             ContextInfo contextInfo) {
@@ -316,7 +312,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return getEndOfPreviousDay(nextBillDate);
     }
 
-    private Instant getEndOfPreviousDay(@lombok.NonNull Instant nextBillDate) {
+    protected Instant getEndOfPreviousDay(@lombok.NonNull Instant nextBillDate) {
         return nextBillDate.truncatedTo(ChronoUnit.DAYS)
                 .minusNanos(1);
     }
@@ -349,7 +345,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 EXISTING_SUBSCRIPTION_NEXT_BILL_DATE);
     }
 
-    private SubscriptionPriceResponse populateDueNowDetails(
+    protected SubscriptionPriceResponse populateDueNowDetails(
             @lombok.NonNull SubscriptionPriceResponse response,
             @lombok.NonNull CartItem subscriptionRootItem,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
@@ -431,7 +427,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return itemDetail;
     }
 
-    private MonetaryAmount determineProratedAmount(@lombok.NonNull CartItem cartItem,
+    protected MonetaryAmount determineProratedAmount(@lombok.NonNull CartItem cartItem,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         RecurringPriceDetail recurringPriceDetail = cartItem.getRecurringPrice();
@@ -467,8 +463,6 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             return cartItem.getSubtotal();
         }
 
-        // VFE Customization: Remove isPostpaid(pricingContext.getPricingStrategy()) from
-        // if-condition
         if (period == 1 && isPostpaid(pricingContext.getPaymentStrategy())) {
             if (pricingContext.getAtypicalNextBillDate() == null) {
                 return typicalRecurringPrice;
@@ -536,7 +530,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         }
     }
 
-    private MonetaryAmount determineCreditedAmount(@lombok.NonNull CartItem cartItem,
+    protected MonetaryAmount determineCreditedAmount(@lombok.NonNull CartItem cartItem,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         if (!isCreate(pricingContext.getFlow())
@@ -547,7 +541,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return MonetaryUtils.zero(pricingContext.getCurrency());
     }
 
-    private MonetaryAmount determinePriorUnbilledAmount(@lombok.NonNull CartItem cartItem,
+    protected MonetaryAmount determinePriorUnbilledAmount(@lombok.NonNull CartItem cartItem,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         if (!isCreate(pricingContext.getFlow())
@@ -602,7 +596,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 .reduce(zero, MonetaryAmount::add);
     }
 
-    private List<EstimatedFuturePayment> buildEstimatedFuturePayments(
+    protected List<EstimatedFuturePayment> buildEstimatedFuturePayments(
             @lombok.NonNull CartItem subscriptionRootItem,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
@@ -620,7 +614,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return estimatedFuturePayments;
     }
 
-    private EstimatedFuturePayment buildEstimatedFuturePayment(
+    protected EstimatedFuturePayment buildEstimatedFuturePayment(
             @lombok.NonNull CartItem subscriptionRootItem,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
