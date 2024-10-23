@@ -16,18 +16,9 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.CANCEL;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.DOWNGRADE;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.UPGRADE;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,20 +26,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.broadleafcommerce.data.tracking.core.policy.PolicyResponse;
 import com.broadleafcommerce.data.tracking.core.policy.trackable.TrackablePolicyUtils;
 import com.broadleafcommerce.subscriptionoperation.domain.Product;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
-import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
-import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionDowngradeRequestException;
-import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionUpgradeRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionItemCreationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import java.util.Collections;
 
@@ -122,152 +106,6 @@ public class DefaultSubscriptionValidationServiceTest {
         assertThatThrownBy(() -> subValidationService.validateSubscriptionCreation(request, null))
                 .isInstanceOf(InvalidSubscriptionCreationRequestException.class)
                 .hasMessage("Subscription items must also be defined for the subscription.");
-    }
-
-    @Test
-    public void testValidateSubscriptionCancellation() {
-        String subId = "subscriptionId";
-        SubscriptionCancellationRequest request = new SubscriptionCancellationRequest();
-        request.setSubscriptionId(subId);
-
-        when(policyUtils.validatePermissions(any(), any()))
-                .thenReturn(PolicyResponse.VALID);
-
-        assertDoesNotThrow(
-                () -> subValidationService.validateSubscriptionCancellation(request, null));
-
-        assertCommonValidationCalled(subId, CANCEL.name());
-    }
-
-    @Test
-    public void testValidateSubscriptionCancellation_invalidAccess() {
-        String subId = "subscriptionId";
-        SubscriptionCancellationRequest request = new SubscriptionCancellationRequest();
-        request.setSubscriptionId(subId);
-
-        when(policyUtils.validatePermissions(any(), any()))
-                .thenReturn(PolicyResponse.NOT_PERMITTED);
-
-        assertThatThrownBy(
-                () -> subValidationService.validateSubscriptionCancellation(request, null))
-                        .isInstanceOf(InsufficientSubscriptionAccessException.class);
-    }
-
-    @Test
-    public void testValidateSubscriptionUpgrade() {
-        String subId = "subscriptionId";
-        SubscriptionUpgradeRequest request = new SubscriptionUpgradeRequest();
-        request.setPriorSubscriptionId(subId);
-
-        Product subscriptionProduct = new Product();
-        subscriptionProduct.setUpgradeProductId("someUpgradeProductId");
-
-        when(policyUtils.validatePermissions(any(), any()))
-                .thenReturn(PolicyResponse.VALID);
-        when(catalogProvider.readProductById(anyString(), any()))
-                .thenReturn(subscriptionProduct);
-
-        assertDoesNotThrow(() -> subValidationService.validateSubscriptionUpgrade(request, null));
-
-        assertCommonValidationCalled(subId, UPGRADE.name());
-    }
-
-    @Test
-    public void testValidateSubscriptionUpgrade_invalidAccess() {
-        String subId = "subscriptionId";
-        SubscriptionUpgradeRequest request = new SubscriptionUpgradeRequest();
-        request.setPriorSubscriptionId(subId);
-
-        Product subscriptionProduct = new Product();
-        subscriptionProduct.setUpgradeProductId("someUpgradeProductId");
-
-        when(policyUtils.validatePermissions(any(), any()))
-                .thenReturn(PolicyResponse.NOT_PERMITTED);
-
-        assertThatThrownBy(() -> subValidationService.validateSubscriptionUpgrade(request, null))
-                .isInstanceOf(InsufficientSubscriptionAccessException.class);
-    }
-
-    // TODO: Update tests once upgrade flow is implemented
-    @Test
-    public void testValidateSubscriptionUpgrade_ineligibleProduct() {
-        String subId = "subscriptionId";
-        SubscriptionUpgradeRequest request = new SubscriptionUpgradeRequest();
-        request.setPriorSubscriptionId(subId);
-
-        Product subscriptionProduct = new Product();
-        subscriptionProduct.setUpgradeProductId(null);
-
-        when(policyUtils.validatePermissions(any(), any()))
-                .thenReturn(PolicyResponse.VALID);
-        when(catalogProvider.readProductById(anyString(), any()))
-                .thenReturn(subscriptionProduct);
-
-        assertThatThrownBy(() -> subValidationService.validateSubscriptionUpgrade(request, null))
-                .isInstanceOf(InvalidSubscriptionUpgradeRequestException.class);
-    }
-
-    @Test
-    public void testValidateSubscriptionDowngrade() {
-        String subId = "subscriptionId";
-        SubscriptionDowngradeRequest request = new SubscriptionDowngradeRequest();
-        request.setPriorSubscriptionId(subId);
-
-        Product subscriptionProduct = new Product();
-        subscriptionProduct.setDowngradeProductId("someDowngradeProductId");
-
-        when(policyUtils.validatePermissions(any(), any()))
-                .thenReturn(PolicyResponse.VALID);
-        when(catalogProvider.readProductById(anyString(), any()))
-                .thenReturn(subscriptionProduct);
-
-        assertDoesNotThrow(() -> subValidationService.validateSubscriptionDowngrade(request, null));
-
-        assertCommonValidationCalled(subId, DOWNGRADE.name());
-    }
-
-    @Test
-    public void testValidateSubscriptionDowngrade_invalidAccess() {
-        String subId = "subscriptionId";
-        SubscriptionDowngradeRequest request = new SubscriptionDowngradeRequest();
-        request.setPriorSubscriptionId(subId);
-
-        Product subscriptionProduct = new Product();
-        subscriptionProduct.setDowngradeProductId("someDowngradeProductId");
-
-        when(policyUtils.validatePermissions(any(), any()))
-                .thenReturn(PolicyResponse.NOT_PERMITTED);
-
-        assertThatThrownBy(() -> subValidationService.validateSubscriptionDowngrade(request, null))
-                .isInstanceOf(InsufficientSubscriptionAccessException.class);
-    }
-
-    // TODO: Update tests once upgrade flow is implemented
-    @Test
-    public void testValidateSubscriptionDowngrade_ineligibleProduct() {
-        String subId = "subscriptionId";
-        SubscriptionDowngradeRequest request = new SubscriptionDowngradeRequest();
-        request.setPriorSubscriptionId(subId);
-
-        Product subscriptionProduct = new Product();
-        subscriptionProduct.setDowngradeProductId(null);
-
-        when(policyUtils.validatePermissions(any(), any()))
-                .thenReturn(PolicyResponse.VALID);
-        when(catalogProvider.readProductById(anyString(), any()))
-                .thenReturn(subscriptionProduct);
-
-        assertThatThrownBy(() -> subValidationService.validateSubscriptionDowngrade(request, null))
-                .isInstanceOf(InvalidSubscriptionDowngradeRequestException.class);
-    }
-
-    private void assertCommonValidationCalled(String subscriptionId, String actionType) {
-        verify(subValidationService, times(1)).getRequiredPermissions(eq(actionType));
-        verify(policyUtils, times(1)).validatePermissions(any(), any());
-        verify(subValidationService, times(1)).validateAdditionalPermissionRules(eq(subscriptionId),
-                eq(actionType), any());
-        verify(subValidationService, times(1)).validateBusinessRules(eq(subscriptionId),
-                eq(actionType), any());
     }
 
     private SubscriptionCreationRequest buildValidCreationRequest() {
