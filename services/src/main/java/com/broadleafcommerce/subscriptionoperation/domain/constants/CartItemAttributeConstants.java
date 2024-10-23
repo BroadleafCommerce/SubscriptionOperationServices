@@ -58,7 +58,6 @@ public final class CartItemAttributeConstants {
          */
         public static final String EXISTING_SUBSCRIPTION_NEXT_BILL_DATE =
                 "existingSubscriptionNextBillDate";
-        public static final String FULFILLMENT_WORKFLOW = "fulfillmentWorkflow";
     }
 
 }
