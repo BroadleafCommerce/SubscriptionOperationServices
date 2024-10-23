@@ -17,24 +17,31 @@
 package com.broadleafcommerce.subscriptionoperation.service;
 
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.CANCEL;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.CHANGE_AUTO_RENEWAL;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.DOWNGRADE;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType.UPGRADE;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.policy.PolicyResponse;
 import com.broadleafcommerce.data.tracking.core.policy.trackable.TrackablePolicyUtils;
 import com.broadleafcommerce.subscriptionoperation.domain.Product;
+import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidChangeAutoRenewalRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionDowngradeRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionUpgradeRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ChangeAutoRenewalRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
@@ -56,6 +63,10 @@ public class DefaultSubscriptionValidationService implements SubscriptionValidat
     @Getter(value = AccessLevel.PROTECTED, onMethod_ = @Nullable)
     @Setter(onMethod_ = @Autowired(required = false))
     private TrackablePolicyUtils policyUtils;
+
+    @Getter(AccessLevel.PROTECTED)
+    @Setter(onMethod_ = {@Autowired, @Lazy})
+    private SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
 
     @Override
     public void validateSubscriptionCreation(
@@ -123,6 +134,25 @@ public class DefaultSubscriptionValidationService implements SubscriptionValidat
         }
         validateBusinessRules(downgradeRequest.getPriorSubscriptionId(), DOWNGRADE.name(),
                 contextInfo);
+    }
+
+    @Override
+    public void validateSubscriptionChangeAutoRenewal(
+            @lombok.NonNull ChangeAutoRenewalRequest request,
+            @lombok.NonNull SubscriptionWithItems subWithItems,
+            @Nullable ContextInfo contextInfo) {
+        validateUserAccessToSubscription(request.getSubscriptionId(), CHANGE_AUTO_RENEWAL.name(),
+                contextInfo);
+
+        // TODO Implement this method
+        Subscription subscription = subWithItems.getSubscription();
+
+        if (request.isAutoRenewalEnabled() == subscription.isAutoRenewalEnabled()) {
+            throw new InvalidChangeAutoRenewalRequestException(
+                    "The subscription is already set to the requested autoRenewal state.");
+        }
+
+        validateBusinessRules(request.getSubscriptionId(), CHANGE_AUTO_RENEWAL.name(), contextInfo);
     }
 
     // a ValidationDTO may be useful here.

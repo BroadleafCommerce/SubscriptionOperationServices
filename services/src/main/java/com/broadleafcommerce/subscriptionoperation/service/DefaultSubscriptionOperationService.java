@@ -17,7 +17,14 @@
 package com.broadleafcommerce.subscriptionoperation.service;
 
 
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionNextStatusChangeReason.DISABLED_AUTO_RENEWAL;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionNextStatusChangeReason.ENABLED_AUTO_RENEWAL;
+
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -29,7 +36,9 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ChangeAutoRenewalRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
@@ -47,6 +56,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -58,10 +68,14 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     protected final SubscriptionProvider<SWI> subscriptionProvider;
 
     @Getter(AccessLevel.PROTECTED)
-    protected final SubscriptionValidationService subscriptionValidationService;
+    protected final TypeFactory typeFactory;
 
     @Getter(AccessLevel.PROTECTED)
-    protected final TypeFactory typeFactory;
+    private final MessageSource messageSource;
+
+    @Getter(AccessLevel.PROTECTED)
+    @Setter(onMethod_ = {@Autowired, @Lazy})
+    protected SubscriptionValidationService subscriptionValidationService;
 
     @Override
     public SubscriptionActionResponse readSubscriptionActions(
@@ -152,6 +166,40 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
             @Nullable ContextInfo contextInfo) {
         subscriptionValidationService.validateSubscriptionDowngrade(downgradeRequest, contextInfo);
         return null;
+    }
+
+    @Override
+    public Subscription changeAutoRenewal(ChangeAutoRenewalRequest changeRequest,
+            @Nullable ContextInfo contextInfo) {
+        SubscriptionWithItems subWithItems =
+                readSubscriptionById(changeRequest.getSubscriptionId(), contextInfo);
+        Subscription subscription = subWithItems.getSubscription();
+        subscriptionValidationService.validateSubscriptionChangeAutoRenewal(changeRequest,
+                subWithItems, contextInfo);
+        subscription.setAutoRenewalEnabled(changeRequest.isAutoRenewalEnabled());
+
+        // TODO: Implement actual renewal logic
+        if (changeRequest.isAutoRenewalEnabled()) {
+            subscription.setSubscriptionNextStatus(null);
+            subscription.setNextStatusChangeDate(null);
+
+            String reason = getMessageSource().getMessage(ENABLED_AUTO_RENEWAL.getMessagePath(),
+                    null, LocaleContextHolder.getLocale());
+            subscription.setNextStatusChangeReason(reason);
+        } else {
+            subscription.setSubscriptionNextStatus(SubscriptionStatuses.CANCELLED.name());
+
+            // TODO: Use next subscription renewal/end of contract date
+            subscription.setNextStatusChangeDate(subscription.getNextBillDate());
+
+            String reason = getMessageSource().getMessage(DISABLED_AUTO_RENEWAL.getMessagePath(),
+                    null, LocaleContextHolder.getLocale());
+            subscription.setNextStatusChangeReason(reason);
+        }
+
+        return subscriptionProvider.replaceSubscription(changeRequest.getSubscriptionId(),
+                subscription,
+                contextInfo);
     }
 
     protected void populateSubscriptionActions(Iterable<SWI> subscriptions,

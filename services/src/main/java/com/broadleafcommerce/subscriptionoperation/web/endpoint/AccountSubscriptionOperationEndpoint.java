@@ -19,12 +19,14 @@ package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
+import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPatchMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,6 +41,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ChangeAutoRenewalRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 
@@ -105,5 +108,19 @@ public class AccountSubscriptionOperationEndpoint {
         request.setUserRef(accountId);
 
         return subscriptionOperationService.readSubscriptionActions(request, contextInfo);
+    }
+
+    @FrameworkPatchMapping(value = "/{subscriptionId}/auto-renewal",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Policy(permissionRoots = "ACCOUNT_SUBSCRIPTION",
+            identityTypes = {IdentityType.ADMIN, IdentityType.OWNER},
+            ownerIdentifierParam = 0, ownerIdentifier = "acct_id,parent_accts")
+    public Subscription changeAutoRenewal(
+            @PathVariable("accountId") String accountId,
+            @PathVariable(value = "subscriptionId") String subscriptionId,
+            @RequestBody ChangeAutoRenewalRequest autoRenewalRequest,
+            @ContextOperation(OperationType.READ) final ContextInfo context) {
+        autoRenewalRequest.setSubscriptionId(subscriptionId);
+        return subscriptionOperationService.changeAutoRenewal(autoRenewalRequest, context);
     }
 }

@@ -81,4 +81,15 @@ public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
             String userRef,
             String subscriptionId,
             @Nullable ContextInfo contextInfo);
+
+    /**
+     * Replaces a subscription.
+     *
+     * @param subscription the {@link Subscription} used for the put operation
+     * @param contextInfo context information around multi-tenant state
+     * @return the updated subscription
+     */
+    Subscription replaceSubscription(String subscriptionId,
+            Subscription subscription,
+            @Nullable ContextInfo contextInfo);
 }

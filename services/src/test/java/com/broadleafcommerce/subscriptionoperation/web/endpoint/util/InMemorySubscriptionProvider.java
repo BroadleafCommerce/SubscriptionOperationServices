@@ -139,6 +139,20 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
                 .orElseThrow(EntityMissingException::new);
     }
 
+    @Override
+    public Subscription replaceSubscription(String subscriptionId,
+            Subscription subscription,
+            ContextInfo contextInfo) {
+        SubscriptionWithItems swi = getStore().values().stream()
+                .filter(subscriptionWithItems -> Objects
+                        .equals(subscriptionWithItems.getSubscription().getId(), subscriptionId))
+                .filter(contextMatches(contextInfo))
+                .findFirst()
+                .orElseThrow(EntityMissingException::new);
+        swi.setSubscription(subscription);
+        return subscription;
+    }
+
     protected Predicate<SubscriptionWithItems> userMatches(String userRefType,
             @Nullable String userRef) {
         return sWI -> sWI.getSubscription().getUserRef() != null
@@ -170,6 +184,4 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
             item.getContextState().setTenant(contextInfo.getContextRequest().getTenantId());
         }
     }
-
-
 }
