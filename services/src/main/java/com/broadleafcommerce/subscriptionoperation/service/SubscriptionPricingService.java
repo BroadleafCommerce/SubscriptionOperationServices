@@ -25,9 +25,20 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPriceRespo
 import java.util.List;
 
 /**
- * TODO
+ * Service for pricing subscriptions.
  */
 public interface SubscriptionPricingService {
+
+    /**
+     * Prices the cart's subscription items, returning {@link SubscriptionPriceResponse
+     * SubscriptionPriceResponses} describing how much the customer should be charged now, &
+     * estimations for how much & when they'll be charged in the future as part of subscription
+     * billing.
+     *
+     * @param cart The cart that we are pricing.
+     * @param contextInfo Context information around sandbox and multitenant state.
+     * @return a list of {@link SubscriptionPriceResponse SubscriptionPriceResponses}
+     */
     List<SubscriptionPriceResponse> priceSubscriptions(Cart cart,
             @Nullable ContextInfo contextInfo);
 }
