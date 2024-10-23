@@ -24,8 +24,8 @@ import java.time.Instant;
 import lombok.Data;
 
 /**
- * Describes subscription billing period, including the beginning, end, & when the customer will be
- * billed.
+ * Describes subscription billing period, including the start date, end date, & when the customer
+ * will be billed.
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

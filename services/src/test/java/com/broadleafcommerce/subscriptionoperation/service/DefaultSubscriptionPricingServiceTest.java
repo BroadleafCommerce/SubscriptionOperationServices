@@ -40,8 +40,8 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPriceRespo
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPricingContext;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionFlow;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionItemReferenceType;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultTermDurationType;
 
 import java.time.Instant;
@@ -114,7 +114,6 @@ public class DefaultSubscriptionPricingServiceTest {
 
         assertThat(subscriptionPricingContext.getFlow())
                 .isEqualTo(DefaultSubscriptionActionFlow.CREATE.name());
-        assertThat(subscriptionPricingContext.getFlowSubmissionDate()).isNotNull();
         assertThat(subscriptionPricingContext.getExistingSubscriptionId()).isBlank();
         assertThat(subscriptionPricingContext.getPaymentStrategy())
                 .isEqualTo(DefaultSubscriptionPaymentStrategy.POSTPAID.name());

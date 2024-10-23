@@ -22,11 +22,11 @@ import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartI
 import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.SUBSCRIPTION_ACTION_FLOW;
 import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.SUBSCRIPTION_PAYMENT_STRATEGY;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionFlow.isCreate;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy.isInAdvance;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy.isPostpaid;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType.isAnnually;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType.isMonthly;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType.isQuarterly;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy.isInAdvance;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy.isPostpaid;
 
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.lang.Nullable;
@@ -244,14 +244,14 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
     }
 
     protected Instant determineNextBillDate(int period,
-            @NonNull Instant startDate,
-            @NonNull SubscriptionPricingContext pricingContext,
+            @lombok.NonNull Instant startDate,
+            @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         if (period == 1 && isInAdvance(pricingContext.getPaymentStrategy())) {
             return startDate;
         }
 
-        int monthsToAdd = 0;
+        int monthsToAdd;
 
         String periodType = pricingContext.getPeriodType();
         if (isMonthly(periodType)) {
@@ -350,7 +350,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             @lombok.NonNull CartItem subscriptionRootItem,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
-        List<SubscriptionPriceItemDetail> dueNowItemDetails = buildItemDetails(
+        List<SubscriptionPriceItemDetail> dueNowItemDetails = buildDueNowItemDetails(
                 subscriptionRootItem, pricingContext, contextInfo);
         response.setDueNowItemDetails(dueNowItemDetails);
 
@@ -376,24 +376,45 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return response;
     }
 
+    protected List<SubscriptionPriceItemDetail> buildDueNowItemDetails(
+            @lombok.NonNull CartItem subscriptionRootItem,
+            @lombok.NonNull SubscriptionPricingContext pricingContext,
+            @Nullable ContextInfo contextInfo) {
+        return buildItemDetails(subscriptionRootItem, null, pricingContext, contextInfo);
+    }
+
     protected List<SubscriptionPriceItemDetail> buildItemDetails(
             @lombok.NonNull CartItem subscriptionRootItem,
+            @Nullable Integer period,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         List<SubscriptionPriceItemDetail> itemDetails = new ArrayList<>();
 
         SubscriptionPriceItemDetail itemDetail =
-                buildItemDetailForCartItem(subscriptionRootItem, null, pricingContext,
+                buildItemDetailForCartItem(subscriptionRootItem, null, period, pricingContext,
                         contextInfo);
         itemDetails.add(itemDetail);
 
-        itemDetails.addAll(buildItemDetailsForDependentCartItems(subscriptionRootItem,
+        itemDetails.addAll(buildItemDetailsForDependentCartItems(subscriptionRootItem, period,
                 pricingContext, contextInfo));
         return itemDetails;
     }
 
+    protected List<SubscriptionPriceItemDetail> buildItemDetailsForDependentCartItems(
+            @lombok.NonNull CartItem cartItem,
+            @Nullable Integer period,
+            @lombok.NonNull SubscriptionPricingContext pricingContext,
+            @Nullable ContextInfo contextInfo) {
+        return cartItem.getDependentCartItems().stream()
+                .filter(doi -> !isSeparateFromPrimaryItem(doi))
+                .map(doi -> buildItemDetailForCartItem(doi, cartItem, period, pricingContext,
+                        contextInfo))
+                .toList();
+    }
+
     protected SubscriptionPriceItemDetail buildItemDetailForCartItem(CartItem cartItem,
             @Nullable CartItem parentCartItem,
+            @Nullable Integer period,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         SubscriptionPriceItemDetail itemDetail =
@@ -403,15 +424,15 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         itemDetail.setCartItemId(cartItem.getId());
 
         MonetaryAmount proratedAmount =
-                determineProratedAmount(cartItem, pricingContext, contextInfo);
+                determineProratedAmount(cartItem, period, pricingContext, contextInfo);
         itemDetail.setProratedAmount(proratedAmount);
 
         MonetaryAmount creditedAmount =
-                determineCreditedAmount(cartItem, pricingContext, contextInfo);
+                determineCreditedAmount(cartItem, period, pricingContext, contextInfo);
         itemDetail.setCreditedAmount(creditedAmount);
 
         MonetaryAmount priorUnbilledAmount =
-                determinePriorUnbilledAmount(cartItem, pricingContext, contextInfo);
+                determinePriorUnbilledAmount(cartItem, period, pricingContext, contextInfo);
         itemDetail.setPriorUnbilledAmount(priorUnbilledAmount);
 
         MonetaryAmount amount = proratedAmount.add(priorUnbilledAmount)
@@ -427,20 +448,22 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return itemDetail;
     }
 
-    protected MonetaryAmount determineProratedAmount(@lombok.NonNull CartItem cartItem,
-            @lombok.NonNull SubscriptionPricingContext pricingContext,
+    protected MonetaryAmount determineProratedAmount(@NonNull CartItem cartItem,
+            @Nullable Integer period,
+            @NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         RecurringPriceDetail recurringPriceDetail = cartItem.getRecurringPrice();
 
         if (!hasMatchingBillingFrequency(recurringPriceDetail, pricingContext)) {
             throw new IllegalArgumentException(String.format(
-                    "Each subscription item's RecurringPriceDetail must have the same billing frequency as the overall subscription. Subscription period type & frequency: %s & %s. Item period type & frequency: %s & %s.",
+                    "Each subscription item's RecurringPriceDetail must have the same billing frequency as the overall "
+                            +
+                            "subscription. Subscription period type & frequency: %s & %s. Item period type & frequency: %s & %s.",
                     pricingContext.getPeriodType(), pricingContext.getPeriodFrequency(),
                     recurringPriceDetail.getPeriodType(),
                     recurringPriceDetail.getPeriodFrequency()));
         }
 
-        Integer period = pricingContext.getEstimatedFuturePaymentPeriod();
         MonetaryAmount typicalRecurringPrice = recurringPriceDetail.getPrice();
         if (isCreate(pricingContext.getFlow())) {
             return determineProratedAmountForCreateFlow(cartItem, period, pricingContext,
@@ -530,8 +553,9 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         }
     }
 
-    protected MonetaryAmount determineCreditedAmount(@lombok.NonNull CartItem cartItem,
-            @lombok.NonNull SubscriptionPricingContext pricingContext,
+    protected MonetaryAmount determineCreditedAmount(@NonNull CartItem cartItem,
+            @Nullable Integer period,
+            @NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         if (!isCreate(pricingContext.getFlow())
                 && isInAdvance(pricingContext.getPaymentStrategy())) {
@@ -541,8 +565,9 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return MonetaryUtils.zero(pricingContext.getCurrency());
     }
 
-    protected MonetaryAmount determinePriorUnbilledAmount(@lombok.NonNull CartItem cartItem,
-            @lombok.NonNull SubscriptionPricingContext pricingContext,
+    protected MonetaryAmount determinePriorUnbilledAmount(@NonNull CartItem cartItem,
+            @Nullable Integer period,
+            @NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         if (!isCreate(pricingContext.getFlow())
                 && isPostpaid(pricingContext.getPaymentStrategy())) {
@@ -550,17 +575,6 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         }
 
         return MonetaryUtils.zero(pricingContext.getCurrency());
-    }
-
-    protected List<SubscriptionPriceItemDetail> buildItemDetailsForDependentCartItems(
-            @lombok.NonNull CartItem cartItem,
-            @lombok.NonNull SubscriptionPricingContext pricingContext,
-            @Nullable ContextInfo contextInfo) {
-        return cartItem.getDependentCartItems().stream()
-                .filter(doi -> !isSeparateFromPrimaryItem(doi))
-                .map(doi -> buildItemDetailForCartItem(doi, cartItem, pricingContext,
-                        contextInfo))
-                .toList();
     }
 
     protected MonetaryAmount calculateProratedAmountTotal(
@@ -603,10 +617,9 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         List<EstimatedFuturePayment> estimatedFuturePayments = new ArrayList<>();
 
         pricingContext.getPeriodDefinitions().forEach((period, periodDefinition) -> {
-            pricingContext.setEstimatedFuturePaymentPeriod(period);
-
             EstimatedFuturePayment estimatedFuturePayment =
-                    buildEstimatedFuturePayment(subscriptionRootItem, pricingContext, contextInfo);
+                    buildEstimatedFuturePayment(subscriptionRootItem, period, pricingContext,
+                            contextInfo);
 
             estimatedFuturePayments.add(estimatedFuturePayment);
         });
@@ -616,15 +629,16 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
 
     protected EstimatedFuturePayment buildEstimatedFuturePayment(
             @lombok.NonNull CartItem subscriptionRootItem,
+            @Nullable Integer period,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         EstimatedFuturePayment estimatedFuturePayment =
                 typeFactory.get(EstimatedFuturePayment.class);
-        populatePeriodAndBillDates(estimatedFuturePayment, subscriptionRootItem, pricingContext,
-                contextInfo);
+        populatePeriodAndBillDates(estimatedFuturePayment, subscriptionRootItem, period,
+                pricingContext, contextInfo);
 
         List<SubscriptionPriceItemDetail> itemDetails = buildItemDetails(
-                subscriptionRootItem, pricingContext, contextInfo);
+                subscriptionRootItem, period, pricingContext, contextInfo);
         estimatedFuturePayment.setItemDetails(itemDetails);
 
         MonetaryAmount proratedAmount =
@@ -649,10 +663,10 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
     protected void populatePeriodAndBillDates(
             @lombok.NonNull EstimatedFuturePayment estimatedFuturePayment,
             @lombok.NonNull CartItem subscriptionRootItem,
+            @Nullable Integer period,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
-        Integer currentPeriod = pricingContext.getEstimatedFuturePaymentPeriod();
-        PeriodDefinition periodDefinition = pricingContext.getPeriodDefinition(currentPeriod);
+        PeriodDefinition periodDefinition = pricingContext.getPeriodDefinition(period);
 
         estimatedFuturePayment.setBillDate(periodDefinition.getBillDate());
         estimatedFuturePayment.setPeriodStartDate(periodDefinition.getPeriodStartDate());

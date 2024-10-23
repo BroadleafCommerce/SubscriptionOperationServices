@@ -28,12 +28,15 @@ public final class CartItemAttributeConstants {
     public static final class Internal {
         /**
          * Describes the subscription action flow that is being executed.
+         * 
          * @see DefaultSubscriptionActionFlow
          */
         public static final String SUBSCRIPTION_ACTION_FLOW = "subscriptionActionFlow";
 
         /**
-         * Describes whether subscription payments pay in advance of receiving goods/access vs are paying for previous goods/access.
+         * Describes whether subscription payments pay in advance of receiving goods/access vs are
+         * paying for previous goods/access.
+         * 
          * @see DefaultSubscriptionPaymentStrategy
          */
         public static final String SUBSCRIPTION_PAYMENT_STRATEGY = "subscriptionPaymentStrategy";
@@ -44,14 +47,14 @@ public final class CartItemAttributeConstants {
         public static final String IS_SEPARATE_FROM_PRIMARY_ITEM = "isSeparateFromPrimaryItem";
 
         /**
-         * The id of an existing subscription. This is most relevant for subscription action
-         * flows that are modifying an existing subscription.
+         * The id of an existing subscription. This is most relevant for subscription action flows
+         * that are modifying an existing subscription.
          */
         public static final String EXISTING_SUBSCRIPTION_ID = "existingSubscriptionId";
 
         /**
-         * The next bill date of an existing subscription. This is most relevant for subscription action
-         * flows that are modifying an existing subscription.
+         * The next bill date of an existing subscription. This is most relevant for subscription
+         * action flows that are modifying an existing subscription.
          */
         public static final String EXISTING_SUBSCRIPTION_NEXT_BILL_DATE =
                 "existingSubscriptionNextBillDate";
