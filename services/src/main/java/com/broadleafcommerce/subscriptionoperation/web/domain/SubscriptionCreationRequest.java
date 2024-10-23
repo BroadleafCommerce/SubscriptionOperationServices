@@ -25,6 +25,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStat
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -199,6 +200,16 @@ public class SubscriptionCreationRequest implements Serializable {
      * Whether the system has outstanding entitlements to grant for this subscription
      */
     private boolean needGrantEntitlements = false;
+
+    /**
+     * Whether this subscription automatically renews at the end of the current subscription term.
+     */
+    private boolean autoRenewalEnabled = true;
+
+    /**
+     * The end of term date for this subscription.
+     */
+    private Instant endOfTermDate;
 
     /**
      * Miscellaneous attributes that can be set to this request in order to inform business logic

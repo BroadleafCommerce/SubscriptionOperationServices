@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonView;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -257,9 +258,14 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private List<SubscriptionAdjustment> subscriptionAdjustments = new ArrayList<>();
 
     /**
-     * Whether this subscription automatically renews at the end of the current billing cycle.
+     * Whether this subscription automatically renews at the end of the current subscription term.
      */
-    private boolean autoRenewalEnabled = false;
+    private boolean autoRenewalEnabled = true;
+
+    /**
+     * The end of term date for this subscription.
+     */
+    private Instant endOfTermDate;
 
     /**
      * The version of this subscription. Used for checking if the requested version of the

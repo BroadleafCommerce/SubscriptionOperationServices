@@ -44,7 +44,7 @@ public class ChangeAutoRenewalRequest implements Serializable {
     /**
      * The state of the auto renewal setting to change to
      */
-    private boolean autoRenewalEnabled = false;
+    private boolean autoRenewalEnabled = true;
 
     /**
      * Additional attributes to be used in the request
