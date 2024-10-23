@@ -16,6 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain;
 
+import com.broadleafcommerce.cart.client.domain.CartItem;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
@@ -27,7 +28,8 @@ import javax.money.MonetaryAmount;
 import lombok.Data;
 
 /**
- * TODO
+ * For a subscription cart item, this object describes the amount that the customer should be
+ * charged now vs their future payments.
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -36,17 +38,17 @@ public class SubscriptionPriceResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * TODO
+     * Reference to the root subscription {@link CartItem}
      */
     private String rootCartItemId;
 
     /**
-     * TODO
+     * Type of item that this object represents. For example, BLC_PRODUCT.
      */
     private String rootItemRefType;
 
     /**
-     * TODO
+     * Reference to the id of the item represented by this object. For example, the product id.
      */
     private String rootItemRef;
 
@@ -95,17 +97,19 @@ public class SubscriptionPriceResponse implements Serializable {
     private MonetaryAmount priorUnbilledAmount;
 
     /**
-     * TODO
+     * A list of {@link SubscriptionPriceItemDetail SubscriptionPriceItemDetails} describing the
+     * individual item prices that contributed to the overall {@link #getAmountDueNow()}.
      */
     private List<SubscriptionPriceItemDetail> dueNowItemDetails = new ArrayList<>();
 
     /**
-     * TODO
+     * A collection of {@link EstimatedFuturePayment} objects describing the timing & amount of
+     * future subscription payments.
      */
     private List<EstimatedFuturePayment> estimatedFuturePayments = new ArrayList<>();
 
-    // /**
-    // * TODO
-    // */
-    // private List<RemovedAdjustment> removedAdjustments = new ArrayList<>();
+     /**
+     * TODO
+     */
+     // private List<RemovedAdjustment> removedAdjustments = new ArrayList<>();
 }

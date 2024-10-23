@@ -28,7 +28,7 @@ import javax.money.MonetaryAmount;
 import lombok.Data;
 
 /**
- * TODO
+ * Describes the timing & amount of future subscription payments.
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -37,17 +37,17 @@ public class EstimatedFuturePayment implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * TODO
+     * The date on which the customer is expected to be billed.
      */
-    private Instant billDate;
+    private Instant invoiceDate;
 
     /**
-     * TODO
+     * The date describing the beginning of the billing period that is being billed for.
      */
     private Instant periodStartDate;
 
     /**
-     * TODO
+     * The date describing the end of the billing period that is being billed for.
      */
     private Instant periodEndDate;
 
@@ -81,7 +81,8 @@ public class EstimatedFuturePayment implements Serializable {
     private MonetaryAmount priorUnbilledAmount;
 
     /**
-     * TODO
+     * A list of {@link SubscriptionPriceItemDetail SubscriptionPriceItemDetails} describing the
+     * individual item prices that contributed to the overall {@link #getAmount()}.
      */
     private List<SubscriptionPriceItemDetail> itemDetails = new ArrayList<>();
 }

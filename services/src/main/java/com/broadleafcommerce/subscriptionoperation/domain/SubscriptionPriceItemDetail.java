@@ -16,6 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.domain;
 
+import com.broadleafcommerce.cart.client.domain.CartItem;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
@@ -25,7 +26,8 @@ import javax.money.MonetaryAmount;
 import lombok.Data;
 
 /**
- * TODO
+ * Describes the amount being charged for this item. This may be an amount due now, or a future
+ * payment.
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,32 +36,33 @@ public class SubscriptionPriceItemDetail implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * TODO
+     * Reference to the subscription {@link CartItem}
      */
     private String cartItemId;
 
     /**
-     * TODO
+     * Type of item that this object represents. For example, BLC_PRODUCT.
      */
     private String itemRefType;
 
     /**
-     * TODO
+     * Reference to the id of the item represented by this object. For example, the product id.
      */
     private String itemRef;
 
     /**
-     * TODO
+     * Type of the parent subscription item's backing item if this is a child subscription item
      */
     private String parentItemRefType;
 
     /**
-     * TODO
+     * Reference of the parent subscription item's backing item if this is a child subscription item
      */
     private String parentItemRef;
 
     /**
-     * TODO
+     * Amount due on the payment schedule date for this item. Equal to {@link #getProratedAmount()}
+     * + {@link #getPriorUnbilledAmount()} - {@link #getCreditedAmount()}.
      */
     private MonetaryAmount amount;
 
