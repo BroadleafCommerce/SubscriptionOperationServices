@@ -202,7 +202,7 @@ public class SubscriptionCreationRequest implements Serializable {
     private boolean needGrantEntitlements = false;
 
     /**
-     * Whether this subscription automatically renews at the end of the current billing cycle.
+     * Whether this subscription automatically renews at the end of the current subscription term.
      */
     private boolean autoRenewalEnabled = true;
 
