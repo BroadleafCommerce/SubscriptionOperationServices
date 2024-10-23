@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.money.MonetaryAmount;
 
@@ -30,18 +32,28 @@ import lombok.Data;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PaymentScheduleItem implements Serializable {
+public class EstimatedFuturePayment implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * TODO
      */
-    private Instant invoiceDate;
+    private Instant billDate;
 
     /**
-     * Amount due on the payment schedule date. Equal to proratedAmount + priorUnbilledAmount -
-     * creditedAmount.
+     * TODO
+     */
+    private Instant periodStartDate;
+
+    /**
+     * TODO
+     */
+    private Instant periodEndDate;
+
+    /**
+     * Amount due on the payment schedule date. Equal to {@link #getProratedAmount()} +
+     * {@link #getPriorUnbilledAmount()} - {@link #getCreditedAmount()}.
      */
     private MonetaryAmount amount;
 
@@ -68,7 +80,8 @@ public class PaymentScheduleItem implements Serializable {
      */
     private MonetaryAmount priorUnbilledAmount;
 
-    private Instant periodStartDate;
-
-    private Instant periodEndDate;
+    /**
+     * TODO
+     */
+    private List<SubscriptionPriceItemDetail> itemDetails = new ArrayList<>();
 }

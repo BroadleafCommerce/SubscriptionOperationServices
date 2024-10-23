@@ -19,8 +19,6 @@ package com.broadleafcommerce.subscriptionoperation.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.money.MonetaryAmount;
 
@@ -31,33 +29,39 @@ import lombok.Data;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SubscriptionPriceResponse implements Serializable {
+public class SubscriptionPriceItemDetail implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * TODO
      */
-    private String rootCartItemId;
+    private String cartItemId;
 
     /**
      * TODO
      */
-    private String rootItemRefType;
+    private String itemRefType;
 
     /**
      * TODO
      */
-    private String rootItemRef;
+    private String itemRef;
 
     /**
-     * Amount due today, which is typically captured immediately. Equal to
-     * {@link #getProratedAmount()} + {@link #getPriorUnbilledAmount()} -
-     * {@link #getCreditedAmount()}.
-     * <p/>
-     * Note: This value is allowed to be negative, representing a required refund.
+     * TODO
      */
-    private MonetaryAmount amountDueNow;
+    private String parentItemRefType;
+
+    /**
+     * TODO
+     */
+    private String parentItemRef;
+
+    /**
+     * TODO
+     */
+    private MonetaryAmount amount;
 
     /**
      * The subscription price, prorated relative to the next invoice date. For a new purchase, this
@@ -93,19 +97,4 @@ public class SubscriptionPriceResponse implements Serializable {
      * Note: This typically only impacts the first period in the estimatedFuturePayments list.
      */
     private MonetaryAmount priorUnbilledAmount;
-
-    /**
-     * TODO
-     */
-    private List<SubscriptionPriceItemDetail> dueNowItemDetails = new ArrayList<>();
-
-    /**
-     * TODO
-     */
-    private List<EstimatedFuturePayment> estimatedFuturePayments = new ArrayList<>();
-
-    // /**
-    // * TODO
-    // */
-    // private List<RemovedAdjustment> removedAdjustments = new ArrayList<>();
 }
