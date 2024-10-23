@@ -26,13 +26,15 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.subscriptionoperation.domain.Product;
-import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
-import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionOperationService;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionValidationService;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionValidationService;
+import com.broadleafcommerce.subscriptionoperation.service.modification.CancelSubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.service.modification.DowngradeSubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.service.modification.ModifySubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.service.modification.UpgradeSubscriptionHandler;
 import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProvider;
@@ -41,6 +43,7 @@ import com.broadleafcommerce.subscriptionoperation.service.provider.external.Ext
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.List;
 
 @Configuration
 public class SubscriptionOperationServiceAutoConfiguration {
@@ -53,13 +56,35 @@ public class SubscriptionOperationServiceAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(name = "cancelSubscriptionModificationHandler")
+    CancelSubscriptionHandler cancelSubscriptionModificationHandler(TypeFactory typeFactory) {
+        return new CancelSubscriptionHandler(typeFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "upgradeSubscriptionModificationHandler")
+    UpgradeSubscriptionHandler upgradeSubscriptionModificationHandler(TypeFactory typeFactory) {
+        return new UpgradeSubscriptionHandler(typeFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "downgradeSubscriptionModificationHandler")
+    DowngradeSubscriptionHandler downgradeSubscriptionModificationHandler(TypeFactory typeFactory) {
+        return new DowngradeSubscriptionHandler(typeFactory);
+    }
+
+    @Bean
     @ConditionalOnMissingBean
-    public SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService(
+    public SubscriptionOperationService<SubscriptionWithItems> subscriptionOperationService(
             SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
+            SubscriptionValidationService subscriptionValidationService,
             TypeFactory typeFactory,
+            List<ModifySubscriptionHandler> modifySubscriptionHandlers,
             MessageSource messageSource) {
         return new DefaultSubscriptionOperationService<>(subscriptionProvider,
+                subscriptionValidationService,
                 typeFactory,
+                modifySubscriptionHandlers,
                 messageSource);
     }
 

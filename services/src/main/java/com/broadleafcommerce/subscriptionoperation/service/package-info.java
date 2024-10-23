@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Broadleaf Commerce
+ * Copyright (C) 2009 - 2020 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -14,30 +14,7 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
+@NonNullApi
 package com.broadleafcommerce.subscriptionoperation.service;
 
-import org.springframework.lang.Nullable;
-
-import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
-
-
-/**
- * Service for validating actions against subscriptions.
- *
- * @author Sunny Yu
- */
-public interface SubscriptionValidationService {
-
-    /**
-     * Validates the creation of a subscription.
-     *
-     * @param request the {@link SubscriptionCreationRequest}
-     * @param contextInfo context information around multitenant state
-     * @throws InvalidSubscriptionCreationRequestException if the request is invalid
-     */
-    void validateSubscriptionCreation(SubscriptionCreationRequest request,
-            @Nullable ContextInfo contextInfo);
-
-}
+import org.springframework.lang.NonNullApi;

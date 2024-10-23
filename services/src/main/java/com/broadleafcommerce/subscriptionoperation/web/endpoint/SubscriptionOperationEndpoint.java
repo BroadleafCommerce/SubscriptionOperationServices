@@ -16,16 +16,15 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
-
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
-import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPutMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,13 +33,12 @@ import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
 import com.broadleafcommerce.data.tracking.core.policy.Policy;
 import com.broadleafcommerce.data.tracking.core.type.OperationType;
-import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
-import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
@@ -54,7 +52,7 @@ public class SubscriptionOperationEndpoint {
     public static final String BASE_URI = "/subscription-ops";
 
     @Getter(AccessLevel.PROTECTED)
-    protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
+    protected final SubscriptionOperationService<SubscriptionWithItems> subscriptionOperationService;
 
     @FrameworkGetMapping(params = {"userRefType", "userRef"})
     @Policy(permissionRoots = "SYSTEM_SUBSCRIPTION")
@@ -88,24 +86,14 @@ public class SubscriptionOperationEndpoint {
                 contextInfo);
     }
 
-    @FrameworkPostMapping(value = "/{subscriptionId}/upgrade")
+    @FrameworkPostMapping(value = "/{subscriptionId}/modifications",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     @Policy(permissionRoots = {"SYSTEM_SUBSCRIPTION"}, operationTypes = OperationType.UPDATE)
-    public Subscription upgradeSubscription(
-            @RequestParam String subscriptionId,
-            @RequestBody SubscriptionUpgradeRequest upgradeRequest,
+    public ModifySubscriptionResponse modifySubscription(
+            @PathVariable("subscriptionId") String subscriptionId,
+            @RequestBody ModifySubscriptionRequest request,
             @ContextOperation(OperationType.UPDATE) final ContextInfo contextInfo) {
-        upgradeRequest.setPriorSubscriptionId(subscriptionId);
-        return subscriptionOperationService.upgradeSubscription(upgradeRequest, contextInfo);
-    }
-
-    @FrameworkPutMapping(value = "/{subscriptionId}/cancel")
-    @Policy(permissionRoots = {"SYSTEM_SUBSCRIPTION"}, operationTypes = OperationType.UPDATE)
-    public Subscription cancelSubscription(
-            @RequestParam String subscriptionId,
-            @RequestBody SubscriptionCancellationRequest subscriptionCancellationRequest,
-            @ContextOperation(OperationType.UPDATE) final ContextInfo contextInfo) {
-        subscriptionCancellationRequest.setSubscriptionId(subscriptionId);
-        return subscriptionOperationService.cancelSubscription(subscriptionCancellationRequest,
-                contextInfo);
+        request.setSubscriptionId(subscriptionId);
+        return subscriptionOperationService.modifySubscription(request, contextInfo);
     }
 }

@@ -34,6 +34,7 @@ import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidChan
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionDowngradeRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionUpgradeRequestException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.UnsupportedSubscriptionModificationRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -64,7 +65,7 @@ public class SubscriptionOperationExceptionAdvisor {
         return new ApiError("INVALID_SUBSCRIPTION_CREATION_REQUEST",
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST)
-                        .toResponseEntity();
+                .toResponseEntity();
     }
 
     @ExceptionHandler
@@ -75,7 +76,7 @@ public class SubscriptionOperationExceptionAdvisor {
         return new ApiError("INVALID_SUBSCRIPTION_UPGRADE_REQUEST",
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST)
-                        .toResponseEntity();
+                .toResponseEntity();
     }
 
     @ExceptionHandler
@@ -86,7 +87,7 @@ public class SubscriptionOperationExceptionAdvisor {
         return new ApiError("INVALID_SUBSCRIPTION_DOWNGRADE_REQUEST",
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST)
-                        .toResponseEntity();
+                .toResponseEntity();
     }
 
     @ExceptionHandler
@@ -108,7 +109,7 @@ public class SubscriptionOperationExceptionAdvisor {
         return new ApiError("INSUFFICIENT_SUBSCRIPTION_ACCESS",
                 ex.getMessage(),
                 HttpStatus.FORBIDDEN)
-                        .toResponseEntity();
+                .toResponseEntity();
     }
 
     @ExceptionHandler({ProviderApiException.class})
@@ -131,12 +132,23 @@ public class SubscriptionOperationExceptionAdvisor {
                 return new ApiError("PROVIDER_API_ERROR",
                         receivedException.getMessage(),
                         receivedException.getStatusCode())
-                                .toResponseEntity();
+                        .toResponseEntity();
             }
         }
 
         logError(ex, request);
         return new ApiError("PROVIDER_API_ERROR", ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR)
+                .toResponseEntity();
+    }
+
+    @ExceptionHandler(UnsupportedSubscriptionModificationRequestException.class)
+    public ResponseEntity<ApiError> handleUnsupportedSubscriptionModificationRequestException(
+            UnsupportedSubscriptionModificationRequestException ex,
+            WebRequest request) {
+        logError(ex, request);
+        return new ApiError("UNSUPPORTED_MODIFICATION_REQUEST",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST)
                 .toResponseEntity();
     }
 

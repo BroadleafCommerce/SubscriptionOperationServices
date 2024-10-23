@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Broadleaf Commerce
+ * Copyright (C) 2009 - 2020 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -14,46 +14,26 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.web.domain;
+package com.broadleafcommerce.subscriptionoperation.service.exception;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.lang.NonNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
+
+import lombok.Getter;
 
 /**
- * TODO
+ * @author Nathan Moore (nathandmoore)
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class SubscriptionCancellationRequest implements Serializable {
+@Getter
+public class UnsupportedSubscriptionModificationRequestException extends RuntimeException {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    private final ModifySubscriptionRequest request;
 
-    /**
-     * TODO
-     */
-    private String subscriptionId;
-
-    /**
-     * TODO
-     */
-    private String reason;
-
-    /**
-     * TODO
-     */
-    private boolean immediateCancellation;
-
-    /**
-     * Miscellaneous attributes that can be set to this request in order to inform business logic
-     */
-    private Map<String, Object> additionalAttributes = new HashMap<>();
+    public UnsupportedSubscriptionModificationRequestException(
+            @NonNull @lombok.NonNull ModifySubscriptionRequest request) {
+        super("Requested action %s cannot be handled.".formatted(request.getAction().getActionType()));
+        this.request = request;
+    }
 
 }

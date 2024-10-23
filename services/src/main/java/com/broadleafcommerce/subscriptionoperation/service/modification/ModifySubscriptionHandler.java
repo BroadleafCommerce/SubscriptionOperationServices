@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Broadleaf Commerce
+ * Copyright (C) 2009 - 2020 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -14,24 +14,22 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.web.domain;
+package com.broadleafcommerce.subscriptionoperation.service.modification;
 
-import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
+import org.springframework.lang.Nullable;
 
-import java.io.Serial;
-import java.io.Serializable;
+import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionResponse;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+/**
+ * @author Nathan Moore (nathandmoore)
+ */
+public interface ModifySubscriptionHandler {
 
-@Data
-@NoArgsConstructor
-public class SubscriptionUpgradeRequest implements Serializable {
+    boolean canHandle(ModifySubscriptionRequest request, @Nullable ContextInfo contextInfo);
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    ModifySubscriptionResponse handle(ModifySubscriptionRequest request,
+            @Nullable ContextInfo contextInfo);
 
-    private Subscription newSubscription;
-
-    private String priorSubscriptionId;
 }

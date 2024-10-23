@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Broadleaf Commerce
+ * Copyright (C) 2009 - 2020 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -16,38 +16,23 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
+
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * A request DTO used to change the auto renewal setting of a subscription.
- *
- * @author Sunny Yu
+ * @author Nathan Moore (nathandmoore)
  */
 @Data
-public class ChangeAutoRenewalRequest implements Serializable {
-
+public class ModifySubscriptionResponse implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * The id of the subscription to change the auto renewal setting for
-     */
-    @NotNull
-    private String subscriptionId;
+    private String cartId;
 
-    /**
-     * The state of the auto renewal setting to change to
-     */
-    private boolean autoRenewalEnabled = true;
+    private SubscriptionWithItems subscription;
 
-    /**
-     * Additional attributes to be used in the request
-     */
-    private Map<String, Object> additionalAttributes = new HashMap<>();
 }
