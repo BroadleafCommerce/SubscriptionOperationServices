@@ -55,7 +55,7 @@ public class SubscriptionPricingContext implements Serializable {
     /**
      * TODO
      */
-    private String pricingStrategy;
+    private String paymentStrategy;
 
     /**
      * TODO

@@ -24,7 +24,8 @@ import java.time.Instant;
 import lombok.Data;
 
 /**
- * TODO
+ * Describes subscription billing period, including the beginning, end, & when the customer will be
+ * billed.
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,17 +34,17 @@ public class PeriodDefinition implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * TODO
+     * The date on which the customer is expected to be billed.
      */
     private Instant billDate;
 
     /**
-     * TODO
+     * The date describing the beginning of the billing period that is being billed for.
      */
     private Instant periodStartDate;
 
     /**
-     * TODO
+     * The date describing the end of the billing period that is being billed for.
      */
     private Instant periodEndDate;
 }

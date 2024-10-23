@@ -17,7 +17,7 @@
 package com.broadleafcommerce.subscriptionoperation.service;
 
 import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.SUBSCRIPTION_ACTION_FLOW;
-import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.SUBSCRIPTION_PRICING_STRATEGY;
+import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.SUBSCRIPTION_PAYMENT_STRATEGY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -41,7 +41,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPricingCon
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionFlow;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionItemReferenceType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPricingStrategy;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultTermDurationType;
 
 import java.time.Instant;
@@ -71,7 +71,7 @@ public class SubscriptionPricingServiceTest {
     @Test
     void testIdentificationOfRootItems() {
         Cart cart = buildCart(DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.POSTPAID.name(),
+                DefaultSubscriptionPaymentStrategy.POSTPAID.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name());
 
         List<CartItem> subscriptionRootItems = service.identifySubscriptionRootItems(cart, null)
@@ -84,7 +84,7 @@ public class SubscriptionPricingServiceTest {
     @Test
     void testIdentificationOfRootItems_twoSubs() {
         Cart cart = buildCart(DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.POSTPAID.name(),
+                DefaultSubscriptionPaymentStrategy.POSTPAID.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name());
         cart = addExtraSubscriptionItem(cart);
 
@@ -103,7 +103,7 @@ public class SubscriptionPricingServiceTest {
     @Test
     void testBuildSubscriptionPricingContext() {
         Cart cart = buildCart(DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.POSTPAID.name(),
+                DefaultSubscriptionPaymentStrategy.POSTPAID.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name());
 
         CartItem subscriptionRootItem = service.identifySubscriptionRootItems(cart, null)
@@ -116,8 +116,8 @@ public class SubscriptionPricingServiceTest {
                 .isEqualTo(DefaultSubscriptionActionFlow.CREATE.name());
         assertThat(subscriptionPricingContext.getFlowSubmissionDate()).isNotNull();
         assertThat(subscriptionPricingContext.getExistingSubscriptionId()).isBlank();
-        assertThat(subscriptionPricingContext.getPricingStrategy())
-                .isEqualTo(DefaultSubscriptionPricingStrategy.POSTPAID.name());
+        assertThat(subscriptionPricingContext.getPaymentStrategy())
+                .isEqualTo(DefaultSubscriptionPaymentStrategy.POSTPAID.name());
         assertThat(subscriptionPricingContext.getPeriodType())
                 .isEqualTo(DefaultSubscriptionPeriodType.MONTHLY.name());
         assertThat(subscriptionPricingContext.getPeriodFrequency()).isEqualTo(1);
@@ -128,7 +128,7 @@ public class SubscriptionPricingServiceTest {
     @Test
     void testBuildSubscriptionPricingContext_postpaidPeriodDefinitions() {
         Cart cart = buildCart(DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.POSTPAID.name(),
+                DefaultSubscriptionPaymentStrategy.POSTPAID.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name());
 
         CartItem subscriptionRootItem = service.identifySubscriptionRootItems(cart, null)
@@ -179,7 +179,7 @@ public class SubscriptionPricingServiceTest {
     @Test
     void testBuildSubscriptionPricingContext_inAdvancePeriodDefinitions() {
         Cart cart = buildCart(DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.IN_ADVANCE.name(),
+                DefaultSubscriptionPaymentStrategy.IN_ADVANCE.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name());
 
         CartItem subscriptionRootItem = service.identifySubscriptionRootItems(cart, null)
@@ -234,7 +234,7 @@ public class SubscriptionPricingServiceTest {
     @Test
     void testPriceSubscriptions_dueNowZero() {
         Cart cart = buildCart(DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.POSTPAID.name(),
+                DefaultSubscriptionPaymentStrategy.POSTPAID.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name());
 
         CartItem subscriptionRootCartItem = cart.getCartItems().get(0);
@@ -294,7 +294,7 @@ public class SubscriptionPricingServiceTest {
     void testPriceSubscriptions_dueNow_postpaid() {
         Cart cart = buildCart(true,
                 DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.POSTPAID.name(),
+                DefaultSubscriptionPaymentStrategy.POSTPAID.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name(), 1);
 
         CartItem subscriptionRootCartItem = cart.getCartItems().get(0);
@@ -357,7 +357,7 @@ public class SubscriptionPricingServiceTest {
     void testPriceSubscriptions_dueNow_inAdvance() {
         Cart cart = buildCart(true,
                 DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.IN_ADVANCE.name(),
+                DefaultSubscriptionPaymentStrategy.IN_ADVANCE.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name(), 1);
 
         CartItem subscriptionRootCartItem = cart.getCartItems().get(0);
@@ -420,7 +420,7 @@ public class SubscriptionPricingServiceTest {
     void testPriceSubscriptions_estimatedFuturePayments_postpaid() {
         Cart cart = buildCart(false,
                 DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.POSTPAID.name(),
+                DefaultSubscriptionPaymentStrategy.POSTPAID.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name(), 1);
 
         CartItem subscriptionRootCartItem = cart.getCartItems().get(0);
@@ -538,7 +538,7 @@ public class SubscriptionPricingServiceTest {
     void testPriceSubscriptions_estimatedFuturePayments_inAdvance() {
         Cart cart = buildCart(true,
                 DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.IN_ADVANCE.name(),
+                DefaultSubscriptionPaymentStrategy.IN_ADVANCE.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name(), 1);
 
         CartItem subscriptionRootCartItem = cart.getCartItems().get(0);
@@ -656,7 +656,7 @@ public class SubscriptionPricingServiceTest {
     void testPriceSubscriptions_estimatedFuturePayments_postpaid_atypicalBillDate() {
         Cart cart = buildCart(false,
                 DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.POSTPAID.name(),
+                DefaultSubscriptionPaymentStrategy.POSTPAID.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name(), 1);
 
         LocalDateTime ldt = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
@@ -780,7 +780,7 @@ public class SubscriptionPricingServiceTest {
     void testPriceSubscriptions_estimatedFuturePayments_inAdvance_atypicalBillDate() {
         Cart cart = buildCart(false,
                 DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.IN_ADVANCE.name(),
+                DefaultSubscriptionPaymentStrategy.IN_ADVANCE.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name(), 1);
 
         LocalDateTime ldt = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
@@ -902,7 +902,7 @@ public class SubscriptionPricingServiceTest {
     @Test
     void testBuildSubscriptionPricingContext_inAdvancePeriodDefinitions_vfeCustomization() {
         Cart cart = buildCart(DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.IN_ADVANCE.name(),
+                DefaultSubscriptionPaymentStrategy.IN_ADVANCE.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name());
 
         CartItem subscriptionRootItem = service.identifySubscriptionRootItems(cart, null)
@@ -957,7 +957,7 @@ public class SubscriptionPricingServiceTest {
     void testPriceSubscriptions_estimatedFuturePayments_inAdvance_atypicalBillDate_vfeCustomization() {
         Cart cart = buildCart(false,
                 DefaultSubscriptionActionFlow.CREATE.name(),
-                DefaultSubscriptionPricingStrategy.IN_ADVANCE.name(),
+                DefaultSubscriptionPaymentStrategy.IN_ADVANCE.name(),
                 DefaultSubscriptionPeriodType.MONTHLY.name(), 1);
 
         LocalDateTime ldt = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
@@ -1079,14 +1079,14 @@ public class SubscriptionPricingServiceTest {
     }
 
     private Cart buildCart(String subscriptionActionFlow,
-            String subscriptionPricingStrategy,
+            String subscriptionPaymentStrategy,
             String periodType) {
-        return buildCart(false, subscriptionActionFlow, subscriptionPricingStrategy, periodType, 1);
+        return buildCart(false, subscriptionActionFlow, subscriptionPaymentStrategy, periodType, 1);
     }
 
     private Cart buildCart(boolean includeDueNowPrice,
             String subscriptionActionFlow,
-            String subscriptionPricingStrategy,
+            String subscriptionPaymentStrategy,
             String periodType,
             int periodFrequency) {
         Cart cart = new Cart();
@@ -1116,8 +1116,8 @@ public class SubscriptionPricingServiceTest {
         parentItem.setTermDurationType(DefaultTermDurationType.MONTHS.name());
         parentItem.setTermDurationLength(1);
         parentItem.getInternalAttributes().put(SUBSCRIPTION_ACTION_FLOW, subscriptionActionFlow);
-        parentItem.getInternalAttributes().put(SUBSCRIPTION_PRICING_STRATEGY,
-                subscriptionPricingStrategy);
+        parentItem.getInternalAttributes().put(SUBSCRIPTION_PAYMENT_STRATEGY,
+                subscriptionPaymentStrategy);
 
         RecurringPriceDetail parentRecurringPrice = new RecurringPriceDetail();
         parentRecurringPrice.setPrice(MonetaryUtils.toAmount(29.00, "USD"));

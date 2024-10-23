@@ -20,13 +20,13 @@ import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartI
 import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.EXISTING_SUBSCRIPTION_NEXT_BILL_DATE;
 import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.IS_SEPARATE_FROM_PRIMARY_ITEM;
 import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.SUBSCRIPTION_ACTION_FLOW;
-import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.SUBSCRIPTION_PRICING_STRATEGY;
+import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartItemAttributeConstants.Internal.SUBSCRIPTION_PAYMENT_STRATEGY;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionFlow.isCreate;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType.isAnnually;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType.isMonthly;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType.isQuarterly;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPricingStrategy.isInAdvance;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPricingStrategy.isPostpaid;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy.isInAdvance;
+import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy.isPostpaid;
 
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.lang.Nullable;
@@ -133,8 +133,8 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         context.setFlow(getSubscriptionActionFlow(subscriptionRootItem, contextInfo));
         context.setExistingSubscriptionId(
                 getExistingSubscriptionId(subscriptionRootItem, contextInfo));
-        context.setPricingStrategy(
-                getSubscriptionPricingStrategy(subscriptionRootItem, contextInfo));
+        context.setPaymentStrategy(
+                getSubscriptionPaymentStrategy(subscriptionRootItem, contextInfo));
 
         RecurringPriceDetail recurringPriceDetail = subscriptionRootItem.getRecurringPrice();
         context.setPeriodType(recurringPriceDetail.getPeriodType());
@@ -168,18 +168,18 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 EXISTING_SUBSCRIPTION_ID);
     }
 
-    private String getSubscriptionPricingStrategy(@lombok.NonNull CartItem subscriptionRootItem,
+    private String getSubscriptionPaymentStrategy(@lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
-        String subscriptionPricingStrategy = MapUtils.getString(
-                subscriptionRootItem.getInternalAttributes(), SUBSCRIPTION_PRICING_STRATEGY);
+        String subscriptionPaymentStrategy = MapUtils.getString(
+                subscriptionRootItem.getInternalAttributes(), SUBSCRIPTION_PAYMENT_STRATEGY);
 
-        if (StringUtils.isBlank(subscriptionPricingStrategy)) {
+        if (StringUtils.isBlank(subscriptionPaymentStrategy)) {
             throw new IllegalArgumentException(String.format(
-                    "The subscription pricing strategy could not be identified for cart item id: %s & product Id: %s.",
+                    "The subscription payment strategy could not be identified for cart item id: %s & product Id: %s.",
                     subscriptionRootItem.getId(), subscriptionRootItem.getProductId()));
         }
 
-        return subscriptionPricingStrategy;
+        return subscriptionPaymentStrategy;
     }
 
     protected Map<Integer, PeriodDefinition> buildPeriodDefinitions(
@@ -199,7 +199,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             // VFE Customization: remove isPostpaid(pricingContext.getPricingStrategy() from
             // if-condition
             if (period == 1 && pricingContext.getAtypicalNextBillDate() != null
-                    && isPostpaid(pricingContext.getPricingStrategy())) {
+                    && isPostpaid(pricingContext.getPaymentStrategy())) {
                 PeriodDefinition periodDefinition = typeFactory.get(PeriodDefinition.class);
                 Instant billDate =
                         pricingContext.getAtypicalNextBillDate().truncatedTo(ChronoUnit.DAYS);
@@ -251,7 +251,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             @NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         // TODO: remove for VFE customization
-        if (period == 1 && isInAdvance(pricingContext.getPricingStrategy())) {
+        if (period == 1 && isInAdvance(pricingContext.getPaymentStrategy())) {
             return startDate;
         }
 
@@ -284,14 +284,14 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             @lombok.NonNull Instant billDate,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
-        if (isPostpaid(pricingContext.getPricingStrategy())) {
+        if (isPostpaid(pricingContext.getPaymentStrategy())) {
             return previousBillDate;
-        } else if (isInAdvance(pricingContext.getPricingStrategy())) {
+        } else if (isInAdvance(pricingContext.getPaymentStrategy())) {
             return billDate;
         } else {
             throw new IllegalArgumentException(
                     String.format("Unexpected subscription pricing strategy: %s",
-                            pricingContext.getPricingStrategy()));
+                            pricingContext.getPaymentStrategy()));
         }
     }
 
@@ -301,16 +301,16 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             ContextInfo contextInfo) {
         Instant nextBillDate;
 
-        if (isPostpaid(pricingContext.getPricingStrategy())) {
+        if (isPostpaid(pricingContext.getPaymentStrategy())) {
             nextBillDate = periodDefinition.getBillDate();
-        } else if (isInAdvance(pricingContext.getPricingStrategy())) {
+        } else if (isInAdvance(pricingContext.getPaymentStrategy())) {
             nextBillDate = determineNextBillDate(period + 1, periodDefinition.getBillDate(),
                     pricingContext,
                     contextInfo);
         } else {
             throw new IllegalArgumentException(
                     String.format("Unexpected subscription pricing strategy: %s",
-                            pricingContext.getPricingStrategy()));
+                            pricingContext.getPaymentStrategy()));
         }
 
         return getEndOfPreviousDay(nextBillDate);
@@ -469,7 +469,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
 
         // VFE Customization: Remove isPostpaid(pricingContext.getPricingStrategy()) from
         // if-condition
-        if (period == 1 && isPostpaid(pricingContext.getPricingStrategy())) {
+        if (period == 1 && isPostpaid(pricingContext.getPaymentStrategy())) {
             if (pricingContext.getAtypicalNextBillDate() == null) {
                 return typicalRecurringPrice;
             }
@@ -540,7 +540,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         if (!isCreate(pricingContext.getFlow())
-                && isInAdvance(pricingContext.getPricingStrategy())) {
+                && isInAdvance(pricingContext.getPaymentStrategy())) {
             // TODO: Need previous subscription price from cart item
         }
 
@@ -551,7 +551,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         if (!isCreate(pricingContext.getFlow())
-                && isPostpaid(pricingContext.getPricingStrategy())) {
+                && isPostpaid(pricingContext.getPaymentStrategy())) {
             // TODO: Need previous subscription price from cart item
         }
 

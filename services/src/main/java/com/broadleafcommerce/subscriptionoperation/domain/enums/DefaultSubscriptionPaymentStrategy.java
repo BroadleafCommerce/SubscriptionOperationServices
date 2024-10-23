@@ -19,7 +19,7 @@ package com.broadleafcommerce.subscriptionoperation.domain.enums;
 /**
  * TODO
  */
-public enum DefaultSubscriptionPricingStrategy {
+public enum DefaultSubscriptionPaymentStrategy {
 
     /**
      * TODO
