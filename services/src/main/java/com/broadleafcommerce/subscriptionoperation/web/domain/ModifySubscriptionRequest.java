@@ -20,6 +20,7 @@ import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -82,6 +83,7 @@ public class ModifySubscriptionRequest implements Serializable {
      * Holds the {@link SubscriptionWithItems} referenced by {@link #subscriptionId}. This should be
      * hydrated in the service-layer, not on the REST API request.
      */
+    @JsonIgnore
     private transient SubscriptionWithItems subscription;
 
     /**

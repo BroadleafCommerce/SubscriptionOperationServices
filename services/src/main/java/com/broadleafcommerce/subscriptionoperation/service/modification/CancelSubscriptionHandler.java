@@ -18,6 +18,7 @@ package com.broadleafcommerce.subscriptionoperation.service.modification;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
+import org.springframework.validation.Errors;
 
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
@@ -65,8 +66,9 @@ public class CancelSubscriptionHandler extends AbstractModifySubscriptionHandler
 
     @Override
     protected void validateBusinessRules(@lombok.NonNull ModifySubscriptionRequest request,
+            @lombok.NonNull Errors errors,
             @Nullable ContextInfo contextInfo) {
-        // TODO Implement this method
+        // TODO Implement other checks
     }
 
     @Override

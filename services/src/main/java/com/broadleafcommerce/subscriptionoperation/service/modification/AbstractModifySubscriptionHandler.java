@@ -18,15 +18,20 @@ package com.broadleafcommerce.subscriptionoperation.service.modification;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
 
 import com.broadleafcommerce.common.error.validation.ValidationException;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.policy.PolicyResponse;
 import com.broadleafcommerce.data.tracking.core.policy.trackable.TrackablePolicyUtils;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
 import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionResponse;
+
+import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,7 +57,9 @@ public abstract class AbstractModifySubscriptionHandler implements ModifySubscri
             @Nullable ContextInfo contextInfo);
 
     /**
-     * Validates the request to modify the subscription.
+     * Validates the request to modify the subscription. It will handle throwing a
+     * {@link ValidationException} if there are validation errors produced by
+     * {@link #validateBusinessRules(ModifySubscriptionRequest, Errors, ContextInfo)}.
      *
      * @param request The {@link ModifySubscriptionRequest} with the details related to the
      *        modification to make.
@@ -66,11 +73,19 @@ public abstract class AbstractModifySubscriptionHandler implements ModifySubscri
             @lombok.NonNull ModifySubscriptionRequest request,
             @Nullable ContextInfo contextInfo) {
         validateUserAccessToSubscription(request, contextInfo);
-        validateBusinessRules(request, contextInfo);
+
+        Errors errors = new BeanPropertyBindingResult(request, "request");
+        validateActionType(request, errors, contextInfo);
+        validateBusinessRules(request, errors, contextInfo);
+
+        if (errors.hasErrors()) {
+            throw new ValidationException(errors);
+        }
     }
 
     /**
-     * Validates the user's access to the subscription.
+     * Validates the user's access to the subscription. Called by
+     * {@link #validateRequest(ModifySubscriptionRequest, ContextInfo)}.
      *
      * @param request The {@link ModifySubscriptionRequest} with the details related to the
      *        modification to make.
@@ -100,13 +115,39 @@ public abstract class AbstractModifySubscriptionHandler implements ModifySubscri
     }
 
     /**
-     * Hook point to supply custom business rules for specific action types.
+     * Validates the {@link ModifySubscriptionRequest#getAction() requested action} against the
+     * resolved {@link SubscriptionWithItems#getAvailableActions() subscription's available
+     * actions}. Called by {@link #validateRequest(ModifySubscriptionRequest, ContextInfo)}.
      *
      * @param request The {@link ModifySubscriptionRequest} with the details related to the
      *        modification to make.
+     * @param errors Object storing validation errors for the `request`
+     * @param contextInfo the current sandbox and multitenant context
+     */
+    protected void validateActionType(@lombok.NonNull ModifySubscriptionRequest request,
+            @lombok.NonNull Errors errors,
+            @Nullable ContextInfo contextInfo) {
+        List<SubscriptionAction> availableActions = request.getSubscription().getAvailableActions();
+        SubscriptionAction requestedAction = request.getAction();
+
+        if (!availableActions.contains(requestedAction)) {
+            errors.rejectValue("action.actionType",
+                    "subscription.modification.validation.action-type.invalid",
+                    "The requested subscription cannot be cancelled.");
+        }
+    }
+
+    /**
+     * Hook point to supply custom business rules for specific action types. Called by
+     * {@link #validateRequest(ModifySubscriptionRequest, ContextInfo)}.
+     *
+     * @param request The {@link ModifySubscriptionRequest} with the details related to the
+     *        modification to make.
+     * @param errors Object storing validation errors for the `request`
      * @param contextInfo the current sandbox and multitenant context
      */
     protected abstract void validateBusinessRules(ModifySubscriptionRequest request,
+            Errors errors,
             @Nullable ContextInfo contextInfo);
 
     /**
