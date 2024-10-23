@@ -108,8 +108,8 @@ public class SubscriptionPriceResponse implements Serializable {
      */
     private List<EstimatedFuturePayment> estimatedFuturePayments = new ArrayList<>();
 
-     /**
+    /**
      * TODO
      */
-     // private List<RemovedAdjustment> removedAdjustments = new ArrayList<>();
+    // private List<RemovedAdjustment> removedAdjustments = new ArrayList<>();
 }

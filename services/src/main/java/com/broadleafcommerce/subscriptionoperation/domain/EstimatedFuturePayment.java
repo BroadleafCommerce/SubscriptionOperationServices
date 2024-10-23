@@ -39,7 +39,7 @@ public class EstimatedFuturePayment implements Serializable {
     /**
      * The date on which the customer is expected to be billed.
      */
-    private Instant invoiceDate;
+    private Instant billDate;
 
     /**
      * The date describing the beginning of the billing period that is being billed for.
