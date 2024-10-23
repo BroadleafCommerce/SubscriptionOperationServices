@@ -49,6 +49,7 @@ import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgrad
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import cz.jirutka.rsql.parser.ast.Node;
@@ -178,7 +179,6 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
                 subWithItems, contextInfo);
         subscription.setAutoRenewalEnabled(changeRequest.isAutoRenewalEnabled());
 
-        // TODO: Implement actual renewal logic
         if (changeRequest.isAutoRenewalEnabled()) {
             subscription.setSubscriptionNextStatus(null);
             subscription.setNextStatusChangeDate(null);
@@ -188,9 +188,7 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
             subscription.setNextStatusChangeReason(reason);
         } else {
             subscription.setSubscriptionNextStatus(SubscriptionStatuses.CANCELLED.name());
-
-            // TODO: Use next subscription renewal/end of contract date
-            subscription.setNextStatusChangeDate(subscription.getNextBillDate());
+            subscription.setNextStatusChangeDate(Date.from(subscription.getEndOfTermDate()));
 
             String reason = getMessageSource().getMessage(DISABLED_AUTO_RENEWAL.getMessagePath(),
                     null, LocaleContextHolder.getLocale());
@@ -198,8 +196,7 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
         }
 
         return subscriptionProvider.replaceSubscription(changeRequest.getSubscriptionId(),
-                subscription,
-                contextInfo);
+                subscription, contextInfo);
     }
 
     protected void populateSubscriptionActions(Iterable<SWI> subscriptions,
@@ -277,6 +274,8 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
         subscription.setCurrency(request.getCurrency());
         subscription.setNeedGrantEntitlements(request.isNeedGrantEntitlements());
         subscription.setSubscriptionAdjustments(request.getSubscriptionAdjustments());
+        subscription.setEndOfTermDate(request.getEndOfTermDate());
+        subscription.setAutoRenewalEnabled(request.isAutoRenewalEnabled());
         return subscription;
     }
 
