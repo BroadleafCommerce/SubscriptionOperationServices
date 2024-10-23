@@ -14,26 +14,23 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.web.domain;
+package com.broadleafcommerce.subscriptionoperation.service.provider.external;
 
 import com.broadleafcommerce.cart.client.domain.Cart;
-import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
+import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.subscriptionoperation.service.provider.CartOperationsProvider;
+import com.broadleafcommerce.subscriptionoperation.web.domain.CreateCartRequest;
 
-import java.io.Serial;
-import java.io.Serializable;
-
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Nathan Moore (nathandmoore)
  */
-@Data
-public class ModifySubscriptionResponse implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private Cart cart;
-
-    private SubscriptionWithItems subscription;
-
+@RequiredArgsConstructor
+public class ExternalCartOperationsProvider implements CartOperationsProvider {
+    @Override
+    public Cart createCart(CreateCartRequest request, ContextInfo contextInfo) {
+        // todo
+        return null;
+    }
 }

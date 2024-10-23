@@ -17,14 +17,18 @@
 package com.broadleafcommerce.subscriptionoperation.service.modification;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.lang.Nullable;
-import org.springframework.validation.Errors;
 
+import com.broadleafcommerce.cart.client.domain.Cart;
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.policy.trackable.TrackablePolicyUtils;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
+import com.broadleafcommerce.subscriptionoperation.service.provider.CartOperationsProvider;
+import com.broadleafcommerce.subscriptionoperation.web.domain.CreateCartRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionResponse;
 
@@ -34,46 +38,50 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 /**
- * Handles upgrading a {@link Subscription}.
+ * Handles initiating the edit-{@link Subscription} flow.
  *
  * @author Nathan Moore (nathandmoore)
  */
 @RequiredArgsConstructor
-public class UpgradeSubscriptionHandler extends AbstractModifySubscriptionHandler
+public class InitiateEditSubscriptionHandler extends AbstractModifySubscriptionHandler
         implements ModifySubscriptionHandler {
 
     @Getter(value = AccessLevel.PROTECTED)
     private final TypeFactory typeFactory;
 
+    @Getter(value = AccessLevel.PROTECTED)
+    private final CartOperationsProvider cartOperationsProvider;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final MessageSource messageSource;
+
     @Getter(value = AccessLevel.PROTECTED, onMethod_ = @Nullable)
     @Setter(onMethod_ = @Autowired(required = false))
     private TrackablePolicyUtils policyUtils;
 
-
     @Override
     public boolean canHandle(@lombok.NonNull ModifySubscriptionRequest request,
             @Nullable ContextInfo contextInfo) {
-        return DefaultSubscriptionActionType.isUpgrade(request.getAction().getActionType());
+        return DefaultSubscriptionActionType.isEdit(request.getAction().getActionType());
     }
 
     @Override
     protected ModifySubscriptionResponse handleInternal(
             @lombok.NonNull ModifySubscriptionRequest request,
             @Nullable ContextInfo contextInfo) {
-        // TODO Implement this method
-        return typeFactory.get(ModifySubscriptionResponse.class);
-    }
+        SubscriptionWithItems subscriptionWithItems = request.getSubscription();
+        // Subscription subscription = subscriptionWithItems.getSubscription();
+        // List<SubscriptionItem> items = subscriptionWithItems.getSubscriptionItems();
 
-    @Override
-    protected void validateBusinessRules(@lombok.NonNull ModifySubscriptionRequest request,
-            @lombok.NonNull Errors errors,
-            @Nullable ContextInfo contextInfo) {
-        // TODO Implement this method with other checks
-        if (request.getNewSubscription() == null) {
-            errors.rejectValue("newSubscription",
-                    "subscription.modification.validation.upgrade.new-subscription.required",
-                    "Must provide a new subscription to upgrade to.");
-        }
+        // todo create cart and add items
+        CreateCartRequest createCartRequest = typeFactory.get(CreateCartRequest.class);
+        Cart cart = cartOperationsProvider.createCart(createCartRequest, contextInfo);
+
+        ModifySubscriptionResponse response = typeFactory.get(
+                ModifySubscriptionResponse.class);
+        response.setSubscription(subscriptionWithItems);
+        response.setCart(cart);
+        return response;
     }
 
     @Override
@@ -81,6 +89,6 @@ public class UpgradeSubscriptionHandler extends AbstractModifySubscriptionHandle
             @Nullable ContextInfo contextInfo) {
         // TODO Implement this method
         return new String[] {"ALL_CUSTOMER_SUBSCRIPTION", "ALL_ACCOUNT_SUBSCRIPTION",
-                "UPGRADE_SUBSCRIPTION"};
+                "EDIT_SUBSCRIPTION"};
     }
 }

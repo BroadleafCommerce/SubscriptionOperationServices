@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2020 Broadleaf Commerce
+ * Copyright (C) 2019 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -16,24 +16,49 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.domain;
 
-import com.broadleafcommerce.cart.client.domain.Cart;
-import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
+import com.broadleafcommerce.money.CurrencyConsumer;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Locale;
+
+import javax.money.CurrencySupplier;
+import javax.money.CurrencyUnit;
 
 import lombok.Data;
 
 /**
+ * A DTO used to provide context on a request to price a cart.
+ *
  * @author Nathan Moore (nathandmoore)
  */
 @Data
-public class ModifySubscriptionResponse implements Serializable {
+public class PriceCartRequest implements Serializable, CurrencySupplier, CurrencyConsumer {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Cart cart;
+    /**
+     * Declares if catalog prices should also be gathered as part of the repricing process.
+     *
+     * @param updateCatalogPricing Whether catalog prices should also be gathered as part of the
+     *        repricing process.
+     * @return Whether catalog prices should also be gathered as part of the repricing process.
+     */
+    private boolean updateCatalogPricing = false;
 
-    private SubscriptionWithItems subscription;
+    /**
+     * The locale to price the cart against.
+     *
+     * @param locale The locale to price the cart against.
+     * @return The locale to price the cart against.
+     */
+    private Locale locale;
 
+    /**
+     * The currency to price the cart against.
+     *
+     * @param currency The currency to price the cart against.
+     * @return The currency to price the cart against.
+     */
+    private CurrencyUnit currency;
 }

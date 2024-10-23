@@ -38,6 +38,7 @@ import com.broadleafcommerce.subscriptionoperation.service.modification.ModifySu
 import com.broadleafcommerce.subscriptionoperation.service.modification.UpgradeSubscriptionHandler;
 import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
+import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCartOperationsProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProviderProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProperties;
@@ -126,6 +127,12 @@ public class SubscriptionOperationServiceAutoConfiguration {
                     objectMapper,
                     typeFactory,
                     properties);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public ExternalCartOperationsProvider subOpsCartOperationsProvider() {
+            return new ExternalCartOperationsProvider();
         }
     }
 }

@@ -69,6 +69,11 @@ public class DowngradeSubscriptionHandler extends AbstractModifySubscriptionHand
             @lombok.NonNull Errors errors,
             @Nullable ContextInfo contextInfo) {
         // TODO Implement this method
+        if (request.getNewSubscription() == null) {
+            errors.rejectValue("newSubscription",
+                    "subscription.modification.validation.downgrade.new-subscription.required",
+                    "Must provide a new subscription to downgrade to.");
+        }
     }
 
     @Override

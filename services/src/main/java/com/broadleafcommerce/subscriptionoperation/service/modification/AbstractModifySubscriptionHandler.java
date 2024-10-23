@@ -146,9 +146,9 @@ public abstract class AbstractModifySubscriptionHandler implements ModifySubscri
      * @param errors Object storing validation errors for the `request`
      * @param contextInfo the current sandbox and multitenant context
      */
-    protected abstract void validateBusinessRules(ModifySubscriptionRequest request,
+    protected void validateBusinessRules(ModifySubscriptionRequest request,
             Errors errors,
-            @Nullable ContextInfo contextInfo);
+            @Nullable ContextInfo contextInfo) {}
 
     /**
      * Hook point to supply the permissions required to perform the given
