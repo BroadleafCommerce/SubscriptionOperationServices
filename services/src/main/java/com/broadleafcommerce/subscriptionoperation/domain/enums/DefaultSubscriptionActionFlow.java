@@ -17,34 +17,11 @@
 package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
 /**
- * TODO
+ * Describes the potential actions that can be taken against a subscription.
  */
 public enum DefaultSubscriptionActionFlow {
 
-    /**
-     * TODO
-     */
-    CREATE,
-
-    /**
-     * TODO
-     */
-    EDIT,
-
-    /**
-     * TODO
-     */
-    UPGRADE,
-
-    /**
-     * TODO
-     */
-    DOWNGRADE,
-
-    /**
-     * TODO
-     */
-    TERMINATE;
+    CREATE, EDIT, UPGRADE, DOWNGRADE, TERMINATE;
 
     public static boolean isCreate(String flow) {
         return CREATE.name().equals(flow);

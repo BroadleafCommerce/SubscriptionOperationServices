@@ -17,17 +17,20 @@
 package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
 /**
- * TODO
+ * Describes whether subscription payments pay in advance of receiving goods/access vs are paying
+ * for previous goods/access.
  */
 public enum DefaultSubscriptionPaymentStrategy {
 
     /**
-     * TODO
+     * Declares that payments made against a subscription are going towards the goods or services
+     * rendered in the next period.
      */
     IN_ADVANCE,
 
     /**
-     * TODO
+     * Declares that payments made against a subscription are going towards the goods or services
+     * rendered in the previous period.
      */
     POSTPAID;
 
