@@ -29,11 +29,10 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import com.broadleafcommerce.common.error.ApiError;
 import com.broadleafcommerce.common.error.validation.web.FrameworkExceptionAdvisor;
 import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.IllegalResponseException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
-import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidChangeAutoRenewalRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
-import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionDowngradeRequestException;
-import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionUpgradeRequestException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.UnsupportedSubscriptionModificationRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -62,39 +61,6 @@ public class SubscriptionOperationExceptionAdvisor {
             WebRequest request) {
         logDebug(ex, request);
         return new ApiError("INVALID_SUBSCRIPTION_CREATION_REQUEST",
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST)
-                        .toResponseEntity();
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ApiError> handleInvalidSubscriptionUpgradeRequestException(
-            InvalidSubscriptionUpgradeRequestException ex,
-            WebRequest request) {
-        logDebug(ex, request);
-        return new ApiError("INVALID_SUBSCRIPTION_UPGRADE_REQUEST",
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST)
-                        .toResponseEntity();
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ApiError> handleInvalidSubscriptionDowngradeRequestException(
-            InvalidSubscriptionDowngradeRequestException ex,
-            WebRequest request) {
-        logDebug(ex, request);
-        return new ApiError("INVALID_SUBSCRIPTION_DOWNGRADE_REQUEST",
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST)
-                        .toResponseEntity();
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ApiError> handleInvalidChangeAutoRenewalRequestException(
-            InvalidChangeAutoRenewalRequestException ex,
-            WebRequest request) {
-        logDebug(ex, request);
-        return new ApiError("INVALID_CHANGE_AUTO_RENEWAL_REQUEST",
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST)
                         .toResponseEntity();
@@ -140,27 +106,36 @@ public class SubscriptionOperationExceptionAdvisor {
                 .toResponseEntity();
     }
 
+    @ExceptionHandler(UnsupportedSubscriptionModificationRequestException.class)
+    public ResponseEntity<ApiError> handleUnsupportedSubscriptionModificationRequestException(
+            UnsupportedSubscriptionModificationRequestException ex,
+            WebRequest request) {
+        logError(ex, request);
+        return new ApiError("UNSUPPORTED_MODIFICATION_REQUEST",
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST)
+                        .toResponseEntity();
+    }
+
+    @ExceptionHandler(IllegalResponseException.class)
+    public ResponseEntity<ApiError> handleIllegalResponseException(IllegalResponseException ex,
+            WebRequest request) {
+        logError(ex, request);
+        return new ApiError("ILLEGAL_API_RESPONSE",
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR)
+                        .toResponseEntity();
+    }
+
     protected void logDebug(Exception ex, WebRequest request) {
         String requestURL =
                 ((ServletWebRequest) request).getRequest().getRequestURL().toString();
-        log.debug("Request to {} raised an exception", requestURL, ex);
-    }
-
-    protected void logInfo(Exception ex, WebRequest request) {
-        String requestURL =
-                ((ServletWebRequest) request).getRequest().getRequestURL().toString();
-        log.info("Request to {} raised an exception", requestURL, ex);
-    }
-
-    protected void logWarn(Exception ex, WebRequest request) {
-        String requestURL =
-                ((ServletWebRequest) request).getRequest().getRequestURL().toString();
-        log.warn("Request to {} raised an exception", requestURL, ex);
+        log.debug("Request to %s raised an exception".formatted(requestURL), ex);
     }
 
     protected void logError(Exception ex, WebRequest request) {
         String requestURL =
                 ((ServletWebRequest) request).getRequest().getRequestURL().toString();
-        log.error("Request to {} raised an exception", requestURL, ex);
+        log.error("Request to %s raised an exception".formatted(requestURL), ex);
     }
 }

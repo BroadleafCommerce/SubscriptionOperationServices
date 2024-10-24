@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Broadleaf Commerce
+ * Copyright (C) 2009 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -17,14 +17,12 @@
 package com.broadleafcommerce.subscriptionoperation.service.exception;
 
 /**
- * Exception denoting that the request to downgrade a subscription was invalid
+ * Exception thrown when an API call received an invalid response.
  *
- * @author Chris Kittrell (ckittrell)
+ * @author Nathan Moore (nathandmoore)
  */
-public class InvalidSubscriptionDowngradeRequestException extends RuntimeException {
-
-    public InvalidSubscriptionDowngradeRequestException(String message) {
+public class IllegalResponseException extends RuntimeException {
+    public IllegalResponseException(String message) {
         super(message);
     }
-
 }

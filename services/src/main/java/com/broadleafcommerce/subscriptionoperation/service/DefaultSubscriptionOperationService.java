@@ -16,15 +16,7 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
-
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionNextStatusChangeReason.DISABLED_AUTO_RENEWAL;
-import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionNextStatusChangeReason.ENABLED_AUTO_RENEWAL;
-
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -36,20 +28,18 @@ import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionType;
-import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
+import com.broadleafcommerce.subscriptionoperation.service.exception.UnsupportedSubscriptionModificationRequestException;
+import com.broadleafcommerce.subscriptionoperation.service.modification.ModifySubscriptionHandler;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
-import com.broadleafcommerce.subscriptionoperation.web.domain.ChangeAutoRenewalRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionItemCreationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import cz.jirutka.rsql.parser.ast.Node;
@@ -57,26 +47,24 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-public class DefaultSubscriptionOperationService<S extends Subscription, I extends SubscriptionItem, SWI extends SubscriptionWithItems>
-        implements SubscriptionOperationService<S, I, SWI> {
+public class DefaultSubscriptionOperationService<SWI extends SubscriptionWithItems>
+        implements SubscriptionOperationService<SWI> {
 
     @Getter(AccessLevel.PROTECTED)
-    protected final SubscriptionProvider<SWI> subscriptionProvider;
+    private final SubscriptionProvider<SWI> subscriptionProvider;
 
     @Getter(AccessLevel.PROTECTED)
-    protected final TypeFactory typeFactory;
+    private final SubscriptionValidationService subscriptionValidationService;
 
     @Getter(AccessLevel.PROTECTED)
-    private final MessageSource messageSource;
+    private final TypeFactory typeFactory;
 
     @Getter(AccessLevel.PROTECTED)
-    @Setter(onMethod_ = {@Autowired, @Lazy})
-    protected SubscriptionValidationService subscriptionValidationService;
+    private final List<ModifySubscriptionHandler> modifySubscriptionHandlers;
 
     @Override
     public SubscriptionActionResponse readSubscriptionActions(
@@ -147,56 +135,20 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     }
 
     @Override
-    public S cancelSubscription(
-            @lombok.NonNull SubscriptionCancellationRequest cancellationRequest,
+    public ModifySubscriptionResponse modifySubscription(
+            @lombok.NonNull ModifySubscriptionRequest request,
             @Nullable ContextInfo contextInfo) {
-        subscriptionValidationService.validateSubscriptionCancellation(cancellationRequest,
-                contextInfo);
-        return null;
-    }
+        SWI swi = readSubscriptionById(request.getSubscriptionId(), contextInfo);
+        populateSubscriptionActions(swi, contextInfo);
+        request.setSubscription(swi);
 
-    @Override
-    public S upgradeSubscription(@lombok.NonNull SubscriptionUpgradeRequest upgradeRequest,
-            @Nullable ContextInfo contextInfo) {
-        subscriptionValidationService.validateSubscriptionUpgrade(upgradeRequest, contextInfo);
-        return null;
-    }
-
-    @Override
-    public S downgradeSubscription(@lombok.NonNull SubscriptionDowngradeRequest downgradeRequest,
-            @Nullable ContextInfo contextInfo) {
-        subscriptionValidationService.validateSubscriptionDowngrade(downgradeRequest, contextInfo);
-        return null;
-    }
-
-    @Override
-    public Subscription changeAutoRenewal(ChangeAutoRenewalRequest changeRequest,
-            @Nullable ContextInfo contextInfo) {
-        SubscriptionWithItems subWithItems =
-                readSubscriptionById(changeRequest.getSubscriptionId(), contextInfo);
-        Subscription subscription = subWithItems.getSubscription();
-        subscriptionValidationService.validateSubscriptionChangeAutoRenewal(changeRequest,
-                subWithItems, contextInfo);
-        subscription.setAutoRenewalEnabled(changeRequest.isAutoRenewalEnabled());
-
-        if (changeRequest.isAutoRenewalEnabled()) {
-            subscription.setSubscriptionNextStatus(null);
-            subscription.setNextStatusChangeDate(null);
-
-            String reason = getMessageSource().getMessage(ENABLED_AUTO_RENEWAL.getMessagePath(),
-                    null, LocaleContextHolder.getLocale());
-            subscription.setNextStatusChangeReason(reason);
-        } else {
-            subscription.setSubscriptionNextStatus(SubscriptionStatuses.CANCELLED.name());
-            subscription.setNextStatusChangeDate(Date.from(subscription.getEndOfTermDate()));
-
-            String reason = getMessageSource().getMessage(DISABLED_AUTO_RENEWAL.getMessagePath(),
-                    null, LocaleContextHolder.getLocale());
-            subscription.setNextStatusChangeReason(reason);
+        for (ModifySubscriptionHandler handler : modifySubscriptionHandlers) {
+            if (handler.canHandle(request, contextInfo)) {
+                return handler.handle(request, contextInfo);
+            }
         }
 
-        return subscriptionProvider.replaceSubscription(changeRequest.getSubscriptionId(),
-                subscription, contextInfo);
+        throw new UnsupportedSubscriptionModificationRequestException(request);
     }
 
     protected void populateSubscriptionActions(Iterable<SWI> subscriptions,
@@ -236,20 +188,19 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     protected SWI buildSubscriptionWithItems(
             @lombok.NonNull SubscriptionCreationRequest creationRequest,
             @Nullable ContextInfo contextInfo) {
-        S subscription = buildSubscription(creationRequest, contextInfo);
-        List<I> items = buildSubscriptionItems(creationRequest, contextInfo);
+        Subscription subscription = buildSubscription(creationRequest, contextInfo);
+        List<SubscriptionItem> items = buildSubscriptionItems(creationRequest, contextInfo);
 
         SWI subscriptionWithItemsToBeCreated = (SWI) typeFactory.get(SubscriptionWithItems.class);
         subscriptionWithItemsToBeCreated.setSubscription(subscription);
-        subscriptionWithItemsToBeCreated.setSubscriptionItems((List<SubscriptionItem>) items);
+        subscriptionWithItemsToBeCreated.setSubscriptionItems(items);
 
         return subscriptionWithItemsToBeCreated;
     }
 
-    @SuppressWarnings("unchecked")
-    protected S buildSubscription(@lombok.NonNull SubscriptionCreationRequest request,
+    protected Subscription buildSubscription(@lombok.NonNull SubscriptionCreationRequest request,
             @Nullable ContextInfo contextInfo) {
-        S subscription = (S) typeFactory.get(Subscription.class);
+        Subscription subscription = typeFactory.get(Subscription.class);
         subscription.setName(request.getName());
         subscription.setSubscriptionStatus(request.getSubscriptionStatus());
         subscription.setSubscriptionNextStatus(request.getSubscriptionNextStatus());
@@ -279,15 +230,14 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
         return subscription;
     }
 
-    @SuppressWarnings("unchecked")
-    protected List<I> buildSubscriptionItems(
+    protected List<SubscriptionItem> buildSubscriptionItems(
             @lombok.NonNull SubscriptionCreationRequest creationRequest,
             @Nullable ContextInfo contextInfo) {
-        List<I> items = new ArrayList<>();
+        List<SubscriptionItem> items = new ArrayList<>();
 
         for (SubscriptionItemCreationRequest request : creationRequest
                 .getItemCreationRequests()) {
-            I item = (I) typeFactory.get(SubscriptionItem.class);
+            SubscriptionItem item = typeFactory.get(SubscriptionItem.class);
             item.setItemRefType(request.getItemRefType());
             item.setItemRef(request.getItemRef());
             item.setItemName(request.getItemName());

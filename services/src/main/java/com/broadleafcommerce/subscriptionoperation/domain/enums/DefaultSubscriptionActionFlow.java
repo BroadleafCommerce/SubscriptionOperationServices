@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Broadleaf Commerce
+ * Copyright (C) 2009 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -14,17 +14,35 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.service.exception;
+package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
 /**
- * Exception denoting that the request to upgrade a subscription was invalid
- *
- * @author Chris Kittrell (ckittrell)
+ * @author Nathan Moore (nathandmoore)
  */
-public class InvalidSubscriptionUpgradeRequestException extends RuntimeException {
+/**
+ * Describes the potential actions that can be taken against a subscription.
+ */
+public enum DefaultSubscriptionActionFlow {
 
-    public InvalidSubscriptionUpgradeRequestException(String message) {
-        super(message);
+    CREATE, EDIT, UPGRADE, DOWNGRADE, TERMINATE;
+
+    public static boolean isCreate(String flow) {
+        return CREATE.name().equals(flow);
     }
 
+    public static boolean isEdit(String flow) {
+        return EDIT.name().equals(flow);
+    }
+
+    public static boolean isUpgrade(String flow) {
+        return UPGRADE.name().equals(flow);
+    }
+
+    public static boolean isDowngrade(String flow) {
+        return DOWNGRADE.name().equals(flow);
+    }
+
+    public static boolean isTerminate(String flow) {
+        return TERMINATE.name().equals(flow);
+    }
 }

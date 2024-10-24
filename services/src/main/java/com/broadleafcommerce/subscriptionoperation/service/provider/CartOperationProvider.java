@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Broadleaf Commerce
+ * Copyright (C) 2009 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -14,30 +14,28 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.service;
+package com.broadleafcommerce.subscriptionoperation.service.provider;
 
 import org.springframework.lang.Nullable;
 
+import com.broadleafcommerce.cart.client.domain.Cart;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
-
+import com.broadleafcommerce.subscriptionoperation.web.domain.CreateCartRequest;
 
 /**
- * Service for validating actions against subscriptions.
+ * Component responsible for interacting with a Cart Operations provider to act against user carts.
  *
- * @author Sunny Yu
+ * @author Nathan Moore (nathandmoore)
  */
-public interface SubscriptionValidationService {
+public interface CartOperationProvider<C extends Cart> {
 
     /**
-     * Validates the creation of a subscription.
+     * Method used to create a new {@link Cart}.
      *
-     * @param request the {@link SubscriptionCreationRequest}
-     * @param contextInfo context information around multitenant state
-     * @throws InvalidSubscriptionCreationRequestException if the request is invalid
+     * @param request The information needed to create a new cart.
+     * @param contextInfo The sandbox and multitenant context
+     * @return The created cart.
      */
-    void validateSubscriptionCreation(SubscriptionCreationRequest request,
-            @Nullable ContextInfo contextInfo);
+    C createCart(CreateCartRequest request, @Nullable ContextInfo contextInfo);
 
 }

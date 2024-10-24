@@ -24,23 +24,32 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.broadleafcommerce.cart.client.domain.Cart;
 import com.broadleafcommerce.common.extension.TypeFactory;
+import com.broadleafcommerce.resource.security.utils.service.AuthenticationUtils;
 import com.broadleafcommerce.subscriptionoperation.domain.Product;
-import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
-import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionOperationService;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionValidationService;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionValidationService;
+import com.broadleafcommerce.subscriptionoperation.service.modification.CancelSubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.service.modification.ChangeSubscriptionAutoRenewalHandler;
+import com.broadleafcommerce.subscriptionoperation.service.modification.DowngradeSubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.service.modification.ModifySubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.service.modification.UpgradeSubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.service.provider.CartOperationProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
+import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCartOperationProvider;
+import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCartOperationProviderProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProviderProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.List;
 
 @Configuration
 public class SubscriptionOperationServiceAutoConfiguration {
@@ -53,19 +62,51 @@ public class SubscriptionOperationServiceAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService(
-            SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
+    @ConditionalOnMissingBean(name = "cancelSubscriptionModificationHandler")
+    CancelSubscriptionHandler cancelSubscriptionModificationHandler(TypeFactory typeFactory) {
+        return new CancelSubscriptionHandler(typeFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "upgradeSubscriptionModificationHandler")
+    UpgradeSubscriptionHandler upgradeSubscriptionModificationHandler(TypeFactory typeFactory) {
+        return new UpgradeSubscriptionHandler(typeFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "downgradeSubscriptionModificationHandler")
+    DowngradeSubscriptionHandler downgradeSubscriptionModificationHandler(TypeFactory typeFactory) {
+        return new DowngradeSubscriptionHandler(typeFactory);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(name = "changeSubscriptionAutoRenewalModificationHandler")
+    ChangeSubscriptionAutoRenewalHandler changeSubscriptionAutoRenewalModificationHandler(
             TypeFactory typeFactory,
+            SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
             MessageSource messageSource) {
-        return new DefaultSubscriptionOperationService<>(subscriptionProvider,
-                typeFactory,
+        return new ChangeSubscriptionAutoRenewalHandler(typeFactory,
+                subscriptionProvider,
                 messageSource);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public SubscriptionOperationService<SubscriptionWithItems> subscriptionOperationService(
+            SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
+            SubscriptionValidationService subscriptionValidationService,
+            TypeFactory typeFactory,
+            List<ModifySubscriptionHandler> modifySubscriptionHandlers) {
+        return new DefaultSubscriptionOperationService<>(subscriptionProvider,
+                subscriptionValidationService,
+                typeFactory,
+                modifySubscriptionHandlers);
     }
 
     @Configuration
     @EnableConfigurationProperties({ExternalSubscriptionProperties.class,
-            ExternalCatalogProviderProperties.class})
+            ExternalCatalogProviderProperties.class,
+            ExternalCartOperationProviderProperties.class})
     public static class SubscriptionProviderConfiguration {
         @Bean
         @ConditionalOnMissingBean
@@ -91,6 +132,21 @@ public class SubscriptionOperationServiceAutoConfiguration {
                     objectMapper,
                     typeFactory,
                     properties);
+        }
+
+        @Bean
+        @ConditionalOnMissingBean
+        public CartOperationProvider<Cart> subOpsCartOperationsProvider(
+                @Qualifier("subscriptionOperationWebClient") WebClient webClient,
+                ObjectMapper objectMapper,
+                TypeFactory typeFactory,
+                ExternalCartOperationProviderProperties properties,
+                AuthenticationUtils authenticationUtils) {
+            return new ExternalCartOperationProvider<>(webClient,
+                    objectMapper,
+                    typeFactory,
+                    properties,
+                    authenticationUtils);
         }
     }
 }

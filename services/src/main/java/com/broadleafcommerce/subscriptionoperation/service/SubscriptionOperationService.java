@@ -23,23 +23,23 @@ import org.springframework.lang.Nullable;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.data.tracking.core.filtering.fetch.rsql.EmptyNode;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
-import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
-import com.broadleafcommerce.subscriptionoperation.web.domain.ChangeAutoRenewalRequest;
+import com.broadleafcommerce.subscriptionoperation.service.exception.UnsupportedSubscriptionModificationRequestException;
+import com.broadleafcommerce.subscriptionoperation.service.modification.ModifySubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCancellationRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionCreationRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionDowngradeRequest;
-import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionUpgradeRequest;
 
 import cz.jirutka.rsql.parser.ast.Node;
 
 /**
  * Service for operations on subscriptions and their items
  */
-public interface SubscriptionOperationService<S extends Subscription, I extends SubscriptionItem, SWI extends SubscriptionWithItems> {
+public interface SubscriptionOperationService<SWI extends SubscriptionWithItems> {
 
     /**
      * This method reads subscriptions for a given user type and user id, additionally filtered and
@@ -110,43 +110,17 @@ public interface SubscriptionOperationService<S extends Subscription, I extends 
             @Nullable ContextInfo contextInfo);
 
     /**
-     * TODO
+     * Handles modifying {@link Subscription Subscriptions} based on the allowed
+     * {@link SubscriptionAction actions}. By default, this should defer the actual business logic
+     * to the appropriate {@link ModifySubscriptionHandler}.
      *
-     * @param subscriptionCancellationRequest
-     * @param context
-     * @return
-     */
-    S cancelSubscription(SubscriptionCancellationRequest subscriptionCancellationRequest,
-            @Nullable ContextInfo context);
-
-    /**
-     * TODO
-     *
-     * @param upgradeRequest
-     * @param contextInfo
-     * @return
-     */
-    S upgradeSubscription(SubscriptionUpgradeRequest upgradeRequest,
-            @Nullable ContextInfo contextInfo);
-
-    /**
-     * TODO
-     *
-     * @param downgradeRequest
-     * @param contextInfo
-     * @return
-     */
-    S downgradeSubscription(SubscriptionDowngradeRequest downgradeRequest,
-            @Nullable ContextInfo contextInfo);
-
-    /**
-     * Changes the auto-renewal state of a subscription.
-     *
-     * @param changeRequest the {@link ChangeAutoRenewalRequest} containing the new auto renewal
-     *        state
+     * @param request The request to modify a subscription.
      * @param contextInfo context information around multi-tenant state
-     * @return the updated {@link Subscription}
+     * @return Details about the result of the action.
+     *
+     * @throws UnsupportedSubscriptionModificationRequestException when the request has no matching
+     *         {@link ModifySubscriptionHandler}.
      */
-    Subscription changeAutoRenewal(ChangeAutoRenewalRequest changeRequest,
+    ModifySubscriptionResponse modifySubscription(ModifySubscriptionRequest request,
             @Nullable ContextInfo contextInfo);
 }

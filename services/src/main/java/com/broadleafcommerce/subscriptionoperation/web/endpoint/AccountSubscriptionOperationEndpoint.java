@@ -16,10 +16,8 @@
  */
 package com.broadleafcommerce.subscriptionoperation.web.endpoint;
 
-
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkGetMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkMapping;
-import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPatchMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkPostMapping;
 import org.broadleafcommerce.frameworkmapping.annotation.FrameworkRestController;
 import org.springframework.data.domain.Page;
@@ -36,12 +34,11 @@ import com.broadleafcommerce.data.tracking.core.context.ContextOperation;
 import com.broadleafcommerce.data.tracking.core.policy.IdentityType;
 import com.broadleafcommerce.data.tracking.core.policy.Policy;
 import com.broadleafcommerce.data.tracking.core.type.OperationType;
-import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
-import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.service.SubscriptionOperationService;
-import com.broadleafcommerce.subscriptionoperation.web.domain.ChangeAutoRenewalRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionResponse;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionRequest;
 import com.broadleafcommerce.subscriptionoperation.web.domain.SubscriptionActionResponse;
 
@@ -60,7 +57,7 @@ public class AccountSubscriptionOperationEndpoint {
     public static final String BASE_URI = "/accounts/{accountId}/subscriptions";
 
     @Getter(AccessLevel.PROTECTED)
-    protected final SubscriptionOperationService<Subscription, SubscriptionItem, SubscriptionWithItems> subscriptionOperationService;
+    protected final SubscriptionOperationService<SubscriptionWithItems> subscriptionOperationService;
 
     @FrameworkGetMapping
     @Policy(permissionRoots = "ACCOUNT_SUBSCRIPTION",
@@ -110,17 +107,21 @@ public class AccountSubscriptionOperationEndpoint {
         return subscriptionOperationService.readSubscriptionActions(request, contextInfo);
     }
 
-    @FrameworkPatchMapping(value = "/{subscriptionId}/auto-renewal",
+    @FrameworkPostMapping(value = "/{subscriptionId}/modifications",
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Policy(permissionRoots = "ACCOUNT_SUBSCRIPTION",
+    @Policy(permissionRoots = {"ACCOUNT_SUBSCRIPTION"},
             identityTypes = {IdentityType.ADMIN, IdentityType.OWNER},
-            ownerIdentifierParam = 0, ownerIdentifier = "acct_id,parent_accts")
-    public Subscription changeAutoRenewal(
+            ownerIdentifierParam = 0,
+            ownerIdentifier = "acct_id,parent_accts",
+            operationTypes = OperationType.UPDATE)
+    public ModifySubscriptionResponse modifySubscription(
             @PathVariable("accountId") String accountId,
-            @PathVariable(value = "subscriptionId") String subscriptionId,
-            @RequestBody ChangeAutoRenewalRequest autoRenewalRequest,
-            @ContextOperation(OperationType.READ) final ContextInfo context) {
-        autoRenewalRequest.setSubscriptionId(subscriptionId);
-        return subscriptionOperationService.changeAutoRenewal(autoRenewalRequest, context);
+            @PathVariable("subscriptionId") String subscriptionId,
+            @RequestBody ModifySubscriptionRequest request,
+            @ContextOperation(OperationType.UPDATE) final ContextInfo contextInfo) {
+        request.setSubscriptionId(subscriptionId);
+        request.setUserRef(accountId);
+        request.setUserRefType(DefaultUserRefTypes.BLC_ACCOUNT.name());
+        return subscriptionOperationService.modifySubscription(request, contextInfo);
     }
 }

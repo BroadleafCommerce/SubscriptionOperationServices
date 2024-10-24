@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Broadleaf Commerce
+ * Copyright (C) 2009 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -14,40 +14,39 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.web.domain;
+package com.broadleafcommerce.subscriptionoperation.service.provider.external;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * A request DTO used to change the auto renewal setting of a subscription.
- *
- * @author Sunny Yu
+ * @author Nathan Moore (nathandmoore)
  */
-@Data
-public class ChangeAutoRenewalRequest implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * The id of the subscription to change the auto renewal setting for
-     */
-    @NotNull
-    private String subscriptionId;
+@Getter
+@Setter
+@ConfigurationProperties("broadleaf.subscriptionoperation.cartoperationprovider")
+public class ExternalCartOperationProviderProperties {
 
     /**
-     * The state of the auto renewal setting to change to
+     * The base url for an external cart operation service.
      */
-    private boolean autoRenewalEnabled = true;
+    private String url;
 
     /**
-     * Additional attributes to be used in the request
+     * The base uri path to the manage cart endpoint.
      */
-    private Map<String, Object> additionalAttributes = new HashMap<>();
+    private String manageCartsUri = "/cart";
+
+    /**
+     * The URI to endpoints managing a specific cart.
+     */
+    private String cartUri = manageCartsUri + "/{cartId}";
+
+    /**
+     * The service client to use when calling an external service. Default is
+     * "subscriptionopsclient".
+     */
+    private String serviceClient = "subscriptionopsclient";
 }

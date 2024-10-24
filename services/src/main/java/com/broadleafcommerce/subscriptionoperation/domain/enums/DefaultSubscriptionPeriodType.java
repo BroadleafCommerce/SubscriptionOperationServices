@@ -14,24 +14,24 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.web.domain;
+package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
-import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
+/**
+ * Enumerates the types of subscription period types.
+ */
+public enum DefaultSubscriptionPeriodType {
 
-import java.io.Serial;
-import java.io.Serializable;
+    MONTHLY, QUARTERLY, ANNUALLY;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+    public static boolean isMonthly(String periodType) {
+        return MONTHLY.name().equals(periodType);
+    }
 
-@Data
-@NoArgsConstructor
-public class SubscriptionUpgradeRequest implements Serializable {
+    public static boolean isQuarterly(String periodType) {
+        return QUARTERLY.name().equals(periodType);
+    }
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private Subscription newSubscription;
-
-    private String priorSubscriptionId;
+    public static boolean isAnnually(String periodType) {
+        return ANNUALLY.name().equals(periodType);
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Broadleaf Commerce
+ * Copyright (C) 2009 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -16,16 +16,30 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service.exception;
 
-/**
- * Exception denoting that the request to change the auto-renewal state of a subscription was
- * invalid
- *
- * @author Sunny Yu
- */
-public class InvalidChangeAutoRenewalRequestException extends RuntimeException {
+import org.springframework.lang.NonNull;
 
-    public InvalidChangeAutoRenewalRequestException(String message) {
-        super(message);
+import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
+import com.broadleafcommerce.subscriptionoperation.service.modification.ModifySubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.web.domain.ModifySubscriptionRequest;
+
+import lombok.Getter;
+
+/**
+ * Thrown when a request is made to modify a {@link Subscription} that has no matching
+ * {@link ModifySubscriptionHandler}.
+ *
+ * @author Nathan Moore (nathandmoore)
+ */
+@Getter
+public class UnsupportedSubscriptionModificationRequestException extends RuntimeException {
+
+    private final ModifySubscriptionRequest request;
+
+    public UnsupportedSubscriptionModificationRequestException(
+            @NonNull @lombok.NonNull ModifySubscriptionRequest request) {
+        super("Requested action %s cannot be handled."
+                .formatted(request.getAction().getActionType()));
+        this.request = request;
     }
 
 }
