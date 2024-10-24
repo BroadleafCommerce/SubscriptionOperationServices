@@ -135,23 +135,25 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
     protected SubscriptionPricingContext buildSubscriptionPricingContext(
             @lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
-        SubscriptionPricingContext context = typeFactory.get(SubscriptionPricingContext.class);
-        context.setFlow(getSubscriptionActionFlow(subscriptionRootItem, contextInfo));
-        context.setCurrency(subscriptionRootItem.getCurrency());
+        SubscriptionPricingContext pricingContext =
+                typeFactory.get(SubscriptionPricingContext.class);
+        pricingContext.setFlow(getSubscriptionActionFlow(subscriptionRootItem, contextInfo));
+        pricingContext.setCurrency(subscriptionRootItem.getCurrency());
 
         Optional<SubscriptionWithItems> existingSubscription =
                 getExistingSubscription(subscriptionRootItem, contextInfo);
         if (existingSubscription.isPresent()) {
-            populateFromExistingSubscription(context, existingSubscription.get(), contextInfo);
+            populateFromExistingSubscription(pricingContext, existingSubscription.get(),
+                    contextInfo);
         } else {
-            populateFromCartItem(context, subscriptionRootItem, contextInfo);
+            populateFromCartItem(pricingContext, subscriptionRootItem, contextInfo);
         }
 
         Map<Integer, PeriodDefinition> periodDefinitions =
-                buildPeriodDefinitions(subscriptionRootItem, context, contextInfo);
-        context.setPeriodDefinitions(periodDefinitions);
+                buildPeriodDefinitions(subscriptionRootItem, pricingContext, contextInfo);
+        pricingContext.setPeriodDefinitions(periodDefinitions);
 
-        return context;
+        return pricingContext;
     }
 
     protected String getSubscriptionActionFlow(@lombok.NonNull CartItem subscriptionRootItem,
@@ -174,37 +176,37 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
     }
 
     protected void populateFromExistingSubscription(
-            @lombok.NonNull SubscriptionPricingContext context,
+            @lombok.NonNull SubscriptionPricingContext pricingContext,
             @lombok.NonNull SubscriptionWithItems existingSubscriptionWithItems,
             @Nullable ContextInfo contextInfo) {
         Subscription existingSubscription = existingSubscriptionWithItems.getSubscription();
 
-        context.setExistingSubscriptionId(existingSubscription.getId());
-        context.setPaymentStrategy(existingSubscription.getPaymentStrategy());
-        context.setPaymentStrategy(existingSubscription.getPaymentStrategy());
-        context.setPeriodType(existingSubscription.getPeriodType());
-        context.setPeriodFrequency(existingSubscription.getPeriodFrequency());
-        context.setEndOfTermsDate(existingSubscription.getEndOfTermsDate().toInstant());
-        context.setAtypicalNextBillDate(existingSubscription.getNextBillDate().toInstant());
+        pricingContext.setExistingSubscriptionId(existingSubscription.getId());
+        pricingContext.setPaymentStrategy(existingSubscription.getPaymentStrategy());
+        pricingContext.setPaymentStrategy(existingSubscription.getPaymentStrategy());
+        pricingContext.setPeriodType(existingSubscription.getPeriodType());
+        pricingContext.setPeriodFrequency(existingSubscription.getPeriodFrequency());
+        pricingContext.setEndOfTermsDate(existingSubscription.getEndOfTermsDate().toInstant());
+        pricingContext.setAtypicalNextBillDate(existingSubscription.getNextBillDate().toInstant());
     }
 
-    protected void populateFromCartItem(@lombok.NonNull SubscriptionPricingContext context,
+    protected void populateFromCartItem(@lombok.NonNull SubscriptionPricingContext pricingContext,
             @lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
-        context.setPaymentStrategy(
+        pricingContext.setPaymentStrategy(
                 getSubscriptionPaymentStrategy(subscriptionRootItem, contextInfo));
 
         RecurringPriceDetail recurringPriceDetail = subscriptionRootItem.getRecurringPrice();
-        context.setPeriodType(recurringPriceDetail.getPeriodType());
-        context.setPeriodFrequency(recurringPriceDetail.getPeriodFrequency());
+        pricingContext.setPeriodType(recurringPriceDetail.getPeriodType());
+        pricingContext.setPeriodFrequency(recurringPriceDetail.getPeriodFrequency());
 
         Instant endOfTermsDate = determineEndOfTermsDate(subscriptionRootItem.getTermDurationType(),
-                subscriptionRootItem.getTermDurationLength());
-        context.setEndOfTermsDate(endOfTermsDate);
+                subscriptionRootItem.getTermDurationLength(), pricingContext);
+        pricingContext.setEndOfTermsDate(endOfTermsDate);
 
         Instant atypicalNextBillDate =
-                determineAtypicalNextBillDate(subscriptionRootItem, context, contextInfo);
-        context.setAtypicalNextBillDate(atypicalNextBillDate);
+                determineAtypicalNextBillDate(subscriptionRootItem, pricingContext, contextInfo);
+        pricingContext.setAtypicalNextBillDate(atypicalNextBillDate);
     }
 
     protected String getSubscriptionPaymentStrategy(@lombok.NonNull CartItem subscriptionRootItem,
@@ -222,8 +224,9 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
     }
 
     protected Instant determineEndOfTermsDate(@lombok.NonNull String termDurationType,
-            @lombok.NonNull Integer termDurationLength) {
-        Instant today = Instant.now().truncatedTo(ChronoUnit.DAYS);
+            @lombok.NonNull Integer termDurationLength,
+            @lombok.NonNull SubscriptionPricingContext pricingContext) {
+        Instant today = pricingContext.getSubscriptionActionDate();
         LocalDateTime ldt = today.atZone(ZoneOffset.UTC).toLocalDateTime();
 
         if (DefaultTermDurationType.isDays(termDurationType)) {
@@ -276,7 +279,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
 
         Instant previousBillDate = Optional.ofNullable(pricingContext.getAtypicalNextBillDate())
                 .map(atypicalNextBillDate -> atypicalNextBillDate.truncatedTo(ChronoUnit.DAYS))
-                .orElse(Instant.now().truncatedTo(ChronoUnit.DAYS));
+                .orElse(pricingContext.getSubscriptionActionDate());
 
         int estimatedFuturePaymentCount =
                 getEstimatedFuturePaymentCount(subscriptionRootItem, pricingContext, contextInfo);
@@ -331,7 +334,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             periodDefinition.setPeriodStartDate(billDate);
         } else if (isPostpaid(pricingContext.getPaymentStrategy())) {
             if (isCreate(pricingContext.getFlow())) {
-                Instant beginningOfToday = Instant.now().truncatedTo(ChronoUnit.DAYS);
+                Instant beginningOfToday = pricingContext.getSubscriptionActionDate();
                 periodDefinition.setPeriodStartDate(beginningOfToday);
             } else {
                 Instant periodStartDate =
