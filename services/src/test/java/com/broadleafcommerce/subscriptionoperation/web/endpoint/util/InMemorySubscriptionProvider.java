@@ -36,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import cz.jirutka.rsql.parser.ast.Node;
@@ -113,15 +114,14 @@ public class InMemorySubscriptionProvider implements SubscriptionProvider<Subscr
     }
 
     @Override
-    public SubscriptionWithItems readSubscriptionById(String subscriptionId,
+    public Optional<SubscriptionWithItems> readSubscriptionById(String subscriptionId,
             @Nullable ContextInfo contextInfo) {
         return getStore().values().stream()
                 .filter(subscriptionWithItems -> Objects
                         .equals(subscriptionWithItems.getSubscription().getId(), subscriptionId))
                 .filter(contextMatches(contextInfo))
                 .map(this::simulateSerialization)
-                .findFirst()
-                .orElseThrow(EntityMissingException::new);
+                .findFirst();
     }
 
     @Override

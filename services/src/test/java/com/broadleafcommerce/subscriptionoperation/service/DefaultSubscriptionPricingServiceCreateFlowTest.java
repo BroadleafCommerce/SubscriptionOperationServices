@@ -21,6 +21,7 @@ import static com.broadleafcommerce.subscriptionoperation.domain.constants.CartI
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,11 +39,13 @@ import com.broadleafcommerce.subscriptionoperation.domain.PeriodDefinition;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPriceItemDetail;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPriceResponse;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPricingContext;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionFlow;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionItemReferenceType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultTermDurationType;
+import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -58,14 +61,17 @@ import javax.money.MonetaryAmount;
 import io.azam.ulidj.ULID;
 
 @ExtendWith(MockitoExtension.class)
-public class DefaultSubscriptionPricingServiceTest {
+public class DefaultSubscriptionPricingServiceCreateFlowTest {
 
     DefaultSubscriptionPricingService service;
+
+    SubscriptionProvider<SubscriptionWithItems> subscriptionProvider;
 
     @BeforeEach
     public void setUp() {
         TypeFactory typeFactory = new TypeFactory(Collections.emptyList());
-        service = spy(new DefaultSubscriptionPricingService(typeFactory));
+        subscriptionProvider = mock(SubscriptionProvider.class);
+        service = spy(new DefaultSubscriptionPricingService(subscriptionProvider, typeFactory));
     }
 
     @Test
@@ -120,8 +126,7 @@ public class DefaultSubscriptionPricingServiceTest {
         assertThat(subscriptionPricingContext.getPeriodType())
                 .isEqualTo(DefaultSubscriptionPeriodType.MONTHLY.name());
         assertThat(subscriptionPricingContext.getPeriodFrequency()).isEqualTo(1);
-        assertThat(subscriptionPricingContext.getTermDurationType()).isNotBlank();
-        assertThat(subscriptionPricingContext.getTermDurationLength()).isGreaterThan(0);
+        assertThat(subscriptionPricingContext.getEndOfTermsDate()).isNotNull();
     }
 
     @Test
@@ -1008,5 +1013,4 @@ public class DefaultSubscriptionPricingServiceTest {
 
         return cart;
     }
-
 }

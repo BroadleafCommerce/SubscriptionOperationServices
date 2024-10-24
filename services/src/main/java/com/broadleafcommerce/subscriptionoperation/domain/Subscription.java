@@ -23,6 +23,7 @@ import com.broadleafcommerce.data.tracking.core.filtering.business.domain.Contex
 import com.broadleafcommerce.data.tracking.core.filtering.domain.Tracking;
 import com.broadleafcommerce.money.CurrencyConsumer;
 import com.broadleafcommerce.money.util.MonetaryUtils;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionSourceType;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.SubscriptionStatuses;
@@ -191,9 +192,22 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private String periodType;
 
     /**
+     * Declares that payments made against a subscription are going towards the goods/services
+     * rendered in the previous vs current period.
+     *
+     * @see DefaultSubscriptionPaymentStrategy
+     */
+    private String paymentStrategy;
+
+    /**
      * Next date this subscription will be billed
      */
     private Date nextBillDate;
+
+    /**
+     * The date at which the subscription's terms will expire.
+     */
+    private Date endOfTermsDate;
 
     /**
      * References an identifier of a PaymentAccount that is considered preferred for this

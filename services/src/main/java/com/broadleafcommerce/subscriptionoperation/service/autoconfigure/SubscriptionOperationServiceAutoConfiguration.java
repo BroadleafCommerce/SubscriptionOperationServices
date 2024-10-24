@@ -98,7 +98,8 @@ public class SubscriptionOperationServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SubscriptionPricingService subscriptionPricingService(
+            SubscriptionProvider<SubscriptionWithItems> subscriptionProvider,
             TypeFactory typeFactory) {
-        return new DefaultSubscriptionPricingService(typeFactory);
+        return new DefaultSubscriptionPricingService(subscriptionProvider, typeFactory);
     }
 }

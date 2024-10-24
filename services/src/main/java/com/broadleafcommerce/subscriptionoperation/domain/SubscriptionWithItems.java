@@ -55,4 +55,8 @@ public class SubscriptionWithItems {
      */
     private Map<String, List<String>> unavailableReasonsByActionType = new HashMap<>();
 
+    public String getSubscriptionId() {
+        return getSubscription().getId();
+    }
+
 }

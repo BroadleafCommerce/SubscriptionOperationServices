@@ -24,6 +24,8 @@ import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 
+import java.util.Optional;
+
 import cz.jirutka.rsql.parser.ast.Node;
 
 
@@ -66,7 +68,7 @@ public interface SubscriptionProvider<SWI extends SubscriptionWithItems> {
      * @param contextInfo context information around multi-tenant state
      * @return a subscription with items for the given id
      */
-    SWI readSubscriptionById(String subscriptionId, @Nullable ContextInfo contextInfo);
+    Optional<SWI> readSubscriptionById(String subscriptionId, @Nullable ContextInfo contextInfo);
 
     /**
      * Retrieves a user-owned subscription with items for a given id

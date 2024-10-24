@@ -17,10 +17,12 @@
 package com.broadleafcommerce.subscriptionoperation.domain;
 
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionFlow;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPaymentStrategy;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,14 +49,21 @@ public class SubscriptionPricingContext implements Serializable {
     private String flow;
 
     /**
+     * TODO
+     */
+    private Instant subscriptionActionDate = Instant.now().truncatedTo(ChronoUnit.DAYS);
+
+    /**
      * The id of an existing subscription. This is most relevant for subscription action flows that
      * are modifying an existing subscription.
      */
     private String existingSubscriptionId;
 
     /**
-     * Describes whether subscription payments pay in advance of receiving goods/access vs are
-     * paying for previous goods/access.
+     * Declares that payments made against a subscription are going towards the goods/services
+     * rendered in the previous vs current period.
+     *
+     * @see DefaultSubscriptionPaymentStrategy
      */
     private String paymentStrategy;
 
@@ -83,22 +92,17 @@ public class SubscriptionPricingContext implements Serializable {
     private String periodType;
 
     /**
-     * The type of time interval (seconds, minutes, hours, etc.)
+     * The date at which the subscription's terms will expire.
      */
-    private String termDurationType;
-
-    /**
-     * Time interval (number of seconds, minutes, hours, etc.)
-     */
-    private int termDurationLength;
+    private Instant endOfTermsDate;
 
     /**
      * Describes upcoming subscription billing periods, including the start date, end date, & when
      * the customer will be billed. Map keys are upcoming period numbers, with 1 being the first
      * period. For creation flows, the first period represents the first time that subscription
      * billing will be engaged (i.e. the first bill following the initial purchase). For other flows
-     * that act upon the subscription in the middle of a period... TODO: fill this out after working
-     * edit flow!
+     * that act upon the subscription in the middle of a period, the first period definition represents
+     * the active period when the action was taken.
      */
     private Map<Integer, PeriodDefinition> periodDefinitions = new HashMap<>();
 

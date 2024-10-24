@@ -37,6 +37,7 @@ import com.broadleafcommerce.subscriptionoperation.service.provider.page.Respons
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map;
+import java.util.Optional;
 
 import cz.jirutka.rsql.parser.ast.Node;
 import lombok.AccessLevel;
@@ -102,7 +103,7 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
     }
 
     @Override
-    public SWI readSubscriptionById(@lombok.NonNull String subscriptionId,
+    public Optional<SWI> readSubscriptionById(@lombok.NonNull String subscriptionId,
             @Nullable ContextInfo contextInfo) {
         String uri = getBaseUri()
                 .path(properties.getSubscriptionWithItemsPath())
@@ -119,8 +120,7 @@ public class ExternalSubscriptionProvider<SWI extends SubscriptionWithItems>
                         response -> response.createException().flatMap(
                                 exception -> Mono.just(new ProviderApiException(exception))))
                 .bodyToMono(getType())
-                .blockOptional()
-                .orElseThrow(EntityMissingException::new));
+                .blockOptional());
     }
 
     @Override

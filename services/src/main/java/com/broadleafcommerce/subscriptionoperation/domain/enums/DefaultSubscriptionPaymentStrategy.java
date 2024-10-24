@@ -17,8 +17,8 @@
 package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
 /**
- * Describes whether subscription payments pay in advance of receiving goods/access vs are paying
- * for previous goods/access.
+ * Declares that payments made against a subscription are going towards the goods/services
+ * rendered in the previous vs current period.
  */
 public enum DefaultSubscriptionPaymentStrategy {
 

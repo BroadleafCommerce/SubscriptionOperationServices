@@ -30,6 +30,7 @@ import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSu
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.cart.client.domain.Cart;
@@ -40,11 +41,15 @@ import com.broadleafcommerce.money.util.MonetaryUtils;
 import com.broadleafcommerce.order.common.domain.RecurringPriceDetail;
 import com.broadleafcommerce.subscriptionoperation.domain.EstimatedFuturePayment;
 import com.broadleafcommerce.subscriptionoperation.domain.PeriodDefinition;
+import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPriceItemDetail;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPriceResponse;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionPricingContext;
+import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionActionFlow;
 import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionItemReferenceType;
+import com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultTermDurationType;
+import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -67,6 +72,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class DefaultSubscriptionPricingService implements SubscriptionPricingService {
+
+    @Getter(AccessLevel.PROTECTED)
+    protected final SubscriptionProvider<SubscriptionWithItems> subscriptionProvider;
 
     @Getter(AccessLevel.PROTECTED)
     protected final TypeFactory typeFactory;
@@ -129,23 +137,15 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             @lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
         SubscriptionPricingContext context = typeFactory.get(SubscriptionPricingContext.class);
-
         context.setFlow(getSubscriptionActionFlow(subscriptionRootItem, contextInfo));
-        context.setExistingSubscriptionId(
-                getExistingSubscriptionId(subscriptionRootItem, contextInfo));
-        context.setPaymentStrategy(
-                getSubscriptionPaymentStrategy(subscriptionRootItem, contextInfo));
-
-        RecurringPriceDetail recurringPriceDetail = subscriptionRootItem.getRecurringPrice();
-        context.setPeriodType(recurringPriceDetail.getPeriodType());
-        context.setPeriodFrequency(recurringPriceDetail.getPeriodFrequency());
-        context.setTermDurationType(subscriptionRootItem.getTermDurationType());
-        context.setTermDurationLength(subscriptionRootItem.getTermDurationLength());
         context.setCurrency(subscriptionRootItem.getCurrency());
 
-        Instant atypicalNextBillDate =
-                determineAtypicalNextBillDate(subscriptionRootItem, context, contextInfo);
-        context.setAtypicalNextBillDate(atypicalNextBillDate);
+        Optional<SubscriptionWithItems> existingSubscription = getExistingSubscription(subscriptionRootItem, contextInfo);
+        if (existingSubscription.isPresent()) {
+            populateFromExistingSubscription(context, existingSubscription.get(), contextInfo);
+        } else {
+            populateFromCartItem(context, subscriptionRootItem, contextInfo);
+        }
 
         Map<Integer, PeriodDefinition> periodDefinitions =
                 buildPeriodDefinitions(subscriptionRootItem, context, contextInfo);
@@ -160,11 +160,47 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 SUBSCRIPTION_ACTION_FLOW, DefaultSubscriptionActionFlow.CREATE.name());
     }
 
-    @Nullable
-    protected String getExistingSubscriptionId(@lombok.NonNull CartItem subscriptionRootItem,
+    protected Optional<SubscriptionWithItems> getExistingSubscription(@lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
-        return MapUtils.getString(subscriptionRootItem.getInternalAttributes(),
-                EXISTING_SUBSCRIPTION_ID);
+        String existingSubscriptionId = MapUtils.getString(subscriptionRootItem.getInternalAttributes(), EXISTING_SUBSCRIPTION_ID);
+
+        if (StringUtils.isBlank(existingSubscriptionId)) {
+            return Optional.empty();
+        }
+
+        return subscriptionProvider.readSubscriptionById(existingSubscriptionId, contextInfo);
+    }
+
+    protected void populateFromExistingSubscription(@lombok.NonNull SubscriptionPricingContext context,
+            @lombok.NonNull SubscriptionWithItems existingSubscriptionWithItems,
+            @Nullable ContextInfo contextInfo) {
+        Subscription existingSubscription = existingSubscriptionWithItems.getSubscription();
+
+        context.setExistingSubscriptionId(existingSubscription.getId());
+        context.setPaymentStrategy(existingSubscription.getPaymentStrategy());
+        context.setPaymentStrategy(existingSubscription.getPaymentStrategy());
+        context.setPeriodType(existingSubscription.getPeriodType());
+        context.setPeriodFrequency(existingSubscription.getPeriodFrequency());
+        context.setEndOfTermsDate(existingSubscription.getEndOfTermsDate().toInstant());
+        context.setAtypicalNextBillDate(existingSubscription.getNextBillDate().toInstant());
+    }
+
+    protected void populateFromCartItem(@lombok.NonNull SubscriptionPricingContext context,
+            @lombok.NonNull CartItem subscriptionRootItem,
+            @Nullable ContextInfo contextInfo) {
+        context.setPaymentStrategy(
+                getSubscriptionPaymentStrategy(subscriptionRootItem, contextInfo));
+
+        RecurringPriceDetail recurringPriceDetail = subscriptionRootItem.getRecurringPrice();
+        context.setPeriodType(recurringPriceDetail.getPeriodType());
+        context.setPeriodFrequency(recurringPriceDetail.getPeriodFrequency());
+
+        Instant endOfTermsDate = determineEndOfTermsDate(subscriptionRootItem.getTermDurationType(), subscriptionRootItem.getTermDurationLength());
+        context.setEndOfTermsDate(endOfTermsDate);
+
+        Instant atypicalNextBillDate =
+                determineAtypicalNextBillDate(subscriptionRootItem, context, contextInfo);
+        context.setAtypicalNextBillDate(atypicalNextBillDate);
     }
 
     protected String getSubscriptionPaymentStrategy(@lombok.NonNull CartItem subscriptionRootItem,
@@ -179,6 +215,24 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         }
 
         return subscriptionPaymentStrategy;
+    }
+
+    protected Instant determineEndOfTermsDate(@lombok.NonNull String termDurationType,
+            @lombok.NonNull Integer termDurationLength) {
+        Instant today = Instant.now().truncatedTo(ChronoUnit.DAYS);
+        LocalDateTime ldt = today.atZone(ZoneOffset.UTC).toLocalDateTime();
+
+        if (DefaultTermDurationType.isDays(termDurationType)) {
+            ldt.plusDays(termDurationLength);
+        } else if (DefaultTermDurationType.isWeeks(termDurationType)) {
+            ldt.plusWeeks(termDurationLength);
+        } else if (DefaultTermDurationType.isMonths(termDurationType)) {
+            ldt.plusMonths(termDurationLength);
+        } else if (DefaultTermDurationType.isYears(termDurationType)) {
+            ldt.plusYears(termDurationLength);
+        }
+
+        return ldt.atZone(ZoneOffset.UTC).toInstant();
     }
 
     /**
@@ -196,8 +250,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
         if (!isCreate(pricingContext.getFlow())) {
-            return getExistingSubscriptionNextBillDate(subscriptionRootItem, pricingContext,
-                    contextInfo);
+            return pricingContext.getAtypicalNextBillDate();
         }
 
         return null;
@@ -224,22 +277,9 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         int estimatedFuturePaymentCount =
                 getEstimatedFuturePaymentCount(subscriptionRootItem, pricingContext, contextInfo);
         for (int period = 1; period <= estimatedFuturePaymentCount; period++) {
-            if (period == 1 && pricingContext.getAtypicalNextBillDate() != null
-                    && isPostpaid(pricingContext.getPaymentStrategy())) {
-                PeriodDefinition periodDefinition = typeFactory.get(PeriodDefinition.class);
-                Instant billDate =
-                        pricingContext.getAtypicalNextBillDate().truncatedTo(ChronoUnit.DAYS);
-                periodDefinition.setBillDate(billDate);
+            if (period == 1 && pricingContext.getAtypicalNextBillDate() != null) {
+                PeriodDefinition periodDefinition = buildAtypicalFirstPeriodDefinition(estimatedFuturePaymentPeriods, period, pricingContext, contextInfo);
 
-                Instant beginningOfToday = Instant.now().truncatedTo(ChronoUnit.DAYS);
-                periodDefinition.setPeriodStartDate(beginningOfToday);
-
-                Instant periodEndDate =
-                        determinePeriodEndDate(period, periodDefinition, pricingContext,
-                                contextInfo);
-                periodDefinition.setPeriodEndDate(periodEndDate);
-
-                estimatedFuturePaymentPeriods.put(period, periodDefinition);
                 previousBillDate = periodDefinition.getBillDate();
                 continue;
             }
@@ -265,6 +305,45 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return estimatedFuturePaymentPeriods;
     }
 
+    @NotNull
+    private PeriodDefinition buildAtypicalFirstPeriodDefinition(
+            @lombok.NonNull Map<Integer, PeriodDefinition> estimatedFuturePaymentPeriods,
+            int period,
+            @lombok.NonNull SubscriptionPricingContext pricingContext,
+            @Nullable ContextInfo contextInfo) {
+        PeriodDefinition periodDefinition = typeFactory.get(PeriodDefinition.class);
+        Instant billDate = pricingContext.getAtypicalNextBillDate()
+                .truncatedTo(ChronoUnit.DAYS);
+
+        if (!isCreate(pricingContext.getFlow())
+                && isInAdvance(pricingContext.getPaymentStrategy())) {
+            billDate = determinePreviousBillDate(billDate, pricingContext, contextInfo);
+            periodDefinition.setBillDate(billDate);
+        } else {
+            periodDefinition.setBillDate(billDate);
+        }
+
+        if (isInAdvance(pricingContext.getPaymentStrategy())) {
+            periodDefinition.setPeriodStartDate(billDate);
+        } else if (isPostpaid(pricingContext.getPaymentStrategy())) {
+            if (isCreate(pricingContext.getFlow())) {
+                Instant beginningOfToday = Instant.now().truncatedTo(ChronoUnit.DAYS);
+                periodDefinition.setPeriodStartDate(beginningOfToday);
+            } else {
+                Instant periodStartDate = determinePreviousBillDate(billDate, pricingContext, contextInfo);
+                periodDefinition.setPeriodStartDate(periodStartDate);
+            }
+        }
+
+        Instant periodEndDate =
+                determinePeriodEndDate(period, periodDefinition, pricingContext,
+                        contextInfo);
+        periodDefinition.setPeriodEndDate(periodEndDate);
+
+        estimatedFuturePaymentPeriods.put(period, periodDefinition);
+        return periodDefinition;
+    }
+
     protected int getEstimatedFuturePaymentCount(
             @lombok.NonNull CartItem subscriptionRootItem,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
@@ -276,10 +355,6 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
             @lombok.NonNull Instant startDate,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
             @Nullable ContextInfo contextInfo) {
-        if (period == 1 && isInAdvance(pricingContext.getPaymentStrategy())) {
-            return startDate;
-        }
-
         int monthsToAdd;
 
         String periodType = pricingContext.getPeriodType();
@@ -301,6 +376,34 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         LocalDateTime ldt = startDate.atZone(ZoneOffset.UTC).toLocalDateTime();
 
         return ldt.plusMonths(monthsToAdd)
+                .atZone(ZoneOffset.UTC)
+                .toInstant();
+    }
+
+    protected Instant determinePreviousBillDate(@lombok.NonNull Instant billDate,
+            @lombok.NonNull SubscriptionPricingContext pricingContext,
+            @Nullable ContextInfo contextInfo) {
+        int monthsToSubtract;
+
+        String periodType = pricingContext.getPeriodType();
+        if (isMonthly(periodType)) {
+            monthsToSubtract = pricingContext.getPeriodFrequency();
+        } else if (isQuarterly(periodType)) {
+            monthsToSubtract = pricingContext.getPeriodFrequency() * 3;
+        } else if (isAnnually(periodType)) {
+            monthsToSubtract = pricingContext.getPeriodFrequency() * 12;
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Invalid period type (%s).", periodType));
+        }
+
+        return subtractMonths(billDate, monthsToSubtract);
+    }
+
+    protected Instant subtractMonths(@lombok.NonNull Instant startDate, int monthsToAdd) {
+        LocalDateTime ldt = startDate.atZone(ZoneOffset.UTC).toLocalDateTime();
+
+        return ldt.minusMonths(monthsToAdd)
                 .atZone(ZoneOffset.UTC)
                 .toInstant();
     }

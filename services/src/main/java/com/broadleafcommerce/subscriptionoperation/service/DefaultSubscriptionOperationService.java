@@ -16,7 +16,6 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service;
 
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +23,7 @@ import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.common.extension.TypeFactory;
 import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
+import com.broadleafcommerce.data.tracking.core.exception.EntityMissingException;
 import com.broadleafcommerce.subscriptionoperation.domain.Subscription;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionAction;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionItem;
@@ -116,7 +116,8 @@ public class DefaultSubscriptionOperationService<S extends Subscription, I exten
     @Override
     public SWI readSubscriptionById(@lombok.NonNull String subscriptionId,
             @Nullable ContextInfo contextInfo) {
-        return subscriptionProvider.readSubscriptionById(subscriptionId, contextInfo);
+        return subscriptionProvider.readSubscriptionById(subscriptionId, contextInfo)
+                .orElseThrow(EntityMissingException::new);
     }
 
     @Override
