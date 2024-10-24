@@ -25,7 +25,6 @@ import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSu
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSubscriptionPeriodType.MONTHLY;
 import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultUserRefTypes.BLC_CUSTOMER;
 import static com.broadleafcommerce.subscriptionoperation.service.modification.InitiateEditSubscriptionHandler.FLOW;
-import static com.broadleafcommerce.subscriptionoperation.service.modification.InitiateEditSubscriptionHandler.SUBSCRIPTION_ID;
 import static com.broadleafcommerce.subscriptionoperation.service.modification.InitiateEditSubscriptionHandler.SUBSCRIPTION_ITEM_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,11 +63,22 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Stream;
 
+import javax.money.CurrencyUnit;
+
 /**
  * @author Nathan Moore (nathandmoore)
  */
 @ExtendWith(MockitoExtension.class)
 public class InitiateEditSubscriptionHandlerTest {
+
+    private static final String SUBSCRIPTION_ID = "subscription";
+    private static final String SUBSCRIPTION_NAME = "12 Months Office 365 Subscription with Teams";
+    private static final String ROOT_ITEM_REF = "office365";
+    private static final String ADD_ON_REF = "teams";
+    private static final String ADD_ON_KEY = "addOn1";
+    private static final String ADD_ON_SI_ID = "teamsSI";
+    private static final String ROOT_ITEM_SI_ID = "office365SI";
+    private static final CurrencyUnit USD = MonetaryUtils.getCurrency("USD");
 
     InitiateEditSubscriptionHandler handler;
 
@@ -132,13 +142,13 @@ public class InitiateEditSubscriptionHandlerTest {
         actual.setName(null);
         assertThat(actual).isEqualTo(expected);
         assertThat(actualName)
-                .matches("Edit 12 Months Office 365 Subscription with Teams - \\w{26}");
+                .matches("Edit %s - \\w{26}".formatted(SUBSCRIPTION_NAME));
     }
 
     private SubscriptionWithItems buildSubscriptionWithItems() {
         Subscription subscription = new Subscription();
-        subscription.setId("subscription");
-        subscription.setName("12 Months Office 365 Subscription with Teams");
+        subscription.setId(SUBSCRIPTION_ID);
+        subscription.setName(SUBSCRIPTION_NAME);
         subscription.setEndOfTermDate(Instant.now().plus(365, ChronoUnit.DAYS));
         subscription.setAutoRenewalEnabled(false);
         subscription.setNextStatusChangeDate(Date.from(subscription.getEndOfTermDate()));
@@ -152,12 +162,12 @@ public class InitiateEditSubscriptionHandlerTest {
         subscription.setPeriodType(MONTHLY.name());
         subscription.setUserRef("customer1");
         subscription.setUserRefType(BLC_CUSTOMER.name());
-        subscription.setCurrency(MonetaryUtils.getCurrency("USD"));
-        subscription.setRootItemRef("office365");
+        subscription.setCurrency(USD);
+        subscription.setRootItemRef(ROOT_ITEM_REF);
         subscription.setRootItemRefType(BLC_PRODUCT.name());
 
         SubscriptionItem office365 = new SubscriptionItem();
-        office365.setId("office365SI");
+        office365.setId(ROOT_ITEM_SI_ID);
         office365.setSubscriptionId(subscription.getId());
         office365.setItemName("12 Months Office 365 Subscription");
         office365.setItemRef(subscription.getRootItemRef());
@@ -189,40 +199,41 @@ public class InitiateEditSubscriptionHandlerTest {
     private SubscriptionItem getAddOnSI(Subscription subscription,
             SubscriptionItem office365) {
         SubscriptionItem teams = new SubscriptionItem();
-        teams.setId("teamsSI");
+        teams.setId(ADD_ON_SI_ID);
         teams.setSubscriptionId(subscription.getId());
         teams.setItemName("Teams Subscription");
-        teams.setItemRef("teams");
+        teams.setItemRef(ADD_ON_REF);
         teams.setItemRefType(BLC_PRODUCT.name());
         teams.setQuantity(1);
         teams.setItemUnitPrice(BigDecimal.ONE);
         teams.setParentItemRef(office365.getItemRef());
         teams.setParentItemRefType(office365.getItemRefType());
-        teams.setAddOnKey("addOn1");
+        teams.setAddOnKey(ADD_ON_KEY);
         return teams;
     }
 
     private CreateCartRequest buildCreateCartRequest() {
         PriceCartRequest priceCartRequest = new PriceCartRequest();
-        priceCartRequest.setCurrency(MonetaryUtils.getCurrency("USD"));
+        priceCartRequest.setCurrency(USD);
         CreateCartRequest request = new CreateCartRequest();
         request.setPriceCartRequest(priceCartRequest);
         AddItemRequest rootItem = new AddItemRequest();
         rootItem.setTermDurationLength(12);
         rootItem.setTermDurationType("MONTHS");
         rootItem.setQuantity(1);
-        rootItem.setProductId("office365");
-        rootItem.getItemAttributes().put(SUBSCRIPTION_ITEM_ID, "office365SI");
+        rootItem.setProductId(ROOT_ITEM_REF);
+        rootItem.getItemAttributes().put(SUBSCRIPTION_ITEM_ID, ROOT_ITEM_SI_ID);
         rootItem.getCartAttributes().put(FLOW, DefaultSubscriptionActionFlow.EDIT.name());
-        rootItem.getCartAttributes().put(SUBSCRIPTION_ID, "subscription");
+        rootItem.getCartAttributes().put(InitiateEditSubscriptionHandler.SUBSCRIPTION_ID,
+                SUBSCRIPTION_ID);
         request.getAddItemRequests().add(rootItem);
         AddItemRequest addOn = new AddItemRequest();
         addOn.setTermDurationLength(12);
         addOn.setTermDurationType("MONTHS");
         addOn.setQuantity(1);
-        addOn.setProductId("teams");
-        addOn.setItemChoiceKey("addOn1");
-        addOn.getItemAttributes().put(SUBSCRIPTION_ITEM_ID, "teamsSI");
+        addOn.setProductId(ADD_ON_REF);
+        addOn.setItemChoiceKey(ADD_ON_KEY);
+        addOn.getItemAttributes().put(SUBSCRIPTION_ITEM_ID, ADD_ON_SI_ID);
         rootItem.getDependentCartItems().add(addOn);
 
         return request;
