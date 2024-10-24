@@ -83,7 +83,8 @@ public class DefaultSubscriptionPricingServiceEditFlowTest {
         String subscriptionPaymentStrategy = DefaultSubscriptionPaymentStrategy.POSTPAID.name();
         String periodType = DefaultSubscriptionPeriodType.MONTHLY.name();
 
-        Optional<SubscriptionWithItems> subscriptionWithItems = buildSubscriptionWithItems(subscriptionPaymentStrategy, periodType);
+        Optional<SubscriptionWithItems> subscriptionWithItems =
+                buildSubscriptionWithItems(subscriptionPaymentStrategy, periodType);
 
         Cart cart = buildCart(DefaultSubscriptionActionFlow.EDIT.name(),
                 subscriptionWithItems.get().getSubscriptionId(),
@@ -114,7 +115,8 @@ public class DefaultSubscriptionPricingServiceEditFlowTest {
         String subscriptionPaymentStrategy = DefaultSubscriptionPaymentStrategy.POSTPAID.name();
         String periodType = DefaultSubscriptionPeriodType.MONTHLY.name();
 
-        Optional<SubscriptionWithItems> subscriptionWithItems = buildSubscriptionWithItems(subscriptionPaymentStrategy, periodType);
+        Optional<SubscriptionWithItems> subscriptionWithItems =
+                buildSubscriptionWithItems(subscriptionPaymentStrategy, periodType);
 
         Cart cart = buildCart(DefaultSubscriptionActionFlow.EDIT.name(),
                 subscriptionWithItems.get().getSubscriptionId(),
@@ -140,7 +142,8 @@ public class DefaultSubscriptionPricingServiceEditFlowTest {
         PeriodDefinition period3 = subscriptionPricingContext.getPeriodDefinition(3);
         PeriodDefinition period4 = subscriptionPricingContext.getPeriodDefinition(4);
 
-        Instant expectedPeriod1StartDate = determinePreviousBillDate(period1.getBillDate(), periodType, 1);
+        Instant expectedPeriod1StartDate =
+                determinePreviousBillDate(period1.getBillDate(), periodType, 1);
         assertThat(period1.getBillDate()).isEqualTo(period1.getPeriodEndDate().plusNanos(1));
         assertThat(period1.getBillDate()).isEqualTo(atypicalNextBillDate);
         assertThat(period1.getPeriodStartDate()).isEqualTo(expectedPeriod1StartDate);
@@ -171,7 +174,8 @@ public class DefaultSubscriptionPricingServiceEditFlowTest {
         String subscriptionPaymentStrategy = DefaultSubscriptionPaymentStrategy.IN_ADVANCE.name();
         String periodType = DefaultSubscriptionPeriodType.MONTHLY.name();
 
-        Optional<SubscriptionWithItems> subscriptionWithItems = buildSubscriptionWithItems(subscriptionPaymentStrategy, periodType);
+        Optional<SubscriptionWithItems> subscriptionWithItems =
+                buildSubscriptionWithItems(subscriptionPaymentStrategy, periodType);
 
         Cart cart = buildCart(DefaultSubscriptionActionFlow.EDIT.name(),
                 subscriptionWithItems.get().getSubscriptionId(),
@@ -231,7 +235,8 @@ public class DefaultSubscriptionPricingServiceEditFlowTest {
             String existingSubscriptionId,
             String subscriptionPaymentStrategy,
             String periodType) {
-        return buildCart(false, subscriptionActionFlow, existingSubscriptionId, subscriptionPaymentStrategy, periodType);
+        return buildCart(false, subscriptionActionFlow, existingSubscriptionId,
+                subscriptionPaymentStrategy, periodType);
     }
 
     private Cart buildCart(boolean includeDueNowPrice,
@@ -312,7 +317,8 @@ public class DefaultSubscriptionPricingServiceEditFlowTest {
         return cart;
     }
 
-    private Optional<SubscriptionWithItems> buildSubscriptionWithItems(String subscriptionPaymentStrategy,
+    private Optional<SubscriptionWithItems> buildSubscriptionWithItems(
+            String subscriptionPaymentStrategy,
             String periodType) {
         String subscriptionId = ULID.random();
         String parentSubItemId = ULID.random();
@@ -382,7 +388,9 @@ public class DefaultSubscriptionPricingServiceEditFlowTest {
                 .toInstant());
     }
 
-    protected Instant determinePreviousBillDate(Instant billDate, String periodType, int periodFrequency) {
+    protected Instant determinePreviousBillDate(Instant billDate,
+            String periodType,
+            int periodFrequency) {
         int monthsToSubtract;
 
         if (isMonthly(periodType)) {

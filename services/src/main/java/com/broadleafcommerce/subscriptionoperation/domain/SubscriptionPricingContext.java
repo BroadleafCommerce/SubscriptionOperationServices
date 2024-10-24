@@ -101,8 +101,8 @@ public class SubscriptionPricingContext implements Serializable {
      * the customer will be billed. Map keys are upcoming period numbers, with 1 being the first
      * period. For creation flows, the first period represents the first time that subscription
      * billing will be engaged (i.e. the first bill following the initial purchase). For other flows
-     * that act upon the subscription in the middle of a period, the first period definition represents
-     * the active period when the action was taken.
+     * that act upon the subscription in the middle of a period, the first period definition
+     * represents the active period when the action was taken.
      */
     private Map<Integer, PeriodDefinition> periodDefinitions = new HashMap<>();
 

@@ -140,7 +140,8 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         context.setFlow(getSubscriptionActionFlow(subscriptionRootItem, contextInfo));
         context.setCurrency(subscriptionRootItem.getCurrency());
 
-        Optional<SubscriptionWithItems> existingSubscription = getExistingSubscription(subscriptionRootItem, contextInfo);
+        Optional<SubscriptionWithItems> existingSubscription =
+                getExistingSubscription(subscriptionRootItem, contextInfo);
         if (existingSubscription.isPresent()) {
             populateFromExistingSubscription(context, existingSubscription.get(), contextInfo);
         } else {
@@ -160,9 +161,11 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 SUBSCRIPTION_ACTION_FLOW, DefaultSubscriptionActionFlow.CREATE.name());
     }
 
-    protected Optional<SubscriptionWithItems> getExistingSubscription(@lombok.NonNull CartItem subscriptionRootItem,
+    protected Optional<SubscriptionWithItems> getExistingSubscription(
+            @lombok.NonNull CartItem subscriptionRootItem,
             @Nullable ContextInfo contextInfo) {
-        String existingSubscriptionId = MapUtils.getString(subscriptionRootItem.getInternalAttributes(), EXISTING_SUBSCRIPTION_ID);
+        String existingSubscriptionId = MapUtils
+                .getString(subscriptionRootItem.getInternalAttributes(), EXISTING_SUBSCRIPTION_ID);
 
         if (StringUtils.isBlank(existingSubscriptionId)) {
             return Optional.empty();
@@ -171,7 +174,8 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return subscriptionProvider.readSubscriptionById(existingSubscriptionId, contextInfo);
     }
 
-    protected void populateFromExistingSubscription(@lombok.NonNull SubscriptionPricingContext context,
+    protected void populateFromExistingSubscription(
+            @lombok.NonNull SubscriptionPricingContext context,
             @lombok.NonNull SubscriptionWithItems existingSubscriptionWithItems,
             @Nullable ContextInfo contextInfo) {
         Subscription existingSubscription = existingSubscriptionWithItems.getSubscription();
@@ -195,7 +199,8 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         context.setPeriodType(recurringPriceDetail.getPeriodType());
         context.setPeriodFrequency(recurringPriceDetail.getPeriodFrequency());
 
-        Instant endOfTermsDate = determineEndOfTermsDate(subscriptionRootItem.getTermDurationType(), subscriptionRootItem.getTermDurationLength());
+        Instant endOfTermsDate = determineEndOfTermsDate(subscriptionRootItem.getTermDurationType(),
+                subscriptionRootItem.getTermDurationLength());
         context.setEndOfTermsDate(endOfTermsDate);
 
         Instant atypicalNextBillDate =
@@ -278,7 +283,8 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 getEstimatedFuturePaymentCount(subscriptionRootItem, pricingContext, contextInfo);
         for (int period = 1; period <= estimatedFuturePaymentCount; period++) {
             if (period == 1 && pricingContext.getAtypicalNextBillDate() != null) {
-                PeriodDefinition periodDefinition = buildAtypicalFirstPeriodDefinition(estimatedFuturePaymentPeriods, period, pricingContext, contextInfo);
+                PeriodDefinition periodDefinition = buildAtypicalFirstPeriodDefinition(
+                        estimatedFuturePaymentPeriods, period, pricingContext, contextInfo);
 
                 previousBillDate = periodDefinition.getBillDate();
                 continue;
@@ -330,7 +336,8 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
                 Instant beginningOfToday = Instant.now().truncatedTo(ChronoUnit.DAYS);
                 periodDefinition.setPeriodStartDate(beginningOfToday);
             } else {
-                Instant periodStartDate = determinePreviousBillDate(billDate, pricingContext, contextInfo);
+                Instant periodStartDate =
+                        determinePreviousBillDate(billDate, pricingContext, contextInfo);
                 periodDefinition.setPeriodStartDate(periodStartDate);
             }
         }

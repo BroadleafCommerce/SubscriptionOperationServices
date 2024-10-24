@@ -17,8 +17,8 @@
 package com.broadleafcommerce.subscriptionoperation.domain.enums;
 
 /**
- * Declares that payments made against a subscription are going towards the goods/services
- * rendered in the previous vs current period.
+ * Declares that payments made against a subscription are going towards the goods/services rendered
+ * in the previous vs current period.
  */
 public enum DefaultSubscriptionPaymentStrategy {
 
