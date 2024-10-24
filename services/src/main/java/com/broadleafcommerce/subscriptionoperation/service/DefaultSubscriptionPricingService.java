@@ -30,7 +30,6 @@ import static com.broadleafcommerce.subscriptionoperation.domain.enums.DefaultSu
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.cart.client.domain.Cart;
@@ -311,8 +310,7 @@ public class DefaultSubscriptionPricingService implements SubscriptionPricingSer
         return estimatedFuturePaymentPeriods;
     }
 
-    @NotNull
-    private PeriodDefinition buildAtypicalFirstPeriodDefinition(
+    protected PeriodDefinition buildAtypicalFirstPeriodDefinition(
             @lombok.NonNull Map<Integer, PeriodDefinition> estimatedFuturePaymentPeriods,
             int period,
             @lombok.NonNull SubscriptionPricingContext pricingContext,
