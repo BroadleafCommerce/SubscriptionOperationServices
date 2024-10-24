@@ -51,12 +51,12 @@ public class SubscriptionItem implements ContextStateAware {
     private String itemName;
 
     /**
-     * Type of item that this object represents
+     * Type of item that this object represents. For example, BLC_PRODUCT.
      */
     private String itemRefType;
 
     /**
-     * Reference to the id of the item represented by this object
+     * Reference to the id of the item represented by this object. For example, the product id.
      */
     private String itemRef;
 
