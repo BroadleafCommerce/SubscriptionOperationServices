@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2020 Broadleaf Commerce
+ * Copyright (C) 2009 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
@@ -100,10 +100,10 @@ public class ExternalCartOperationProvider<C extends Cart> extends AbstractExter
                 .onStatus(HttpStatusCode::isError,
                         response -> response.createException().flatMap(
                                 exception -> Mono.just(new ProviderApiException(exception)))))
-                .bodyToMono(getCartType())
-                .blockOptional()
-                .orElseThrow(() -> new IllegalResponseException(
-                        "Response to create cart request did not provide the created cart."));
+                                        .bodyToMono(getCartType())
+                                        .blockOptional()
+                                        .orElseThrow(() -> new IllegalResponseException(
+                                                "Response to create cart request did not provide the created cart."));
     }
 
     protected List<String> getAuthorizationHeader() {

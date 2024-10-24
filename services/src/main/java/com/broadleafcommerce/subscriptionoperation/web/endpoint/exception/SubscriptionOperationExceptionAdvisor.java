@@ -63,7 +63,7 @@ public class SubscriptionOperationExceptionAdvisor {
         return new ApiError("INVALID_SUBSCRIPTION_CREATION_REQUEST",
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST)
-                .toResponseEntity();
+                        .toResponseEntity();
     }
 
     @ExceptionHandler
@@ -74,7 +74,7 @@ public class SubscriptionOperationExceptionAdvisor {
         return new ApiError("INSUFFICIENT_SUBSCRIPTION_ACCESS",
                 ex.getMessage(),
                 HttpStatus.FORBIDDEN)
-                .toResponseEntity();
+                        .toResponseEntity();
     }
 
     @ExceptionHandler({ProviderApiException.class})
@@ -97,7 +97,7 @@ public class SubscriptionOperationExceptionAdvisor {
                 return new ApiError("PROVIDER_API_ERROR",
                         receivedException.getMessage(),
                         receivedException.getStatusCode())
-                        .toResponseEntity();
+                                .toResponseEntity();
             }
         }
 
@@ -114,7 +114,7 @@ public class SubscriptionOperationExceptionAdvisor {
         return new ApiError("UNSUPPORTED_MODIFICATION_REQUEST",
                 ex.getMessage(),
                 HttpStatus.BAD_REQUEST)
-                .toResponseEntity();
+                        .toResponseEntity();
     }
 
     @ExceptionHandler(IllegalResponseException.class)
@@ -124,7 +124,7 @@ public class SubscriptionOperationExceptionAdvisor {
         return new ApiError("ILLEGAL_API_RESPONSE",
                 ex.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR)
-                .toResponseEntity();
+                        .toResponseEntity();
     }
 
     protected void logDebug(Exception ex, WebRequest request) {

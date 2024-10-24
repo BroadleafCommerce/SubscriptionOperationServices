@@ -41,8 +41,8 @@ import com.broadleafcommerce.subscriptionoperation.service.modification.UpgradeS
 import com.broadleafcommerce.subscriptionoperation.service.provider.CartOperationProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
-import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCartOperationProviderProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCartOperationProvider;
+import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCartOperationProviderProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProviderProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProperties;
