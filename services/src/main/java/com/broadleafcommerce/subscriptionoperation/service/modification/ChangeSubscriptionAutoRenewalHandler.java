@@ -68,7 +68,8 @@ public class ChangeSubscriptionAutoRenewalHandler extends AbstractModifySubscrip
     @Override
     public boolean canHandle(@lombok.NonNull ModifySubscriptionRequest request,
             @Nullable ContextInfo contextInfo) {
-        return DefaultSubscriptionActionType.isCancel(request.getAction().getActionType());
+        return DefaultSubscriptionActionType
+                .isChangeAutoRenewal(request.getAction().getActionType());
     }
 
     @Override
@@ -112,7 +113,16 @@ public class ChangeSubscriptionAutoRenewalHandler extends AbstractModifySubscrip
     protected void validateBusinessRules(@lombok.NonNull ModifySubscriptionRequest request,
             @lombok.NonNull Errors errors,
             @Nullable ContextInfo contextInfo) {
-        // TODO Implement this method
+        boolean currentAutoRenewalStatus = request.getSubscription()
+                .getSubscription()
+                .isAutoRenewalEnabled();
+        boolean nextAutoRenewalStatus = request.isAutoRenewalEnabled();
+
+        if (currentAutoRenewalStatus == nextAutoRenewalStatus) {
+            errors.rejectValue("autoRenewalEnabled",
+                    "subscription.modification.validation.change-auto-renewal.auto-renewal-enabled.invalid",
+                    "Auto Renewal is already enabled.");
+        }
     }
 
     @Override

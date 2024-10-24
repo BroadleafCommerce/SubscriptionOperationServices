@@ -138,7 +138,10 @@ public class DefaultSubscriptionOperationService<SWI extends SubscriptionWithIte
     public ModifySubscriptionResponse modifySubscription(
             @lombok.NonNull ModifySubscriptionRequest request,
             @Nullable ContextInfo contextInfo) {
-        SubscriptionWithItems swi = readSubscriptionById(request.getSubscriptionId(), contextInfo);
+        SWI swi = readSubscriptionById(request.getSubscriptionId(), contextInfo);
+        populateSubscriptionActions(swi, contextInfo);
+        request.setSubscription(swi);
+
         for (ModifySubscriptionHandler handler : modifySubscriptionHandlers) {
             if (handler.canHandle(request, contextInfo)) {
                 return handler.handle(request, contextInfo);

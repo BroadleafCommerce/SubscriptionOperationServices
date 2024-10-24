@@ -59,12 +59,17 @@ import lombok.Setter;
 public class InitiateEditSubscriptionHandler extends AbstractModifySubscriptionHandler
         implements ModifySubscriptionHandler {
 
-    public static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    public static final String SUBSCRIPTION_ITEM_ID = "subscriptionItemId";
+    public static final String SUBSCRIPTION_ID = "subscriptionId";
+    public static final String FLOW = "flow";
+
     @Getter(value = AccessLevel.PROTECTED)
     private final TypeFactory typeFactory;
 
     @Getter(value = AccessLevel.PROTECTED)
-    private final CartOperationProvider cartOperationProvider;
+    private final CartOperationProvider<Cart> cartOperationProvider;
 
     @Getter(AccessLevel.PROTECTED)
     private final MessageSource messageSource;
@@ -110,11 +115,9 @@ public class InitiateEditSubscriptionHandler extends AbstractModifySubscriptionH
         List<SubscriptionItem> items = subscriptionWithItems.getSubscriptionItems();
 
         CreateCartRequest createCartRequest = typeFactory.get(CreateCartRequest.class);
-        createCartRequest.setName(subscription.getName() + " - " + ULID.random(SECURE_RANDOM));
+        createCartRequest.setName(generateCartName(subscription));
         createCartRequest.setType(DefaultCartTypes.STANDARD.name());
-        PriceCartRequest priceCartRequest = typeFactory.get(PriceCartRequest.class);
-        priceCartRequest.setCurrency(subscription.getCurrency());
-        createCartRequest.setPriceCartRequest(priceCartRequest);
+        createCartRequest.setPriceCartRequest(buildPriceCartRequest(subscription, contextInfo));
 
         Map<String, List<String>> subItemIdsToChildrenIds = new HashMap<>();
         Map<String, AddItemRequest> addItemRequestsBySubItemId = new HashMap<>();
@@ -125,39 +128,59 @@ public class InitiateEditSubscriptionHandler extends AbstractModifySubscriptionH
                     .map(SubscriptionItem::getId)
                     .collect(Collectors.toList());
             subItemIdsToChildrenIds.put(next.getId(), children);
-            addItemRequestsBySubItemId.put(next.getId(), buildAddItemRequest(next));
+            AddItemRequest itemRequest = buildAddItemRequest(next, subscription);
+            addItemRequestsBySubItemId.put(next.getId(), itemRequest);
 
             if (next.getParentItemRef() == null) {
                 rootItemId.set(next.getId());
             }
         }
 
-        // add children as dependents
+        addDependentsToParents(subItemIdsToChildrenIds, addItemRequestsBySubItemId);
+
+        AddItemRequest rootItem = addItemRequestsBySubItemId.get(rootItemId.get());
+        createCartRequest.getAddItemRequests().add(rootItem);
+
+        return createCartRequest;
+    }
+
+    protected PriceCartRequest buildPriceCartRequest(@lombok.NonNull Subscription subscription,
+            @Nullable ContextInfo contextInfo) {
+        PriceCartRequest priceCartRequest = typeFactory.get(PriceCartRequest.class);
+        priceCartRequest.setCurrency(subscription.getCurrency());
+        return priceCartRequest;
+    }
+
+    protected void addDependentsToParents(
+            @lombok.NonNull Map<String, List<String>> subItemIdsToChildrenIds,
+            @lombok.NonNull Map<String, AddItemRequest> addItemRequestsBySubItemId) {
         subItemIdsToChildrenIds.forEach((id, children) -> {
             AddItemRequest parent = addItemRequestsBySubItemId.get(id);
             children.stream()
                     .map(addItemRequestsBySubItemId::get)
                     .forEach(addItemRequest -> parent.getDependentCartItems().add(addItemRequest));
         });
-
-        AddItemRequest rootItem = addItemRequestsBySubItemId.get(rootItemId.get());
-        rootItem.getCartAttributes().put("subscriptionId", subscription.getId());
-        rootItem.getCartAttributes().put("flow", DefaultSubscriptionActionFlow.EDIT.name());
-        rootItem.setTermDurationType(subscription.getTermDurationType());
-        rootItem.setTermDurationLength(subscription.getTermDurationLength());
-        createCartRequest.getAddItemRequests().add(rootItem);
-
-        return createCartRequest;
     }
 
-    protected AddItemRequest buildAddItemRequest(@lombok.NonNull SubscriptionItem item) {
+    protected String generateCartName(Subscription subscription) {
+        return "Edit %s - %s".formatted(subscription.getName(), ULID.random(SECURE_RANDOM));
+    }
+
+    protected AddItemRequest buildAddItemRequest(@lombok.NonNull SubscriptionItem item,
+            @lombok.NonNull Subscription subscription) {
         AddItemRequest addItemRequest = typeFactory.get(AddItemRequest.class);
         addItemRequest.setProductId(item.getItemRef());
         addItemRequest.setQuantity(item.getQuantity());
         addItemRequest.setItemChoiceKey(item.getAddOnKey());
-        addItemRequest.getItemAttributes().put("subscriptionItemId", item.getId());
-        addItemRequest.getItemAttributes().put("parentRef", item.getParentItemRef());
-        addItemRequest.getItemAttributes().put("parentRefType", item.getParentItemRefType());
+        addItemRequest.getItemAttributes().put(SUBSCRIPTION_ITEM_ID, item.getId());
+        addItemRequest.setTermDurationType(subscription.getTermDurationType());
+        addItemRequest.setTermDurationLength(subscription.getTermDurationLength());
+
+        if (item.getParentItemRef() == null) {
+            addItemRequest.getCartAttributes().put(SUBSCRIPTION_ID, subscription.getId());
+            addItemRequest.getCartAttributes().put(FLOW,
+                    DefaultSubscriptionActionFlow.EDIT.name());
+        }
 
         return addItemRequest;
     }
