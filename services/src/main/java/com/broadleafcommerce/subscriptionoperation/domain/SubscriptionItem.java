@@ -71,6 +71,13 @@ public class SubscriptionItem implements ContextStateAware {
     private String parentItemRef;
 
     /**
+     * If this item was the result of an add-on, then this stores the key of the add-on in the
+     * context of its parent. This is important when editing a subscription in order to recreate the
+     * original cart item.
+     */
+    private String addOnKey;
+
+    /**
      * Unit price of the item (price of a single unit)
      */
     private BigDecimal itemUnitPrice;

@@ -14,26 +14,7 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package com.broadleafcommerce.subscriptionoperation.service.provider;
+@NonNullApi
+package com.broadleafcommerce.subscriptionoperation.service.provider.external;
 
-import org.springframework.lang.Nullable;
-
-import com.broadleafcommerce.cart.client.domain.Cart;
-import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.subscriptionoperation.web.domain.CreateCartRequest;
-
-/**
- * @author Nathan Moore (nathandmoore)
- */
-public interface CartOperationsProvider {
-
-    /**
-     * Method used to create a new {@link Cart}.
-     *
-     * @param request The information needed to create a new cart.
-     * @param contextInfo The sandbox and multitenant context
-     * @return The created cart.
-     */
-    Cart createCart(CreateCartRequest request, @Nullable ContextInfo contextInfo);
-
-}
+import org.springframework.lang.NonNullApi;

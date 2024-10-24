@@ -69,6 +69,10 @@
             <artifactId>ignite-spring</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.broadleafcommerce.microservices</groupId>
+            <artifactId>broadleaf-resource-security</artifactId>
+        </dependency>
 
         <!-- Tests -->
         <dependency>

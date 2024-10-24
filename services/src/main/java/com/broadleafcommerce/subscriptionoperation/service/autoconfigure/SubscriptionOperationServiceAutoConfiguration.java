@@ -24,7 +24,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.broadleafcommerce.cart.client.domain.Cart;
 import com.broadleafcommerce.common.extension.TypeFactory;
+import com.broadleafcommerce.resource.security.utils.service.AuthenticationUtils;
 import com.broadleafcommerce.subscriptionoperation.domain.Product;
 import com.broadleafcommerce.subscriptionoperation.domain.SubscriptionWithItems;
 import com.broadleafcommerce.subscriptionoperation.service.DefaultSubscriptionOperationService;
@@ -36,9 +38,11 @@ import com.broadleafcommerce.subscriptionoperation.service.modification.ChangeSu
 import com.broadleafcommerce.subscriptionoperation.service.modification.DowngradeSubscriptionHandler;
 import com.broadleafcommerce.subscriptionoperation.service.modification.ModifySubscriptionHandler;
 import com.broadleafcommerce.subscriptionoperation.service.modification.UpgradeSubscriptionHandler;
+import com.broadleafcommerce.subscriptionoperation.service.provider.CartOperationProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.CatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.SubscriptionProvider;
-import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCartOperationsProvider;
+import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCartOperationProviderProperties;
+import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCartOperationProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProvider;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalCatalogProviderProperties;
 import com.broadleafcommerce.subscriptionoperation.service.provider.external.ExternalSubscriptionProperties;
@@ -101,7 +105,8 @@ public class SubscriptionOperationServiceAutoConfiguration {
 
     @Configuration
     @EnableConfigurationProperties({ExternalSubscriptionProperties.class,
-            ExternalCatalogProviderProperties.class})
+            ExternalCatalogProviderProperties.class,
+            ExternalCartOperationProviderProperties.class})
     public static class SubscriptionProviderConfiguration {
         @Bean
         @ConditionalOnMissingBean
@@ -131,8 +136,17 @@ public class SubscriptionOperationServiceAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public ExternalCartOperationsProvider subOpsCartOperationsProvider() {
-            return new ExternalCartOperationsProvider();
+        public CartOperationProvider<Cart> subOpsCartOperationsProvider(
+                @Qualifier("subscriptionOperationWebClient") WebClient webClient,
+                ObjectMapper objectMapper,
+                TypeFactory typeFactory,
+                ExternalCartOperationProviderProperties properties,
+                AuthenticationUtils authenticationUtils) {
+            return new ExternalCartOperationProvider<>(webClient,
+                    objectMapper,
+                    typeFactory,
+                    properties,
+                    authenticationUtils);
         }
     }
 }

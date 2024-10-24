@@ -16,21 +16,37 @@
  */
 package com.broadleafcommerce.subscriptionoperation.service.provider.external;
 
-import com.broadleafcommerce.cart.client.domain.Cart;
-import com.broadleafcommerce.data.tracking.core.context.ContextInfo;
-import com.broadleafcommerce.subscriptionoperation.service.provider.CartOperationsProvider;
-import com.broadleafcommerce.subscriptionoperation.web.domain.CreateCartRequest;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Nathan Moore (nathandmoore)
  */
-@RequiredArgsConstructor
-public class ExternalCartOperationsProvider implements CartOperationsProvider {
-    @Override
-    public Cart createCart(CreateCartRequest request, ContextInfo contextInfo) {
-        // todo
-        return null;
-    }
+@Getter
+@Setter
+@ConfigurationProperties("broadleaf.subscriptionoperation.cartoperationprovider")
+public class ExternalCartOperationProviderProperties {
+
+    /**
+     * The base url for an external cart operation service.
+     */
+    private String url;
+
+    /**
+     * The base uri path to the manage cart endpoint.
+     */
+    private String manageCartsUri = "/cart";
+
+    /**
+     * The URI to endpoints managing a specific cart.
+     */
+    private String cartUri = manageCartsUri + "/{cartId}";
+
+    /**
+     * The service client to use when calling an external service. Default is
+     * "subscriptionopsclient".
+     */
+    private String serviceClient = "subscriptionopsclient";
 }

@@ -268,6 +268,21 @@ public class Subscription implements ContextStateAware, CurrencySupplier, Curren
     private Instant endOfTermDate;
 
     /**
+     * The length of the terms, e.g., if this is 36 and {@link #termDurationType} is MONTHS, then
+     * the user should be billed for 36 months.
+     *
+     * @see #termDurationType
+     */
+    private Integer termDurationLength;
+
+    /**
+     * The term duration type, e.g. DAYS, WEEKS, MONTHS, YEARS.
+     *
+     * @see #termDurationLength
+     */
+    private String termDurationType;
+
+    /**
      * The version of this subscription. Used for checking if the requested version of the
      * subscription is up-to-date before saving changes. This should never be manually
      * decremented/incremented.

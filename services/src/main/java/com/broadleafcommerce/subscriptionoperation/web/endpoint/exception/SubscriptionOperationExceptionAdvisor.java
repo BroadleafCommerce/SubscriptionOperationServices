@@ -29,6 +29,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import com.broadleafcommerce.common.error.ApiError;
 import com.broadleafcommerce.common.error.validation.web.FrameworkExceptionAdvisor;
 import com.broadleafcommerce.subscriptionoperation.exception.ProviderApiException;
+import com.broadleafcommerce.subscriptionoperation.service.exception.IllegalResponseException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InsufficientSubscriptionAccessException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.InvalidSubscriptionCreationRequestException;
 import com.broadleafcommerce.subscriptionoperation.service.exception.UnsupportedSubscriptionModificationRequestException;
@@ -116,27 +117,25 @@ public class SubscriptionOperationExceptionAdvisor {
                 .toResponseEntity();
     }
 
+    @ExceptionHandler(IllegalResponseException.class)
+    public ResponseEntity<ApiError> handleIllegalResponseException(IllegalResponseException ex,
+            WebRequest request) {
+        logError(ex, request);
+        return new ApiError("ILLEGAL_API_RESPONSE",
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR)
+                .toResponseEntity();
+    }
+
     protected void logDebug(Exception ex, WebRequest request) {
         String requestURL =
                 ((ServletWebRequest) request).getRequest().getRequestURL().toString();
-        log.debug("Request to {} raised an exception", requestURL, ex);
-    }
-
-    protected void logInfo(Exception ex, WebRequest request) {
-        String requestURL =
-                ((ServletWebRequest) request).getRequest().getRequestURL().toString();
-        log.info("Request to {} raised an exception", requestURL, ex);
-    }
-
-    protected void logWarn(Exception ex, WebRequest request) {
-        String requestURL =
-                ((ServletWebRequest) request).getRequest().getRequestURL().toString();
-        log.warn("Request to {} raised an exception", requestURL, ex);
+        log.debug("Request to %s raised an exception".formatted(requestURL), ex);
     }
 
     protected void logError(Exception ex, WebRequest request) {
         String requestURL =
                 ((ServletWebRequest) request).getRequest().getRequestURL().toString();
-        log.error("Request to {} raised an exception", requestURL, ex);
+        log.error("Request to %s raised an exception".formatted(requestURL), ex);
     }
 }
